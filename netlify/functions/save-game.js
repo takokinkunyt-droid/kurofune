@@ -13,19 +13,18 @@ async function redis(body) {
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers };
-  if (event.httpMethod !== 'DELETE') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   try {
-    const { playerId } = JSON.parse(event.body);
-    if (!playerId) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing playerId' }) };
-    await redis(['del', `save:${playerId}`]);
-    await redis(['del', `player:${playerId}`]);
-    await redis(['zrem', 'ranking', playerId]);
-    return { statusCode: 200, headers, body: JSON.stringify({ success: true, message: 'Delete successful' }) };
+    const { playerId, saveData } = JSON.parse(event.body);
+    if (!playerId || !saveData) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing playerId or saveData' }) };
+    const dataToSave = { ...saveData, playerId, lastSaveTime: Date.now() };
+    await redis(['set', `save:${playerId}`, JSON.stringify(dataToSave)]);
+    return { statusCode: 200, headers, body: JSON.stringify({ success: true, message: 'Save successful', timestamp: Date.now() }) };
   } catch (error) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: error.message }) };
   }
