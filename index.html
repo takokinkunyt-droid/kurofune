@@ -1653,14 +1653,41 @@
         }
 
         /* モーダル群 */
-        .modal-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #333; border: 2px solid #ccc; padding: 25px; z-index: 100000; display: none; border-radius: 8px; width: 350px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); }
+        .modal-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #333; border: 2px solid #ccc; padding: 42px 25px 25px; z-index: 100000; display: none; border-radius: 8px; width: 350px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); }
         .modal-panel h3 { margin-top: 0; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; text-align: center; color: var(--primary-color);}
         .modal-panel label { font-size: 0.9rem; font-weight: bold; color: #555; display: block; margin-top: 15px; margin-bottom: 5px;}
         .modal-panel input { background: #f9f9f9; border: 1px solid #ccc; padding: 10px; width: 100%; box-sizing: border-box; border-radius: 4px; font-size: 1rem;}
         .modal-panel button { background: var(--primary-color); color: #fff; border: none; padding: 10px; cursor: pointer; margin-top: 10px; width: 100%; font-weight: bold; border-radius: 4px; transition: 0.2s;}
         .modal-panel button:hover { background: #333; transform: scale(1.02);}
         .modal-panel button.close-btn { background: #95a5a6; margin-top: 15px;}
-        .modal-panel button.danger-btn { background: #e74c3c; margin-top: 20px;}
+                .modal-panel button.danger-btn { background: #e74c3c; margin-top: 20px;}
+        .modal-x-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: #fff;
+            color: #666;
+            font-size: 24px;
+            line-height: 30px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+            z-index: 1;
+        }
+        .modal-x-btn:hover {
+            background: #f7f7f7;
+            color: #000;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+        }
+        .modal-x-btn:active {
+            transform: scale(0.96);
+        }
 
         #cheat-panel { background: #000; color: #0f0; border-color: #0f0; box-shadow: 0 0 40px #0f0;} #cheat-panel h3 { border-bottom-color: #0f0; color: #0f0;} #cheat-panel label { color: #0f0;} #cheat-panel input { background: #111; color: #0f0; border-color: #0f0;} #cheat-panel button { background: #0f0; color: #000;}
         #offline-popup { position: absolute; top: 20px; right: -400px; background: rgba(41, 128, 185, 0.95); color: white; padding: 20px 30px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 99999; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid var(--gold-color); }
@@ -2083,6 +2110,7 @@ animation:facilitySweep 6s linear infinite;
 <div id="offline-popup"><h3 style="margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom:5px;">🌙 オフライン生産報告</h3><p style="margin-bottom:0;" id="offline-popup-text"></p></div>
 
 <div id="settings-modal" class="modal-panel">
+    <button class="modal-x-btn" onclick="document.getElementById('settings-modal').style.display='none'" aria-label="閉じる">×</button>
     <h3 class="serif-font">システム設定</h3>
     <p style="font-size: 0.9rem; color: #666; text-align: center;">自動セーブは数秒ごとに実行されています。</p>
     <p id="cloud-status-settings" style="font-size: 0.85rem; color: #888; text-align: center;">☁️ 読み込み中…</p>
@@ -2091,6 +2119,7 @@ animation:facilitySweep 6s linear infinite;
 </div>
 
 <div id="achievements-modal" class="modal-panel" style="width: 450px; max-height: 80vh; overflow-y: auto;">
+    <button class="modal-x-btn" onclick="document.getElementById('achievements-modal').style.display='none'" aria-label="閉じる">×</button>
     <h3 class="serif-font">🏆 実績一覧</h3>
     <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
         <div style="font-size:0.85rem; font-weight:700; letter-spacing:0.1em; color:#888; padding: 4px 2px; border-bottom: 1px solid #ddd; margin-bottom:4px;">通常実績</div>
