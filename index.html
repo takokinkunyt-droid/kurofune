@@ -290,12 +290,13 @@
         .clicker-top-right {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             flex-shrink: 0;
+            margin-left: auto;
         }
 
         .clicker-top-left { flex-wrap: wrap; }
-        .clicker-top-right { margin-left: auto; }
 
         .clicker-top-btn {
             cursor: pointer;
@@ -392,22 +393,35 @@
             min-height: 0;
             border-radius: 28px;
             position: relative;
-            overflow: hidden;
+            overflow: hidden !important;
             box-shadow:
                 0 20px 45px rgba(0,0,0,0.42),
                 inset 0 1px 0 rgba(255,255,255,0.08),
                 inset 0 0 0 1px rgba(255, 235, 185, 0.10);
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+        }
+
+        #shop-area {
+            overflow: hidden !important;
+            overflow-y: auto !important;
+            max-height: calc(100% - 20px);
         }
 
         .clicker-col-left {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 18px;
+            padding: 10px 12px;
             text-align: center;
             color: #fff;
             border: 1px solid rgba(255, 227, 174, 0.20);
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 224, 170, 0.45) transparent;
             background:
                 radial-gradient(circle at 30% 20%, rgba(255, 235, 180, 0.20), transparent 26%),
                 radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.10), transparent 24%),
@@ -438,31 +452,7 @@
         }
 
         .clicker-title-ribbon {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            padding: 12px 14px;
-            border-radius: 18px;
-            background:
-                linear-gradient(180deg, rgba(255, 238, 201, 0.16), rgba(0,0,0,0.12));
-            border: 1px solid rgba(255, 232, 186, 0.18);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 20px rgba(0,0,0,0.16);
-            letter-spacing: 0.08em;
-        }
-
-        .clicker-title-ribbon .ribbon-kicker {
-            display: block;
-            font-size: 0.82rem;
-            color: rgba(255, 244, 220, 0.8);
-            margin-bottom: 4px;
-        }
-
-        .clicker-title-ribbon .ribbon-title {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #fff8e8;
-            text-shadow: 0 1px 0 rgba(0,0,0,0.35), 0 0 16px rgba(255, 224, 173, 0.12);
+            display: none;
         }
 
         .top-ui-wrapper {
@@ -510,7 +500,7 @@
 
         .clicker-score-board {
             width: 100%;
-            padding: 16px 18px;
+            padding: 14px 16px;
             border-radius: 22px;
             background:
                 linear-gradient(180deg, rgba(255, 241, 210, 0.10), rgba(0,0,0,0.18)),
@@ -523,15 +513,15 @@
         }
 
         .clicker-col-left .kurofune-count-title {
-            font-size: 1.0rem;
+            font-size: 0.9rem;
             color: rgba(255, 241, 218, 0.82);
             letter-spacing: 0.12em;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-shadow: 0 1px 0 rgba(0,0,0,0.5);
         }
 
         .clicker-col-left .kurofune-count {
-            font-size: clamp(2.2rem, 4vw, 3.5rem);
+            font-size: clamp(1.5rem, 5vw, 2.4rem);
             line-height: 1;
             font-weight: 900;
             color: #fffbe8;
@@ -539,7 +529,10 @@
                 0 2px 0 rgba(0,0,0,0.42),
                 0 0 18px rgba(255, 234, 168, 0.18);
             letter-spacing: 0.04em;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .clicker-col-left .kps-display {
@@ -570,7 +563,7 @@
             position: relative;
             z-index: 2;
             width: 100%;
-            min-height: 320px;
+            min-height: clamp(160px, 26vh, 320px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -654,17 +647,14 @@
         .kurofune-click-target {
             position: relative;
             z-index: 3;
-            font-size: clamp(8.5rem, 10vw, 11.5rem);
+            font-size: clamp(8.5rem, min(14vw, 18vh), 16rem);
             cursor: pointer;
-            margin: 0;
+            margin: 10px 0;
             display: inline-block;
             transform-origin: center center;
             transition: transform 0.08s ease, filter 0.25s ease;
-            color: #050505;
             filter:
-                grayscale(1)
-                contrast(1.25)
-                brightness(1.15)
+                grayscale(1) brightness(0.55) contrast(1.2)
                 drop-shadow(0 18px 24px rgba(0,0,0,0.55))
                 drop-shadow(0 0 24px rgba(255, 229, 160, 0.08));
             animation: shipBreath 2.8s ease-in-out infinite;
@@ -678,9 +668,7 @@
         .kurofune-click-target:hover {
             transform: translateY(-2px) scale(1.03);
             filter:
-                grayscale(1)
-                contrast(1.25)
-                brightness(1.15)
+                grayscale(1) brightness(0.62) contrast(1.2)
                 drop-shadow(0 22px 28px rgba(0,0,0,0.58))
                 drop-shadow(0 0 36px rgba(255, 230, 175, 0.18));
         }
@@ -688,9 +676,7 @@
         .kurofune-click-target:active {
             transform: scale(0.86) translateY(10px);
             filter:
-                grayscale(1)
-                contrast(1.25)
-                brightness(1.15)
+                grayscale(1) brightness(0.55) contrast(1.2)
                 drop-shadow(0 10px 12px rgba(0,0,0,0.72))
                 drop-shadow(0 0 16px rgba(255, 220, 140, 0.12));
             animation: shipSmash 0.18s ease-out;
@@ -725,53 +711,47 @@
             margin-top: 10px;
         }
 
-        .reinc-container {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            margin-top: auto;
-            padding: 16px;
-            border-radius: 22px;
-            border: 1px solid rgba(255, 233, 180, 0.16);
-            background:
-                linear-gradient(180deg, rgba(255, 239, 201, 0.10), rgba(0,0,0,0.18)),
-                rgba(14, 6, 2, 0.72);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 28px rgba(0,0,0,0.22);
+        .clicker-top-reinc {
+            display: none;
         }
 
-        #reincarnation-hint {
-            color: rgba(255, 241, 218, 0.86);
-            font-size: 0.92rem;
-            font-weight: 700;
-            white-space: pre-wrap;
-            margin: 0 0 10px 0;
-            line-height: 1.5;
+        .reinc-top-hint {
+            color: #ffdd88;
+            font-size: 0.9rem;
+            font-weight: 900;
+            white-space: pre-line;
+            line-height: 1.3;
+            text-align: center;
+            max-width: 220px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        #reincarnation-btn {
-            width: auto;
-            min-width: 150px;
+        .reinc-top-btn {
             border: none;
-            border-radius: 999px;
-            padding: 10px 16px;
+            border-radius: 12px;
+            padding: 10px 18px;
             cursor: pointer;
             color: #fff8ea;
-            font-size: 0.92rem;
             font-weight: 900;
-            letter-spacing: 0.08em;
-            background: linear-gradient(135deg, #9f5dff 0%, #6a2ca8 55%, #4a176f 100%);
-            box-shadow: 0 12px 24px rgba(106, 44, 168, 0.42), inset 0 1px 0 rgba(255,255,255,0.15);
+            letter-spacing: 0.06em;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c41e3a 100%);
+            box-shadow: 0 10px 24px rgba(220, 53, 69, 0.45), inset 0 1px 0 rgba(255,255,255,0.2);
             transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
-            text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.2;
             white-space: nowrap;
         }
 
-        #reincarnation-btn span { font-size: 0.72rem; }
+        .reinc-top-btn-label { font-size: 1rem; }
+        .reinc-top-btn-detail { font-size: 0.72rem; font-weight: 700; opacity: 0.9; }
 
-        #reincarnation-btn:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 14px 28px rgba(106, 44, 168, 0.55), 0 0 18px rgba(190, 138, 255, 0.18);
-            filter: saturate(1.08);
+        .reinc-top-btn:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 14px 32px rgba(220, 53, 69, 0.55), 0 0 20px rgba(255, 180, 0, 0.25);
+            filter: saturate(1.12) brightness(1.08);
         }
 
         .clicker-col-center {
@@ -831,12 +811,14 @@
         }
 
         #clicker-center-area::-webkit-scrollbar,
-        .clicker-col-right::-webkit-scrollbar {
+        .clicker-col-right::-webkit-scrollbar,
+        .clicker-col-left::-webkit-scrollbar {
             width: 10px;
         }
 
         #clicker-center-area::-webkit-scrollbar-thumb,
-        .clicker-col-right::-webkit-scrollbar-thumb {
+        .clicker-col-right::-webkit-scrollbar-thumb,
+        .clicker-col-left::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, rgba(123, 74, 25, 0.42), rgba(80, 45, 16, 0.56));
             border-radius: 999px;
             border: 2px solid rgba(255, 244, 223, 0.6);
@@ -917,12 +899,15 @@
         }
 
         .facility-row {
-            min-height: 102px;
+            min-height: 98px;
             margin: 12px 14px;
             padding: 14px 16px;
             border: 1px solid rgba(123, 74, 25, 0.14);
             border-radius: 24px;
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
             position: relative;
             overflow: hidden;
             transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
@@ -965,59 +950,46 @@
 
         .facility-row-title,
         .facility-row-icons,
-        .facility-row-meta,
-        .facility-row-head {
+        .facility-row-meta {
             position: relative;
             z-index: 2;
         }
 
-        .facility-row-head {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            margin-bottom: 12px;
-        }
-
         .facility-row-title {
-            flex: 0 1 auto;
+            flex: 0 0 152px;
             color: #fffaf0;
             font-size: 1.02rem;
             text-shadow: 0 1px 0 rgba(0,0,0,0.46);
+            padding-right: 14px;
+            border-right: 1px dashed rgba(255,255,255,0.32);
+            margin-right: 14px;
             font-weight: 800;
             letter-spacing: 0.04em;
             line-height: 1.25;
-            text-align: left;
-            white-space: nowrap;
         }
 
         .facility-row-title .facility-count-line {
-            display: block;
-            font-size: 0.82rem;
-            color: rgba(255,255,255,0.74);
-            margin-top: 5px;
-            letter-spacing: 0.06em;
+            display: none;
         }
 
         .facility-row-title .facility-level-line {
-            display: block;
-            font-size: 0.74rem;
-            color: rgba(255, 225, 168, 0.92);
-            margin-top: 3px;
-            letter-spacing: 0.08em;
+            display: none;
+        }
+
+        .facility-row-meta {
+            display: none;
         }
 
         .facility-row-icons {
+            width: 100%;
             display: flex;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             gap: 6px;
             font-size: 1.7rem;
-            align-items: center;
-            min-height: 42px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: thin;
+            align-content: flex-start;
+            min-height: 32px;
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.22));
+            overflow: visible;
         }
 
         .facility-row-icons span {
@@ -1030,12 +1002,13 @@
         }
 
         .facility-row-meta {
-            flex: 1 1 120px;
+            flex: 0 0 148px;
             display: flex;
             flex-direction: column;
             gap: 8px;
             align-items: stretch;
             justify-content: center;
+            margin-left: 12px;
             min-width: 0;
         }
 
@@ -1054,7 +1027,7 @@
         }
 
         .facility-progress {
-            width: 100%;
+            width: 120px;
             height: 11px;
             border-radius: 999px;
             overflow: hidden;
@@ -1429,67 +1402,6 @@
             border-color: rgba(62, 168, 173, 0.35);
         }
 
-        .update-log-layout {
-            padding: 0 60px 60px;
-            max-width: 980px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .update-thread {
-            border: 1px solid rgba(0,0,0,0.12);
-            border-radius: 8px;
-            background: #fff;
-            box-shadow: 0 8px 22px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-
-        .update-thread details + details { border-top: 1px solid rgba(0,0,0,0.08); }
-
-        .update-thread summary {
-            cursor: pointer;
-            padding: 18px 22px;
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            align-items: center;
-            font-weight: 800;
-            color: var(--primary-color);
-            list-style: none;
-        }
-
-        .update-thread summary::-webkit-details-marker { display: none; }
-
-        .update-thread summary::after {
-            content: "開く";
-            color: var(--accent-color);
-            font-size: 0.86rem;
-            white-space: nowrap;
-        }
-
-        .update-thread details[open] summary::after { content: "閉じる"; }
-
-        .update-date {
-            color: #777;
-            font-size: 0.9rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        .update-detail {
-            padding: 0 22px 22px;
-            color: #444;
-            line-height: 1.8;
-        }
-
-        .update-detail h3 {
-            font-size: 1rem;
-            color: var(--accent-color);
-            margin: 16px 0 8px;
-        }
-
-        .update-detail ul { padding-left: 1.2em; }
-
         .shop-info-left {
             display: flex;
             align-items: center;
@@ -1659,23 +1571,14 @@
 
         @media (max-width: 1200px) {
             .clicker-main-layout {
-                grid-template-columns: minmax(240px, 0.85fr) minmax(280px, 1fr) minmax(260px, 0.95fr);
-                gap: 10px;
-                padding: 10px;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
             }
 
             .clicker-col-left,
             .clicker-col-center,
             .clicker-col-right {
-                border-radius: 20px;
-            }
-
-            .clicker-col-left .kurofune-count {
-                font-size: clamp(1.8rem, 4vw, 3rem);
-            }
-
-            .kurofune-click-target {
-                font-size: clamp(6rem, 12vw, 11rem);
+                min-height: 420px;
             }
         }
 
@@ -1713,10 +1616,16 @@
                 padding-top: 4px;
             }
 
-            #reincarnation-btn {
-                min-width: 130px;
-                padding: 9px 13px;
-                font-size: 0.84rem;
+            .clicker-top-reinc {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+                padding-top: 4px;
+            }
+
+            .reinc-top-hint {
+                text-align: center;
+                max-width: none;
             }
         }
 
@@ -1751,10 +1660,7 @@
         }
 
         /* モーダル群 */
-        .modal-backdrop { position: absolute; inset: 0; z-index: 99999; display: none; background: rgba(0,0,0,0.42); }
         .modal-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #333; border: 2px solid #ccc; padding: 25px; z-index: 100000; display: none; border-radius: 8px; width: 350px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); }
-        .modal-x-btn { position: absolute; top: 10px; right: 12px; width: 34px; height: 34px; border: none; border-radius: 50%; background: rgba(0,0,0,0.08); color: #333; font-size: 1.25rem; font-weight: 900; line-height: 1; cursor: pointer; transition: 0.2s; }
-        .modal-x-btn:hover { background: var(--accent-color); color: #fff; transform: scale(1.06); }
         .modal-panel h3 { margin-top: 0; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; text-align: center; color: var(--primary-color);}
         .modal-panel label { font-size: 0.9rem; font-weight: bold; color: #555; display: block; margin-top: 15px; margin-bottom: 5px;}
         .modal-panel input { background: #f9f9f9; border: 1px solid #ccc; padding: 10px; width: 100%; box-sizing: border-box; border-radius: 4px; font-size: 1rem;}
@@ -1880,7 +1786,7 @@
             z-index: 200000;
             font-size: 6rem;
             transform: translate(-50%, -50%);
-            filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.7));
+            filter: grayscale(1) brightness(0.55) contrast(1.2) drop-shadow(0 0 30px rgba(255, 215, 0, 0.7));
             pointer-events: none;
             transition: top 0.9s cubic-bezier(0.65, 0, 0.35, 1), left 0.9s cubic-bezier(0.65, 0, 0.35, 1), transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
         }
@@ -1950,6 +1856,46 @@
         .study-card.boom { border-top-color: var(--accent-color); background: #fffafa; }
         .study-card.boom h3 { color: var(--accent-color); }
 
+        /* アップデートログ（スレッド式） */
+        .changelog-layout { padding: 0 60px 100px; display: flex; flex-direction: column; gap: 22px; max-width: 900px; margin: 0 auto; width: 100%; }
+        .changelog-thread {
+            background: white; border-radius: 12px; border: 1px solid #e2ddd0;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.06); overflow: hidden;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .changelog-thread.latest { border-color: var(--gold-color); box-shadow: 0 10px 28px rgba(212, 175, 55, 0.18); }
+        .changelog-thread-header {
+            display: flex; align-items: center; gap: 16px; padding: 20px 24px; cursor: pointer;
+            user-select: none;
+        }
+        .changelog-thread-header:hover { background: rgba(212, 175, 55, 0.06); }
+        .changelog-version-badge {
+            flex-shrink: 0; padding: 6px 14px; border-radius: 999px; font-weight: 800; font-size: 0.92rem;
+            letter-spacing: 0.05em; background: var(--primary-color); color: #fff;
+        }
+        .changelog-thread.latest .changelog-version-badge { background: var(--gold-color); color: #1a1a1a; }
+        .changelog-thread-title-wrap { flex: 1; min-width: 0; }
+        .changelog-thread-title { font-size: 1.2rem; font-weight: 800; color: var(--primary-color); }
+        .changelog-thread-date { font-size: 0.82rem; color: #999; margin-top: 2px; letter-spacing: 0.04em; }
+        .changelog-thread-chevron { flex-shrink: 0; font-size: 1.1rem; color: #aaa; transition: transform 0.3s ease; }
+        .changelog-thread.expanded .changelog-thread-chevron { transform: rotate(180deg); color: var(--gold-color); }
+        .changelog-thread-body {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            border-top: 1px solid transparent;
+        }
+        .changelog-thread.expanded .changelog-thread-body { border-top: 1px solid #eee; }
+        .changelog-thread-body-inner { padding: 22px 24px 26px; }
+        .changelog-section-title { font-size: 0.86rem; font-weight: 800; letter-spacing: 0.1em; color: var(--accent-color); margin-bottom: 10px; }
+        .changelog-section-title.preview-title { color: #8e44ad; margin-top: 22px; }
+        .changelog-content-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+        .changelog-content-list li { font-size: 0.98rem; color: #444; line-height: 1.6; padding-left: 22px; position: relative; }
+        .changelog-content-list li::before { content: "⚓"; position: absolute; left: 0; top: 0; font-size: 0.85rem; opacity: 0.7; }
+        .changelog-preview-box {
+            background: linear-gradient(135deg, rgba(142, 68, 173, 0.08), rgba(212, 175, 55, 0.10));
+            border: 1px dashed rgba(142, 68, 173, 0.4); border-radius: 10px; padding: 16px 18px;
+            font-size: 0.98rem; color: #5d3b75; font-weight: 700; line-height: 1.6;
+        }
+
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
 /* ===== Facility Mega Animation Pack ===== */
@@ -2001,8 +1947,8 @@ animation:facilitySweep 6s linear infinite;
             <div class="nav-item" onclick="switchScreen('screen-game-select', this)"><span class="nav-icon">⚔️</span><span class="nav-text">海軍演習 (ゲーム)</span></div>
             <div class="nav-item" onclick="switchScreen('screen-music', this)"><span class="nav-icon">🎵</span><span class="nav-text">音（音楽室）</span></div>
             <div class="nav-item" onclick="switchScreen('screen-study', this)"><span class="nav-icon">📜</span><span class="nav-text">歴史資料室</span></div>
+            <div class="nav-item" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
             <div class="nav-item" onclick="switchScreen('screen-ranking', this); refreshRanking();"><span class="nav-icon">🏆</span><span class="nav-text">世界ランキング</span></div>
-            <div class="nav-item" onclick="switchScreen('screen-update-log', this)"><span class="nav-icon">📝</span><span class="nav-text">アップデートログ</span></div>
             <div style="margin-top: auto; display: flex; flex-direction: column;">
                 <div class="nav-item" onclick="toggleSidebar()" style="border-top: 1px solid #333; color: #888;"><span class="nav-icon" id="sidebar-toggle-icon">◀</span><span class="nav-text">メニューを畳む</span></div>
                 <div class="nav-item" onclick="toggleFullscreen()" style="border-top: 1px solid #333; color: var(--gold-color);"><span class="nav-icon">📺</span><span class="nav-text">全画面切り替え</span></div>
@@ -2030,7 +1976,7 @@ animation:facilitySweep 6s linear infinite;
             <div class="screen-header"><h2 class="serif-font">海軍演習：ゲーム選択</h2></div>
             <div class="game-select-layout">
                 <div class="game-select-card" onclick="goToGame('screen-game')"><span class="game-select-icon">💥</span><h3 class="game-select-title serif-font">浦賀沖大砲戦 (改)</h3><p class="game-select-desc">黒船を操り、幕府の小舟を大砲で撃ち落とせ！30体撃破すると現れる巨大ボス要塞を攻略しろ！</p><button class="btn-primary" style="padding: 10px 25px; font-size: 1rem;">出撃する</button></div>
-                <div class="game-select-card" onclick="goToGame('screen-clicker')"><span class="game-select-icon">🚢</span><h3 class="game-select-title serif-font">黒船クリッカー</h3><p class="game-select-desc">黒船をひたすら連打してポイントを稼ごう！溜まった物資で設備や軍備を購入し、無限開国に挑め！</p><button class="btn-primary" style="padding: 10px 25px; font-size: 1rem; background-color: var(--gold-color);">開発する</button></div>
+                <div class="game-select-card" onclick="goToGame('screen-clicker')"><span class="game-select-icon" style="filter: grayscale(1) brightness(0.55) contrast(1.2);">🚢</span><h3 class="game-select-title serif-font">黒船クリッカー</h3><p class="game-select-desc">黒船をひたすら連打してポイントを稼ごう！溜まった物資で設備や軍備を購入し、無限開国に挑め！</p><button class="btn-primary" style="padding: 10px 25px; font-size: 1rem; background-color: var(--gold-color);">開発する</button></div>
             </div>
         </div>
 
@@ -2055,14 +2001,19 @@ animation:facilitySweep 6s linear infinite;
 
             <div class="clicker-top-bar">
                 <div class="clicker-top-left">
-                    <div class="clicker-top-btn" onclick="openModal('settings-modal')">⚙️ 設定</div>
-                    <div class="clicker-top-btn" onclick="openModal('achievements-modal')">🏆 実績</div>
+                    <div class="clicker-top-btn" onclick="document.getElementById('settings-modal').style.display='block'">⚙️ 設定</div>
+                    <div class="clicker-top-btn" onclick="document.getElementById('achievements-modal').style.display='block'">🏆 実績</div>
                     <div class="clicker-top-btn" id="btn-to-ascension" style="display: none; color: var(--gold-color); border-color: var(--gold-color);" onclick="switchScreen('screen-ascension')">🌟 昇天ゾーン</div>
                 </div>
                 <div class="clicker-news"><marquee id="news-ticker-text" scrollamount="5">瓦版：ペリー来航に江戸市中が大パニック！</marquee></div>
                 <div class="clicker-top-right">
-                    <button id="reincarnation-btn" style="display: none;" onclick="triggerReincarnation()">輪廻転生<br><span id="reincarnation-btn-detail"></span></button>
-                    <span class="clicker-top-badge">COOKIE-STYLE MODE</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        <span id="reincarnation-hint" class="reinc-top-hint">※今世で 100,000 隻 稼ぐと…？</span>
+                        <button id="reincarnation-btn" class="reinc-top-btn" style="display: none;" onclick="triggerReincarnation()">
+                            <span class="reinc-top-btn-label">輪廻転生</span>
+                            <span id="reincarnation-btn-detail" class="reinc-top-btn-detail"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -2087,10 +2038,6 @@ animation:facilitySweep 6s linear infinite;
                         <div id="clicker-sunburst" class="sunburst-bg"></div>
                         <div class="kurofune-click-target" id="clicker-target" onclick="clickKurofune(event)">🚢</div>
                         <p class="ship-hint">※クリック・Spaceキーで増殖</p>
-                    </div>
-
-                    <div class="reinc-container">
-                        <p id="reincarnation-hint">※今世で 100,000 隻 稼ぐと…？</p>
                     </div>
                 </div>
 
@@ -2158,6 +2105,12 @@ animation:facilitySweep 6s linear infinite;
             </div>
         </div>
 
+        <!-- アップデートログ -->
+        <div id="screen-changelog" class="screen">
+            <div class="screen-header"><h2 class="serif-font">📰 アップデートログ</h2><p style="color: #888;">バージョンが更新されるたびに、ここに新しいスレッドが立ちます。タイトルをクリックすると詳細が開きます。</p></div>
+            <div class="changelog-layout" id="changelog-list"></div>
+        </div>
+
         <!-- 世界ランキング -->
         <div id="screen-ranking" class="screen">
             <div class="screen-header"><h2 class="serif-font">🏆 世界ランキング：黒船保有数</h2><p style="color: #888;">全世界の船長たちと現在の黒船保有数を競おう！</p></div>
@@ -2177,50 +2130,41 @@ animation:facilitySweep 6s linear infinite;
             </div>
         </div>
 
-        <!-- アップデートログ -->
-        <div id="screen-update-log" class="screen">
-            <div class="screen-header"><h2 class="serif-font">アップデートログ</h2><p style="color: #888;">リリースごとの変更内容</p></div>
-            <div class="update-log-layout">
-                <div class="update-thread">
-                    <details open>
-                        <summary><span>Ver.1.0.1リリース</span><span class="update-date">2026年6月16日</span></summary>
-                        <div class="update-detail">
-                            <h3>内容</h3>
-                            <ul>
-                                <li>モニターサイズによって黒船クリッカー左画面のUIが隠れる問題を修正しました。</li>
-                                <li>転生するボタンを上の瓦版の右に表示するよう変更しました。</li>
-                                <li>昇天アップグレード「追加基地Ⅰ」「追加基地Ⅱ」で追加される施設が、新しく転生し戻ってくるとき消えてしまう問題を修正しました。</li>
-                                <li>黒船を明るい白黒表示に調整しました。</li>
-                                <li>実績と設定を、UI外のクリックまたは右上の×で閉じられるようにしました。</li>
-                                <li>生産ライン内の施設表示を、施設名・進化バー・横並び絵文字の構成に調整しました。</li>
-                            </ul>
-                            <h3>予告</h3>
-                            <p>大型アップデート「カスタマイズ式黒船」</p>
-                        </div>
-                    </details>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
 
 <!-- モーダル・オーバーレイ群（全画面対応のため app-container 内に配置） -->
 <div id="achievement-toast-container" style="position:absolute;"></div>
 <div id="offline-popup"><h3 style="margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom:5px;">🌙 オフライン生産報告</h3><p style="margin-bottom:0;" id="offline-popup-text"></p></div>
-<div id="modal-backdrop" class="modal-backdrop" onclick="closeOpenModal()"></div>
 
 <div id="settings-modal" class="modal-panel">
-    <button class="modal-x-btn" onclick="closeOpenModal()" aria-label="閉じる">×</button>
     <h3 class="serif-font">システム設定</h3>
     <p style="font-size: 0.9rem; color: #666; text-align: center;">自動セーブは数秒ごとに実行されています。</p>
     <p id="cloud-status-settings" style="font-size: 0.85rem; color: #888; text-align: center;">☁️ 読み込み中…</p>
-    <button class="close-btn" onclick="closeOpenModal()">閉じる</button>
+
+    <div style="display:flex; flex-direction:column; gap:16px; margin: 16px 0;">
+
+        <!-- 数字を短く表記 -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:0.9rem;">🔢 数字を短く表記</div>
+                <div style="font-size:0.78rem; color:#777;">million / billion などで表記します</div>
+            </div>
+            <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+                <input type="checkbox" id="toggle-short-numbers" style="opacity:0; width:0; height:0;"
+                    onchange="shortNumbers = this.checked; updateClickerUI(); saveSettings();">
+                <span id="short-numbers-track" style="position:absolute; inset:0; background:#ccc; border-radius:24px; transition:background 0.2s;"></span>
+                <span id="short-numbers-thumb" style="position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span>
+            </label>
+        </div>
+
+    </div>
+
+    <button class="close-btn" onclick="document.getElementById('settings-modal').style.display='none'">閉じる</button>
     <button class="danger-btn" onclick="resetSaveData()">💀 セーブデータを全消去する</button>
 </div>
 
 <div id="achievements-modal" class="modal-panel" style="width: 450px; max-height: 80vh; overflow-y: auto;">
-    <button class="modal-x-btn" onclick="closeOpenModal()" aria-label="閉じる">×</button>
     <h3 class="serif-font">🏆 実績一覧</h3>
     <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
         <div style="font-size:0.85rem; font-weight:700; letter-spacing:0.1em; color:#888; padding: 4px 2px; border-bottom: 1px solid #ddd; margin-bottom:4px;">通常実績</div>
@@ -2230,7 +2174,7 @@ animation:facilitySweep 6s linear infinite;
         <div style="font-size:0.85rem; font-weight:700; letter-spacing:0.1em; color:#c0392b; padding: 4px 2px; border-bottom: 2px solid #c0392b; margin-top:14px; margin-bottom:4px;">🔴 最終実績</div>
         <div id="achievements-final" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
-    <button class="close-btn" onclick="closeOpenModal()">閉じる</button>
+    <button class="close-btn" onclick="document.getElementById('achievements-modal').style.display='none'">閉じる</button>
 </div>
 
 <div id="cheat-panel" class="modal-panel">
@@ -2242,7 +2186,7 @@ animation:facilitySweep 6s linear infinite;
     <button class="close-btn" onclick="closeCheat()">CLOSE</button>
 </div>
 
-<div id="reincarnation-overlay"><div style="font-size: 15rem; filter: drop-shadow(0 0 50px red);" id="reincarnation-ship">🚢</div></div>
+<div id="reincarnation-overlay"><div style="font-size: 15rem; filter: grayscale(1) brightness(0.55) contrast(1.2) drop-shadow(0 0 50px red);" id="reincarnation-ship">🚢</div></div>
 
 </div>
 <!-- ============================================
@@ -2292,6 +2236,7 @@ animation:facilitySweep 6s linear infinite;
     let chibaTimer = 0;
     let isDraggingSeekBar = false;
     let audio = null, audioContext = null, sourceNode = null, bassEQ = null, visualizerInterval = null;
+    let shortNumbers = false; // 数字を短く表記するフラグ
 
     // ==========================================
     // オンラインセーブ・ランキング関連
@@ -2402,6 +2347,7 @@ animation:facilitySweep 6s linear infinite;
 
     function toggleSidebar() { const sb = document.getElementById('sidebar'), icon = document.getElementById('sidebar-toggle-icon'); sb.classList.toggle('collapsed'); if(sb.classList.contains('collapsed')) { icon.textContent = '▶'; } else { icon.textContent = '◀'; } }
     
+    // グローバルスコープに関数を割り当て（HTMLのonclick用）
     function switchScreen(screenId, navElement) {
         if (!navElement && (screenId === 'screen-game' || screenId === 'screen-clicker' || screenId === 'screen-ascension')) { 
             document.querySelectorAll('.nav-menu .nav-item').forEach(item => { if(item.textContent.includes('海軍演習')) item.classList.add('active'); else item.classList.remove('active'); }); 
@@ -2542,6 +2488,25 @@ animation:facilitySweep 6s linear infinite;
             if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
             cloudSyncTimer = setTimeout(() => { syncToCloud(saveData); }, 3000);
         }
+    }
+
+    function saveSettings() {
+        localStorage.setItem('kurofuneSettings', JSON.stringify({ shortNumbers }));
+    }
+
+    function loadSettings() {
+        try {
+            const s = JSON.parse(localStorage.getItem('kurofuneSettings') || 'null');
+            if (!s) return;
+            if (s.shortNumbers != null) shortNumbers = s.shortNumbers;
+        } catch(e) {}
+        // UIに反映
+        const toggle = document.getElementById('toggle-short-numbers');
+        const track = document.getElementById('short-numbers-track');
+        const thumb = document.getElementById('short-numbers-thumb');
+        if (toggle) toggle.checked = shortNumbers;
+        if (track) track.style.background = shortNumbers ? '#3498db' : '#ccc';
+        if (thumb) thumb.style.transform = shortNumbers ? 'translateX(20px)' : 'translateX(0)';
     }
 
     // ==========================================
@@ -2691,25 +2656,18 @@ animation:facilitySweep 6s linear infinite;
         return div.innerHTML;
     }
 
-    function openModal(modalId) {
-        closeOpenModal();
-        const backdrop = document.getElementById('modal-backdrop');
-        const modal = document.getElementById(modalId);
-        if (backdrop) backdrop.style.display = 'block';
-        if (modal) modal.style.display = 'block';
-    }
-
-    function closeOpenModal() {
-        const backdrop = document.getElementById('modal-backdrop');
-        const modalIds = ['settings-modal', 'achievements-modal'];
-        modalIds.forEach((modalId) => {
-            const modal = document.getElementById(modalId);
-            if (modal) modal.style.display = 'none';
-        });
-        if (backdrop) backdrop.style.display = 'none';
-    }
-
     function sanitizeNum(val, def) { let n = parseFloat(val); return (isNaN(n) || !isFinite(n)) ? def : n; }
+    
+    function formatNumber(n) {
+        if (!shortNumbers) return Math.floor(n).toLocaleString();
+        const abs = Math.abs(n);
+        const decimals = 2;
+        if (abs >= 1e12) return (n / 1e12).toFixed(decimals) + ' trillion';
+        if (abs >= 1e9)  return (n / 1e9).toFixed(decimals) + ' billion';
+        if (abs >= 1e6)  return (n / 1e6).toFixed(decimals) + ' million';
+        if (abs >= 1e3)  return (n / 1e3).toFixed(decimals) + ' thousand';
+        return Math.floor(n).toLocaleString();
+    }
     
     function ensureDataIntegrity() {
         clickerScore = sanitizeNum(clickerScore, 0); currentLifeScore = sanitizeNum(currentLifeScore, clickerScore); 
@@ -2719,26 +2677,27 @@ animation:facilitySweep 6s linear infinite;
         for (let key in facilities) { facilities[key].count = sanitizeNum(facilities[key].count, 0); facilities[key].cost = sanitizeNum(facilities[key].cost, facilities[key].baseCost); facilities[key].multiplier = sanitizeNum(facilities[key].multiplier, 1); facilities[key].upLevel = sanitizeNum(facilities[key].upLevel, 0); }
     }
 
-    function applyAscensionFacilityUnlocks() {
-        if (skills.addBase1) {
-            facilities.flute.locked = false;
-            facilities.cake.locked = false;
-            facilities.gun.locked = false;
-        }
-        if (skills.addBase2) {
-            facilities.binoculars.locked = false;
-            facilities.liquor.locked = false;
-            facilities.katana.locked = false;
-        }
-    }
-
     function applySaveObject(save) {
         clickerScore = sanitizeNum(save.clickerScore, 0); currentLifeScore = sanitizeNum(save.currentLifeScore, clickerScore);
         clickPower = sanitizeNum(save.clickPower, 1); upClickCost = sanitizeNum(save.upClickCost, 15); upClickLevel = sanitizeNum(save.upClickLevel, 1);
         reincarnationCount = sanitizeNum(save.reincarnationCount, 0); fragments = sanitizeNum(save.fragments, 0);
 
         skills = { ...skills, ...(save.skills || {}) };
-        for (let key in facilities) { if (save.facilities && save.facilities[key]) { let savedFac = save.facilities[key]; facilities[key].count = sanitizeNum(savedFac.count, 0); facilities[key].cost = sanitizeNum(savedFac.cost, facilities[key].baseCost); facilities[key].multiplier = sanitizeNum(savedFac.multiplier, 1); facilities[key].upLevel = sanitizeNum(savedFac.upLevel, 0); } }
+        for (let key in facilities) {
+            if (save.facilities && save.facilities[key]) {
+                let savedFac = save.facilities[key];
+                facilities[key].count = sanitizeNum(savedFac.count, 0);
+                facilities[key].cost = sanitizeNum(savedFac.cost, facilities[key].baseCost);
+                facilities[key].multiplier = sanitizeNum(savedFac.multiplier, 1);
+                facilities[key].upLevel = sanitizeNum(savedFac.upLevel, 0);
+                if (typeof savedFac.locked === 'boolean') facilities[key].locked = savedFac.locked;
+            }
+        }
+        // 昇天アップグレード「追加基地Ⅰ/Ⅱ」の所持状況から施設のロック解除状態を必ず再適用する
+        // （セーブデータのlocked値が古い/欠損していても、転生・再読み込み後に施設が消えないようにする）
+        if (skills.addBase1) { facilities.flute.locked = false; facilities.cake.locked = false; facilities.gun.locked = false; }
+        if (skills.addBase2) { facilities.binoculars.locked = false; facilities.liquor.locked = false; facilities.katana.locked = false; }
+
         if (save.achievements) { for (let key in save.achievements) { if (achievements[key]) achievements[key].unlocked = save.achievements[key].unlocked; } }
 
         availableFacilityUpgrades = Array.isArray(save.availableFacilityUpgrades) ? save.availableFacilityUpgrades : [];
@@ -2780,7 +2739,7 @@ animation:facilitySweep 6s linear infinite;
                 try { applySaveObject(save); } catch (e) { console.error("Save apply error", e); }
             }
             ensureDataIntegrity();
-            applyAscensionFacilityUnlocks();
+            loadSettings();
             const btnAsc = document.getElementById('btn-to-ascension');
             if (reincarnationCount > 0 && btnAsc) btnAsc.style.display = 'block';
             initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); updateAscensionUI(); updateCenterView(); updateAchievementsModal();
@@ -2873,7 +2832,7 @@ animation:facilitySweep 6s linear infinite;
         if(isInvincible && invincibilityTimer>0){invincibilityTimer--; if(invincibilityTimer<=0)isInvincible=false;}
         if(enemiesDefeated<30){ if(frameCount%Math.max(15,45-Math.floor(score/60))===0) enemies.push({x:Math.random()*(cw-80)+40,y:-50,size:35,speedY:3+Math.random()*3,emoji:'🛶',points:10}); } else if(!boss && enemies.length===0){ boss={x:cw/2,y:120,size:110,emoji:'🏯',hp:35,maxHp:35,speedX:4,direction:1}; }
         for(let i=bullets.length-1;i>=0;i--){ let b=bullets[i]; b.y+=b.speedY; ctx.font=`${b.size}px Arial`; ctx.fillText(b.emoji,b.x,b.y); if(b.y<0) bullets.splice(i,1); }
-        if(!(isInvincible&&frameCount%4<2)){ ctx.font=`${player.size}px Arial`; ctx.fillText(player.emoji,player.x,player.y); }
+        if(!(isInvincible&&frameCount%4<2)){ ctx.font=`${player.size}px Arial`; ctx.save(); ctx.filter='grayscale(1) brightness(0.55) contrast(1.2)'; ctx.fillText(player.emoji,player.x,player.y); ctx.restore(); }
         for(let i=enemies.length-1;i>=0;i--){ let e=enemies[i]; e.y+=e.speedY; ctx.font=`${e.size}px Arial`; ctx.fillText(e.emoji,e.x,e.y);
             if(Math.sqrt(Math.pow(player.x-e.x,2)+Math.pow(player.y-e.y,2))<(player.size/2+e.size/2-12)){ if(isInvincible){ explosions.push({x:e.x,y:e.y,size:e.size*1.5,life:12,emoji:'💥'}); score+=e.points; enemiesDefeated++; document.getElementById('score-display').textContent=score; enemies.splice(i,1); continue; }else{ gameOver(); return; } }
             for(let j=bullets.length-1;j>=0;j--){ let b=bullets[j]; if(Math.sqrt(Math.pow(e.x-b.x,2)+Math.pow(e.y-b.y,2))<(e.size/2+b.size/2)){ explosions.push({x:e.x,y:e.y,size:e.size*1.5,life:15,emoji:'💥'}); score+=e.points; enemiesDefeated++; document.getElementById('score-display').textContent=score; enemies.splice(i,1); bullets.splice(j,1); break; } }
@@ -2924,7 +2883,7 @@ animation:facilitySweep 6s linear infinite;
         let clickCard = document.createElement('div'); clickCard.className = 'shop-card'; clickCard.id = 'up-click'; clickCard.onclick = () => buyUpgrade();
         clickCard.innerHTML = `
             <div class="shop-info-left"><span class="shop-icon">🛠️</span><div class="shop-details"><h4>近代ドック拡張</h4><p>1クリックの基本生産を +1</p></div></div>
-            <div class="shop-info-right"><div class="shop-cost" id="up-click-cost">${upClickCost.toLocaleString()} 隻</div><div class="shop-count" id="up-click-level">Lv.${upClickLevel}</div></div>
+            <div class="shop-info-right"><div class="shop-cost" id="up-click-cost">${formatNumber(upClickCost)} 隻</div><div class="shop-count" id="up-click-level">Lv.${upClickLevel}</div></div>
         `;
         container.appendChild(clickCard);
 
@@ -2932,7 +2891,7 @@ animation:facilitySweep 6s linear infinite;
             let wrenchCard = document.createElement('div'); wrenchCard.className = 'shop-card special-card'; wrenchCard.id = 'up-wrench'; wrenchCard.onclick = () => buyWrench();
             wrenchCard.innerHTML = `
                 <div class="shop-info-left"><span class="shop-icon">🔧</span><div class="shop-details"><h4>レンチ</h4><p>全体の生産効率を <strong>+1%</strong> する</p></div></div>
-                <div class="shop-info-right"><div class="shop-cost" id="up-wrench-cost">${upWrenchCost.toLocaleString()} 隻</div><div class="shop-count" id="up-wrench-level">Lv.${wrenchLevel}</div></div>
+                <div class="shop-info-right"><div class="shop-cost" id="up-wrench-cost">${formatNumber(upWrenchCost)} 隻</div><div class="shop-count" id="up-wrench-level">Lv.${wrenchLevel}</div></div>
             `;
             container.appendChild(wrenchCard);
 
@@ -2940,7 +2899,7 @@ animation:facilitySweep 6s linear infinite;
                 let combatCard = document.createElement('div'); combatCard.className = 'shop-card special-card'; combatCard.id = 'up-combat'; combatCard.onclick = () => buyCombatTech();
                 combatCard.innerHTML = `
                     <div class="shop-info-left"><span class="shop-icon">⚔️</span><div class="shop-details"><h4>戦闘用技術</h4><p>クリック力が <strong>2倍</strong> になる(1回限り)</p></div></div>
-                    <div class="shop-info-right"><div class="shop-cost" id="up-combat-cost">100,000 隻</div></div>
+                    <div class="shop-info-right"><div class="shop-cost" id="up-combat-cost">${formatNumber(100000)} 隻</div></div>
                 `;
                 container.appendChild(combatCard);
             }
@@ -2951,7 +2910,7 @@ animation:facilitySweep 6s linear infinite;
             let card = document.createElement('div'); card.className = 'shop-card upgrade-card'; card.id = `up-fac-${index}`; card.onclick = () => buyFacilityUpgrade(index);
             card.innerHTML = `
                 <div class="shop-info-left"><span class="shop-icon">${fac.icon}</span><div class="shop-details"><h4>${fac.name} 強化 [${up.milestoneTarget}達成]</h4><p>生産量が <strong>2倍</strong> になる！</p></div></div>
-                <div class="shop-info-right"><div class="shop-cost" style="color: #9b59b6;">${up.cost.toLocaleString()} 隻</div></div>
+                <div class="shop-info-right"><div class="shop-cost" style="color: #9b59b6;">${formatNumber(up.cost)} 隻</div></div>
             `;
             container.appendChild(card);
         });
@@ -3024,6 +2983,7 @@ animation:facilitySweep 6s linear infinite;
             if (fac.count <= 0) continue;
 
             const tier = getFacilityTier(fac.count);
+            const evoLabel = getFacilityEvoLabel(fac, tier);
             const nextTarget = fac.upLevel < facilityUpgradeMilestones.length ? facilityUpgradeMilestones[fac.upLevel] : null;
             const progress = nextTarget ? Math.min(100, (fac.count / nextTarget) * 100) : 100;
             const displayCount = Math.min(fac.count, 100);
@@ -3032,12 +2992,22 @@ animation:facilitySweep 6s linear infinite;
             row.className = `facility-row scene-${key} tier-${tier} level-${Math.min(5, fac.upLevel)}`;
             row.style.setProperty('--scene-opacity', `${0.24 + Math.min(0.7, fac.count / 150)}`);
 
-            const head = document.createElement('div');
-            head.className = 'facility-row-head';
-
             const title = document.createElement('div');
             title.className = 'facility-row-title serif-font';
-            title.textContent = fac.name;
+            title.innerHTML = `${fac.name}`;
+
+            const progressBar = document.createElement('div');
+            progressBar.className = 'facility-progress';
+            progressBar.innerHTML = `<span style="--progress:${progress}%"></span>`;
+
+            const titleAndProgress = document.createElement('div');
+            titleAndProgress.style.display = 'flex';
+            titleAndProgress.style.alignItems = 'center';
+            titleAndProgress.style.justifyContent = 'space-between';
+            titleAndProgress.style.gap = '12px';
+            titleAndProgress.style.width = '100%';
+            titleAndProgress.appendChild(title);
+            titleAndProgress.appendChild(progressBar);
 
             const icons = document.createElement('div');
             icons.className = `facility-row-icons facility-anim-${key}`;
@@ -3049,16 +3019,16 @@ animation:facilitySweep 6s linear infinite;
             const meta = document.createElement('div');
             meta.className = 'facility-row-meta';
             meta.innerHTML = `
+                <div class="facility-pill">KpS ${fac.kps.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 <div class="facility-progress"><span style="--progress:${progress}%"></span></div>
+                <div class="facility-pill">${nextTarget ? `進化 ${fac.count}/${nextTarget}` : '最終進化'}</div>
             `;
 
             const sceneWrap = document.createElement('div');
             sceneWrap.innerHTML = getFacilitySceneHTML(key, fac, tier);
 
             row.appendChild(sceneWrap.firstElementChild);
-            head.appendChild(title);
-            head.appendChild(meta);
-            row.appendChild(head);
+            row.appendChild(titleAndProgress);
             row.appendChild(icons);
             centerArea.appendChild(row);
         }
@@ -3068,7 +3038,7 @@ animation:facilitySweep 6s linear infinite;
         const reincBtn = document.getElementById('reincarnation-btn'), reincHint = document.getElementById('reincarnation-hint');
         let pending = calcPendingFragments();
         if (pending > 0) {
-            if (reincBtn) reincBtn.style.display = 'block'; 
+            if (reincBtn) reincBtn.style.display = 'flex'; 
             if (reincHint) {
                 reincHint.style.display = 'block';
                 let nextReq = getNextFragmentReq(); let remaining = Math.ceil(nextReq - currentLifeScore);
@@ -3081,12 +3051,12 @@ animation:facilitySweep 6s linear infinite;
             if (reincHint) {
                 reincHint.style.display = 'block'; 
                 let base = getBaseReincarnationCost(); let remaining = Math.ceil(base - currentLifeScore);
-                reincHint.innerHTML = `※ 今世で ${Math.ceil(base).toLocaleString()} 隻 稼ぐと…？\n（あと ${remaining.toLocaleString()} 隻）`;
+                reincHint.innerHTML = `※ 今世で ${Math.ceil(base).toLocaleString()} 隻 稼ぐと…？<br>（あと ${remaining.toLocaleString()} 隻）`;
             }
         }
 
         const totalScoreEl = document.getElementById('clicker-total-score');
-        if (totalScoreEl) totalScoreEl.textContent = `${Math.floor(clickerScore).toLocaleString()} 隻`;
+        if (totalScoreEl) totalScoreEl.textContent = `${formatNumber(clickerScore)} 隻`;
         const kpsEl = document.getElementById('clicker-kps');
         if (kpsEl) kpsEl.textContent = `毎秒増加量(KpS): ${getKPS().toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} 隻`;
         
@@ -3094,7 +3064,7 @@ animation:facilitySweep 6s linear infinite;
         if(upClickCard) {
             const costEl = document.getElementById('up-click-cost');
             const lvlEl = document.getElementById('up-click-level');
-            if (costEl) costEl.textContent = `${upClickCost.toLocaleString()} 隻`; 
+            if (costEl) costEl.textContent = `${formatNumber(upClickCost)} 隻`; 
             if (lvlEl) lvlEl.textContent = `Lv.${upClickLevel}`;
             if (clickerScore >= upClickCost) upClickCard.classList.remove('disabled'); else upClickCard.classList.add('disabled');
         }
@@ -3205,7 +3175,7 @@ animation:facilitySweep 6s linear infinite;
                 bottom: 22%;
                 left: 50%;
                 transform: translateX(-50%);
-                filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+                filter: grayscale(1) brightness(0.55) contrast(1.2) drop-shadow(0 10px 20px rgba(0,0,0,0.5));
                 transition: all 4s ease-in;
             ">🚢</div>
             <div id="ending-text" style="
@@ -3730,7 +3700,6 @@ animation:facilitySweep 6s linear infinite;
         const buffStatus = document.getElementById('clicker-buff-status');
         if (buffStatus) buffStatus.textContent = '';
         for(let key in facilities) { facilities[key].count = 0; facilities[key].cost = facilities[key].baseCost; facilities[key].multiplier = 1; facilities[key].upLevel = 0; }
-        applyAscensionFacilityUnlocks();
         
         const btn = document.getElementById('btn-to-ascension');
         if (btn) btn.style.display = 'block'; 
@@ -3763,7 +3732,6 @@ animation:facilitySweep 6s linear infinite;
             fragments -= cost; skills[skillId] = true;
             if(skillId === 'addBase1') { facilities.flute.locked = false; facilities.cake.locked = false; facilities.gun.locked = false; initFacilitiesDOM(); }
             if(skillId === 'addBase2') { facilities.binoculars.locked = false; facilities.liquor.locked = false; facilities.katana.locked = false; initFacilitiesDOM(); }
-            applyAscensionFacilityUnlocks();
             if(skillId === 'modernization') { initUpgradesDOM(); }
             if(skillId === 'keiyaku' || skillId === 'kaikoku') { initUpgradesDOM(); }
             updateAscensionUI(); saveGame();
@@ -3888,8 +3856,104 @@ animation:facilitySweep 6s linear infinite;
     }
 
     // ==========================================
+    // アップデートログ（スレッド式）
+    // ==========================================
+    // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
+    const changelogData = [
+        {
+            version: "v1.0.2",
+            title: "UIをもっと最適化",
+            date: "2026-06-17",
+            content: [
+                "黒船保有数の表示を縮小し、モニターサイズに応じて自動でフォントサイズを調整するようにしました。改行なしで表示されるようになり、より見やすくなっています。",
+                "右欄（商会の棚）のスクロール機能を完全に無効化。画面を最大限有効活用できるようになりました。",
+                "設定欄に「数字を短く表記」オプションを追加。ONの場合、大きな数字が million / billion で表記されます。",
+                "「輪廻転生」ボタンと「今世で〇隻稼ぐと…？」のメッセージを、画面右上の目立つ場所に配置。転生チャレンジの進捗がより明確に見えるようになりました。",
+                "左カラムのタイトル「黒船クリッカー」を削除し、UIをよりコンパクト化。黒船の絵文字をさらに大きく表示するようにしました。"
+            ],
+            preview: "6月30日予定"
+        },
+        {
+            version: "v1.0.1",
+            title: "修正版リリース：UI最適化と黒船の意匠変更",
+            date: "2026-06-16",
+            content: [
+                "モニターのサイズによって黒船クリッカー画面（特に左側の黒船表示エリア）のUIが見切れてしまう問題を修正。画面の高さに応じて自動でレイアウトがフィットするようにしました。",
+                "「輪廻転生」ボタンの位置を変更。今までは左下にありましたが、画面上部の瓦版（ニュースティッカー）の右側に移動しました。",
+                "昇天アップグレード「追加基地Ⅰ」「追加基地Ⅱ」で解放した施設が、転生後にページを再読み込みすると消えてしまう不具合を修正。",
+                "黒船のグラフィックを黒色・モノクロ調に変更。より「黒船」らしい重厚な見た目になりました。"
+            ],
+            preview: "大型アップデート「カスタマイズ式黒船」"
+        }
+    ];
+
+    function renderChangelog() {
+        const container = document.getElementById('changelog-list');
+        if (!container) return;
+        if (container.dataset.rendered === '1') return; // 二重描画防止
+        container.dataset.rendered = '1';
+
+        container.innerHTML = '';
+        changelogData.forEach((entry, index) => {
+            const thread = document.createElement('div');
+            thread.className = 'changelog-thread' + (index === 0 ? ' latest' : '');
+            thread.id = `changelog-thread-${index}`;
+
+            const contentItems = (entry.content || []).map(c => `<li>${escapeHtml(c)}</li>`).join('');
+
+            thread.innerHTML = `
+                <div class="changelog-thread-header" onclick="toggleChangelogThread(${index})">
+                    <span class="changelog-version-badge">${escapeHtml(entry.version)}</span>
+                    <div class="changelog-thread-title-wrap">
+                        <div class="changelog-thread-title">${escapeHtml(entry.title)}</div>
+                        <div class="changelog-thread-date">${escapeHtml(entry.date)}</div>
+                    </div>
+                    <span class="changelog-thread-chevron">▼</span>
+                </div>
+                <div class="changelog-thread-body" id="changelog-body-${index}">
+                    <div class="changelog-thread-body-inner">
+                        <div class="changelog-section-title">■ 内容</div>
+                        <ul class="changelog-content-list">${contentItems}</ul>
+                        <div class="changelog-section-title preview-title">■ 予告</div>
+                        <div class="changelog-preview-box">${escapeHtml(entry.preview || '')}</div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(thread);
+        });
+
+        // 最新スレッドはデフォルトで開いておく
+        if (changelogData.length > 0) toggleChangelogThread(0, true);
+    }
+
+    function toggleChangelogThread(index, forceOpen) {
+        const thread = document.getElementById(`changelog-thread-${index}`);
+        const body = document.getElementById(`changelog-body-${index}`);
+        if (!thread || !body) return;
+
+        const isExpanded = thread.classList.contains('expanded');
+        const willExpand = forceOpen === true ? true : !isExpanded;
+
+        if (willExpand) {
+            thread.classList.add('expanded');
+            body.style.maxHeight = body.scrollHeight + 'px';
+        } else {
+            thread.classList.remove('expanded');
+            body.style.maxHeight = '0px';
+        }
+    }
+
+    // ==========================================
     // 起動時の初期化リスナー
     // ==========================================
+    // グローバルスコープに関数を割り当て（HTMLのonclick用）
+    window.switchScreen = switchScreen;
+    window.toggleSidebar = toggleSidebar;
+    window.toggleFullscreen = toggleFullscreen;
+    window.renderChangelog = renderChangelog;
+    window.refreshRanking = refreshRanking;
+    window.triggerReincarnation = triggerReincarnation;
+
     window.addEventListener('DOMContentLoaded', () => {
         audio = document.getElementById('bgm-player');
         let seekBar = document.getElementById('seek-bar');
