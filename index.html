@@ -1939,7 +1939,7 @@
         .modal-panel button.close-btn { background: #95a5a6; margin-top: 15px;}
         .modal-panel button.danger-btn { background: #e74c3c; margin-top: 20px;}
 
-        #cheat-panel { background: #000; color: #0f0; border-color: #0f0; box-shadow: 0 0 40px #0f0;} #cheat-panel h3 { border-bottom-color: #0f0; color: #0f0;} #cheat-panel label { color: #0f0;} #cheat-panel input { background: #111; color: #0f0; border-color: #0f0;} #cheat-panel button { background: #0f0; color: #000;}
+        #sys-console-7f3a { background: #000; color: #0f0; border-color: #0f0; box-shadow: 0 0 40px #0f0;} #sys-console-7f3a h3 { border-bottom-color: #0f0; color: #0f0;} #sys-console-7f3a label { color: #0f0;} #sys-console-7f3a input { background: #111; color: #0f0; border-color: #0f0;} #sys-console-7f3a button { background: #0f0; color: #000;}
         #offline-popup { position: absolute; top: 20px; right: -400px; background: rgba(41, 128, 185, 0.95); color: white; padding: 20px 30px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 99999; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid var(--gold-color); }
         #offline-popup.show { right: 20px; }
 
@@ -2010,10 +2010,10 @@
         .skill-node.purchased { background: var(--gold-color); color: #1a1a1a; border-color: #f39c12; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
         .skill-node.available { border-color: #e74c3c; box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
         .skill-node:hover.available { transform: scale(1.05); }
-        .skill-name { font-size: 1.2rem; font-weight: 900; margin-bottom: 10px; -webkit-text-stroke: 1px #fff; paint-order: stroke fill; text-shadow: 0 0 2px #fff; }
-        .skill-cost { font-family: monospace; font-weight: 900; color: #bdc3c7; margin-bottom: 10px; -webkit-text-stroke: 1px #fff; paint-order: stroke fill; text-shadow: 0 0 2px #fff; }
+        .skill-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; -webkit-text-stroke: 1px #fff; paint-order: stroke fill; text-shadow: 0 0 2px #fff; }
+        .skill-cost { font-family: monospace; font-weight: bold; color: #bdc3c7; margin-bottom: 10px; -webkit-text-stroke: 1px #fff; paint-order: stroke fill; text-shadow: 0 0 2px #fff; }
         .skill-node.purchased .skill-cost { color: #555; }
-        .skill-desc { font-size: 0.85rem; font-weight: 700; line-height: 1.4; position: relative; z-index: 2; -webkit-text-stroke: 1px #fff; paint-order: stroke fill; text-shadow: 0 0 2px #fff;}
+        .skill-desc { font-size: 0.85rem; line-height: 1.4; position: relative; z-index: 2; -webkit-text-stroke: 1px #fff; paint-order: stroke fill; text-shadow: 0 0 2px #fff;}
 
         /* ===== 円形昇天ツリー ===== */
         .ascension-header-bar {
@@ -2156,11 +2156,11 @@
         }
         .circle-node.purchased:hover { transform: translate(-50%, -50%) scale(1.04); }
 
-        .circle-node .skill-name { font-size: 0.95rem; font-weight: 900; margin-bottom: 5px; line-height: 1.25; }
+        .circle-node .skill-name { font-size: 0.95rem; font-weight: bold; margin-bottom: 5px; line-height: 1.25; }
         .circle-node.is-center .skill-name, .circle-node.is-far .skill-name { font-size: 1.05rem; }
-        .circle-node .skill-cost { font-family: monospace; font-size: 0.72rem; font-weight: 900; color: #bdc3c7; margin-bottom: 4px; }
+        .circle-node .skill-cost { font-family: monospace; font-size: 0.72rem; font-weight: bold; color: #bdc3c7; margin-bottom: 4px; }
         .circle-node.purchased .skill-cost { color: #6b5a1e; }
-        .circle-node .skill-desc { font-size: 0.66rem; font-weight: 700; line-height: 1.3; position: relative; z-index: 2; }
+        .circle-node .skill-desc { font-size: 0.66rem; line-height: 1.3; position: relative; z-index: 2; }
 
         .circle-node.is-special {
             border-width: 4px;
@@ -2580,6 +2580,9 @@ animation:facilitySweep 6s linear infinite;
                 <div class="circle-node" id="node-senpanKill" onclick="buySkill('senpanKill')" style="left:38%; top:88%; border-color:#7f5a2e; background: radial-gradient(circle at 35% 30%, #4a3520, #221708 80%);">
                     <div class="skill-name" style="color:#e0b97a;">戦犯殺害</div><div class="skill-cost">コスト: 14 かけら</div><div class="skill-desc">アップグレードに「桜田門外の変」を追加。すべての施設のKpSを2倍（1回限り）。</div>
                 </div>
+                <div class="circle-node is-far is-special" id="node-achievementBoost" onclick="buySkill('achievementBoost')" style="left:14%; top:88%; border-color:#3f9c6a; background: radial-gradient(circle at 35% 30%, #1f4a35, #0a1f16 80%);">
+                    <div class="skill-name" style="color:#7fe0b0;">実績の有用性</div><div class="skill-cost">コスト: 1000 かけら</div><div class="skill-desc">解除した実績一つごとに、全体のKpSが10%上昇する。</div>
+                </div>
 
                 <div class="circle-node is-far is-special" id="node-keiyaku" onclick="buySkill('keiyaku')" style="left:50%; top:96%; border-color:#e74c3c; background: radial-gradient(circle at 35% 30%, #5a2a2a, #2c1010 80%);">
                     <div class="skill-name" style="color:#ff8a7a;">契約</div><div class="skill-cost">コスト: 30 かけら</div><div class="skill-desc">黒船とアメリカの間に条約を結ぶ。「日米和親条約」を追加。</div>
@@ -2611,10 +2614,7 @@ animation:facilitySweep 6s linear infinite;
                     <div class="skill-name" style="color:#d9b3ff;">もしもの話</div><div class="skill-cost">コスト: 1 かけら</div><div class="skill-desc">すべての始まり。</div>
                 </div>
 
-                <div class="circle-node" id="node-super-perry" onclick="buySuperSkill('perry')" style="left:50%; top:14%; border-color:#b388ff; background: radial-gradient(circle at 35% 30%, #3a1a5c, #190a2e 80%);">
-                    <div class="skill-name" style="color:#d9b3ff;">ペリー再来航</div><div class="skill-cost">コスト: 1 かけら</div><div class="skill-desc">建物の一括購入が可能になる。「1」「10」「100」ずつ買える。</div>
-                </div>
-                <div class="circle-node" id="node-super-efficiency" onclick="buySuperSkill('efficiency')" style="left:80%; top:28%; border-color:#b388ff; background: radial-gradient(circle at 35% 30%, #3a1a5c, #190a2e 80%);">
+                <div class="circle-node" id="node-super-efficiency" onclick="buySuperSkill('efficiency')" style="left:50%; top:14%; border-color:#b388ff; background: radial-gradient(circle at 35% 30%, #3a1a5c, #190a2e 80%);">
                     <div class="skill-name" style="color:#d9b3ff;">生産効率化</div><div class="skill-cost">コスト: 2 かけら</div><div class="skill-desc">クリック力が +50% 増加する。</div>
                 </div>
                 <div class="circle-node" id="node-super-kakera1" onclick="buySuperSkill('kakera1')" style="left:82%; top:64%; border-color:#b388ff; background: radial-gradient(circle at 35% 30%, #3a1a5c, #190a2e 80%);">
@@ -2635,6 +2635,9 @@ animation:facilitySweep 6s linear infinite;
                 </div>
                 <div class="circle-node is-far is-special" id="node-super-haihan" onclick="buySuperSkill('haihanChiken')" style="left:76%; top:94%; border-color:#c9963f; background: radial-gradient(circle at 35% 30%, #5c3d1a, #2a1f0a 80%);">
                     <div class="skill-name" style="color:#f0cf8e;">廃藩置県</div><div class="skill-cost">コスト: 30 かけら</div><div class="skill-desc">新たな開国技術「廃藩置県」を追加。1回限り、全体のKpSを2倍にする。</div>
+                </div>
+                <div class="circle-node" id="node-super-carryover" onclick="buySuperSkill('carryOver')" style="left:8%; top:46%; border-color:#5cc9b3; background: radial-gradient(circle at 35% 30%, #1a5c4f, #0a2a22 80%);">
+                    <div class="skill-name" style="color:#8ef0d9;">持ち越し</div><div class="skill-cost">コスト: 1 かけら</div><div class="skill-desc">超転生したとき、隻の数が変わらない（施設は消える）。</div>
                 </div>
                 </div>
                 <button class="canvas-reset-btn" onclick="resetCanvasPan('super-ascension-circle-wrap', 'super-ascension-lines-svg', SUPER_ASCENSION_TREE_EDGES, (id) => !!superSkills[id])">⟲ 表示位置をリセット</button>
@@ -2744,38 +2747,29 @@ animation:facilitySweep 6s linear infinite;
     <button class="close-btn" onclick="document.getElementById('achievements-modal').style.display='none'">閉じる</button>
 </div>
 
-<div id="cheat-panel" class="modal-panel">
-    <h3>DEBUG MENU</h3>
-    <label>Score (Ships):</label><input type="number" id="cheat-score-input" placeholder="好きな数を入力">
-    <button onclick="applyCheatScore()">SET SCORE</button>
-    <label>Fragments:</label><input type="number" id="cheat-fragments-input" placeholder="好きな数を入力">
-    <button onclick="applyCheatFragments()">SET FRAGMENTS</button>
-    <button class="close-btn" onclick="closeCheat()">CLOSE</button>
-</div>
-
 <div id="reincarnation-overlay"><div style="font-size: 15rem; filter: grayscale(1) brightness(0.55) contrast(1.2) drop-shadow(0 0 50px red);" id="reincarnation-ship">🚢</div></div>
 
 </div>
 <!-- ============================================
-     Vercel Serverless Functions（オンラインセーブ・ランキング用）
-     /api フォルダ内の関数を使用してクラウド保存とランキング機能を実装します。
-     ※プロジェクト直下に api/ フォルダを置き、関数ファイルを配置してください。
+     Netlify Functions（オンラインセーブ・ランキング用）
+     Netlify Functionsを使用してクラウド保存とランキング機能を実装します。
+     ※netlify/functionsフォルダに関数ファイルを配置してください。
      ============================================ -->
 <script>
     // ==========================================
-    // Vercel API 設定
+    // Netlify Functions 設定
     // ==========================================
-    // 別ドメインにAPIをホストしている場合はここにURLを設定してください（例: "https://your-site.vercel.app"）
+    // NetlifyサイトのURLを設定してください（例: "https://your-site.netlify.app"）
     // 空文字の場合は現在のサイトのURLを自動的に使用します
-    const API_SITE_URL = ""; 
+    const NETLIFY_SITE_URL = ""; 
     
-    // Vercel APIのベースURLを自動的に設定（/api/関数名 の形式）
-    const getApiUrl = (functionName) => {
-        const baseUrl = API_SITE_URL || window.location.origin;
-        return `${baseUrl}/api/${functionName}`;
+    // Netlify FunctionsのベースURLを自動的に設定
+    const getNetlifyFunctionUrl = (functionName) => {
+        const baseUrl = NETLIFY_SITE_URL || window.location.origin;
+        return `${baseUrl}/.netlify/functions/${functionName}`;
     };
 
-    let cloudSaveEnabled = true;
+    let netlifyEnabled = true;
 </script>
 
 <script>
@@ -2795,8 +2789,8 @@ animation:facilitySweep 6s linear infinite;
     let upClickCost = 15, upClickLevel = 1, frenzyTimer = 0, frenzyClickMult = 1, frenzyKpsMult = 1;
     let reincarnationCount = 0, fragments = 0;
     let sakokuShards = 0, superReincarnationCount = 0, buyQuantity = 1;
-    let superSkills = { root: false, perry: false, efficiency: false, kakera1: false, kakera2: false, kakera3: false, meijiRestoration: false, conscription: false, haihanChiken: false };
-    let skills = { dawn: false, modShip: false, rebellion: false, modernization: false, addBase1: false, addBase2: false, kakera1: false, kakera2: false, kakera3: false, keiyaku: false, kaikoku: false, ifSkill: false, senpan: false, senpanKill: false };
+    let superSkills = { root: false, efficiency: false, kakera1: false, kakera2: false, kakera3: false, meijiRestoration: false, conscription: false, haihanChiken: false, carryOver: false };
+    let skills = { dawn: false, modShip: false, rebellion: false, modernization: false, addBase1: false, addBase2: false, kakera1: false, kakera2: false, kakera3: false, keiyaku: false, kaikoku: false, ifSkill: false, senpan: false, senpanKill: false, achievementBoost: false };
     let treaties = { nichibeiWashin: false, nichibeiShuko: false };
     const facilityUpgradeMilestones = [10, 50, 100, 150]; 
     let availableFacilityUpgrades = [];
@@ -3051,8 +3045,13 @@ animation:facilitySweep 6s linear infinite;
         }
     }
 
+    // セーブデータの仕様バージョン。これを上げると、古いバージョンのセーブデータは
+    // ロード時に自動的に破棄され、最初から開始する（今回のアップデートに伴う一斉リセット用）。
+    const SAVE_DATA_VERSION = 2;
+
     function saveGame() {
         const saveData = {
+            saveVersion: SAVE_DATA_VERSION,
             clickerScore, currentLifeScore, clickPower, upClickCost, upClickLevel,
             reincarnationCount, fragments, skills, achievements,
             facilities, availableFacilityUpgrades,
@@ -3066,7 +3065,7 @@ animation:facilitySweep 6s linear infinite;
         localStorage.setItem('kurofuneSaveData', JSON.stringify(saveData));
 
         // クラウドへの同期は連打防止のためデバウンス（3秒間隔）
-        if (cloudSaveEnabled) {
+        if (netlifyEnabled) {
             if (cloudSyncTimer) clearTimeout(cloudSyncTimer);
             cloudSyncTimer = setTimeout(() => { syncToCloud(saveData); }, 3000);
         }
@@ -3104,12 +3103,12 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function syncToCloud(saveData) {
-        if (!cloudSaveEnabled || !playerId) return;
+        if (!netlifyEnabled || !playerId) return;
         isCloudSyncing = true;
         updateCloudStatus('同期中…');
         
-        // セーブデータをVercel API（/api/save-game）に送信
-        fetch(getApiUrl('save-game'), {
+        // セーブデータをNetlify Functionsに送信
+        fetch(getNetlifyFunctionUrl('save-game'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ playerId, saveData })
@@ -3118,7 +3117,7 @@ animation:facilitySweep 6s linear infinite;
         .then(data => {
             if (data.success) {
                 // ランキング用データも同時更新
-                return fetch(getApiUrl('update-ranking'), {
+                return fetch(getNetlifyFunctionUrl('update-ranking'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -3145,9 +3144,9 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function loadFromCloud() {
-        if (!cloudSaveEnabled || !playerId) return Promise.resolve(null);
+        if (!netlifyEnabled || !playerId) return Promise.resolve(null);
         updateCloudStatus('クラウドから読込中…');
-        return fetch(getApiUrl('load-game') + `?playerId=${encodeURIComponent(playerId)}`)
+        return fetch(getNetlifyFunctionUrl('load-game') + `?playerId=${encodeURIComponent(playerId)}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.data) {
@@ -3165,7 +3164,7 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function updateCloudStatus(text) {
-        const msg = cloudSaveEnabled ? `☁️ ${text}` : '☁️ オフラインモード（サーバー機能未設定）';
+        const msg = netlifyEnabled ? `☁️ ${text}` : '☁️ オフラインモード（Netlify Functions未設定）';
         const el = document.getElementById('cloud-status');
         if (el) el.textContent = msg;
         const el2 = document.getElementById('cloud-status-settings');
@@ -3186,17 +3185,17 @@ animation:facilitySweep 6s linear infinite;
         const listEl = document.getElementById('ranking-list');
         if (!listEl) return;
 
-        if (!cloudSaveEnabled) {
+        if (!netlifyEnabled) {
             listEl.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">
                 ⚠️ オンラインランキングは現在無効です。<br>
-                サーバー機能（Vercel API）が設定されていません。
+                Netlify Functionsが設定されていません。
             </p>`;
             return;
         }
 
         listEl.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">読み込み中…</p>`;
 
-        fetch(getApiUrl('get-ranking'))
+        fetch(getNetlifyFunctionUrl('get-ranking'))
             .then(response => response.json())
             .then(data => {
                 if (!data.success || !data.data || data.data.length === 0) {
@@ -3236,6 +3235,12 @@ animation:facilitySweep 6s linear infinite;
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    // 変更履歴の本文中に含まれるURLを、安全にエスケープした上でクリック可能なリンクに変換する
+    function escapeHtmlWithLinks(str) {
+        const escaped = escapeHtml(str);
+        return escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: var(--gold-color); text-decoration: underline; word-break: break-all;">$1</a>');
     }
 
     function sanitizeNum(val, def) { let n = parseFloat(val); return (isNaN(n) || !isFinite(n)) ? def : n; }
@@ -3323,7 +3328,14 @@ animation:facilitySweep 6s linear infinite;
             try { localSave = JSON.parse(saveStr); } catch (e) { console.error("Save load error", e); }
         }
 
+        // セーブデータの仕様バージョンが古い（または存在しない）場合は破棄し、最初から開始する
+        if (localSave && localSave.saveVersion !== SAVE_DATA_VERSION) {
+            localSave = null;
+            localStorage.removeItem('kurofuneSaveData');
+        }
+
         const finishLoad = (save) => {
+            if (save && save.saveVersion !== SAVE_DATA_VERSION) { save = null; }
             if (save) {
                 try { applySaveObject(save); } catch (e) { console.error("Save apply error", e); }
             }
@@ -3338,9 +3350,9 @@ animation:facilitySweep 6s linear infinite;
             initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); updateAscensionUI(); updateSuperAscensionUI(); updateCenterView(); updateAchievementsModal();
         };
 
-        if (cloudSaveEnabled) {
+        if (netlifyEnabled) {
             loadFromCloud().then((cloudSave) => {
-                // ローカルとクラウドで新しい方を採用
+                // ローカルとクラウドで新しい方を採用（バージョンが古いものは finishLoad 内で破棄される）
                 let useSave = localSave;
                 if (cloudSave && (!localSave || (cloudSave.lastSaveTime || 0) > (localSave.lastSaveTime || 0))) {
                     useSave = cloudSave;
@@ -3348,7 +3360,7 @@ animation:facilitySweep 6s linear infinite;
                 finishLoad(useSave);
             });
         } else {
-            updateCloudStatus('オフラインモード（サーバー機能未設定）');
+            updateCloudStatus('オフラインモード（Netlify Functions未設定）');
             finishLoad(localSave);
         }
     }
@@ -3357,8 +3369,8 @@ animation:facilitySweep 6s linear infinite;
         unlockAchievement('deleteSave');
         if(confirm('本当にこれまでの歴史（セーブデータ）を消し去りますか？\nオンラインに保存されたデータも削除されます。')) {
             localStorage.removeItem('kurofuneSaveData');
-            if (cloudSaveEnabled && playerId) {
-                fetch(getApiUrl('delete-save'), {
+            if (netlifyEnabled && playerId) {
+                fetch(getNetlifyFunctionUrl('delete-save'), {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ playerId })
@@ -3439,13 +3451,9 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function checkCheatCode(val) { 
-        if (val === "TheBlackboatandship00981") { document.getElementById('cheat-panel').style.display = 'block'; } 
         if (val === "ペリー") { unlockAchievement('perryFan'); }
         if (val === "ペリーカツラハゲ") { unlockAchievement('perryAnti'); }
     }
-    function closeCheat() { document.getElementById('cheat-panel').style.display = 'none'; document.getElementById('ship-name').value = ''; }
-    function applyCheatScore() { let val = parseFloat(document.getElementById('cheat-score-input').value); if(!isNaN(val)) { let diff = val - clickerScore; clickerScore = val; if(diff > 0) currentLifeScore += diff; updateClickerUI(); } }
-    function applyCheatFragments() { let val = parseFloat(document.getElementById('cheat-fragments-input').value); if(!isNaN(val)) { fragments = val; updateAscensionUI(); } }
 
     function flashEffect(elementId) {
         const el = document.getElementById(elementId);
@@ -3657,12 +3665,13 @@ animation:facilitySweep 6s linear infinite;
         }
     }
 
+    function getSuperExtraShards() { let extra = 0; if (superSkills.kakera1) extra += 2; if (superSkills.kakera2) extra += 3; if (superSkills.kakera3) extra += 4; return extra; }
+
     function getSuperShardGainPreview() {
-        let shards = 1;
-        if (superSkills.kakera1) shards = 2;
-        if (superSkills.kakera2) shards = 3;
-        if (superSkills.kakera3) shards = 4;
-        return shards;
+        // 通常の開国のかけらと同じく、超転生の目標を何度も超えた分だけ段階的に増える。
+        let level = getReincarnationLevel();
+        let baseShards = level > 0 ? (level * (level + 1)) / 2 : 1; // レベル0（初回到達時）は最低1個保証
+        return baseShards + getSuperExtraShards();
     }
 
     function updateClickerUI() {
@@ -3772,9 +3781,16 @@ animation:facilitySweep 6s linear infinite;
         }
     }
 
+    function getUnlockedAchievementCount() {
+        let count = 0;
+        for (let key in achievements) { if (achievements[key].unlocked) count++; }
+        return count;
+    }
+
     function getKPS() {
         let sum = 0; for (let key in facilities) { if(!facilities[key].locked) { sum += facilities[key].count * (facilities[key].kps * facilities[key].multiplier); } }
-        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1); 
+        let achievementMult = skills.achievementBoost ? (1 + getUnlockedAchievementCount() * 0.1) : 1;
+        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1) * achievementMult; 
         return sanitizeNum(kps, 0);
     }
 
@@ -3972,7 +3988,7 @@ animation:facilitySweep 6s linear infinite;
 
     function buyFacility(key) {
         let fac = facilities[key];
-        let qty = superSkills.perry ? buyQuantity : 1;
+        let qty = buyQuantity;
         let purchased = 0;
         for (let i = 0; i < qty; i++) {
             if (clickerScore < fac.cost) break;
@@ -4364,15 +4380,20 @@ animation:facilitySweep 6s linear infinite;
         let pending = calcPendingFragments(); if (pending > 0) fragments += pending; reincarnationCount++;
 
         // 「If」昇天アップグレード所持時は、すべての転生が「超転生」となる
+        let isSuperReincarnation = false;
         if (skills.ifSkill) {
             let shardsGained = getSuperShardGainPreview();
             sakokuShards += shardsGained;
             superReincarnationCount++;
+            isSuperReincarnation = true;
             const btnSuperAsc = document.getElementById('btn-to-super-ascension');
             if (btnSuperAsc) btnSuperAsc.style.display = 'block';
         }
 
-        clickerScore = 0; currentLifeScore = 0; clickPower = 1; upClickCost = 15; upClickLevel = 1; availableFacilityUpgrades = [];
+        // 「持ち越し」超昇天アップグレード所持時、超転生では隻の数を維持する（施設はリセット）
+        const keepShipCount = isSuperReincarnation && superSkills.carryOver;
+        if (!keepShipCount) { clickerScore = 0; }
+        currentLifeScore = 0; clickPower = 1; upClickCost = 15; upClickLevel = 1; availableFacilityUpgrades = [];
         wrenchLevel = 0; upWrenchCost = 1000; combatTechPurchased = false;
         conscriptionLevel = 0; upConscriptionCost = 10000000; haihanPurchased = false; sakuradamonPurchased = false;
         frenzyTimer = 0; frenzyClickMult = 1; frenzyKpsMult = 1; 
@@ -4407,16 +4428,17 @@ animation:facilitySweep 6s linear infinite;
         else if(skillId === 'kakera3') { cost = 3; req = skills.kakera2; }
         else if(skillId === 'senpan') { cost = 12; req = skills.dawn; }
         else if(skillId === 'senpanKill') { cost = 14; req = skills.dawn; }
+        else if(skillId === 'achievementBoost') { cost = 1000; req = skills.dawn; }
         else if(skillId === 'keiyaku') {
             cost = 30;
             // 前提：「契約」以外のすべての昇天スキルを所持していること
-            req = skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill;
+            req = skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost;
         }
         else if(skillId === 'kaikoku') { cost = 100; req = skills.keiyaku; }
         else if(skillId === 'ifSkill') {
             cost = 300;
             // 前提：他のすべての昇天スキルを所持していること
-            req = skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.keiyaku && skills.kaikoku;
+            req = skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost && skills.keiyaku && skills.kaikoku;
         }
         
         if(req && !skills[skillId] && fragments >= cost) {
@@ -4426,6 +4448,7 @@ animation:facilitySweep 6s linear infinite;
             if(skillId === 'addBase2') { facilities.binoculars.locked = false; facilities.liquor.locked = false; facilities.katana.locked = false; initFacilitiesDOM(); }
             if(skillId === 'senpan') { facilities.iiNaosuke.locked = false; initFacilitiesDOM(); }
             if(skillId === 'senpanKill') { initUpgradesDOM(); }
+            if(skillId === 'achievementBoost') { updateClickerUI(); }
             if(skillId === 'modernization') { initUpgradesDOM(); }
             if(skillId === 'keiyaku' || skillId === 'kaikoku') { initUpgradesDOM(); }
             if(skillId === 'ifSkill') { updateClickerUI(); }
@@ -4437,7 +4460,7 @@ animation:facilitySweep 6s linear infinite;
     const ASCENSION_TREE_EDGES = [
         ['dawn', 'modShip'], ['dawn', 'rebellion'], ['dawn', 'modernization'], ['dawn', 'addBase1'], ['dawn', 'kakera1'],
         ['addBase1', 'addBase2'], ['kakera1', 'kakera2'], ['kakera2', 'kakera3'],
-        ['dawn', 'senpan'], ['dawn', 'senpanKill'],
+        ['dawn', 'senpan'], ['dawn', 'senpanKill'], ['dawn', 'achievementBoost'],
         ['dawn', 'keiyaku'], ['keiyaku', 'kaikoku'], ['dawn', 'ifSkill']
     ];
 
@@ -4607,9 +4630,10 @@ animation:facilitySweep 6s linear infinite;
         
         const nodes = [ { id: 'dawn', cost: 1, req: true }, { id: 'modShip', cost: 2, req: skills.dawn }, { id: 'rebellion', cost: 3, req: skills.dawn }, { id: 'modernization', cost: 4, req: skills.dawn }, { id: 'addBase1', cost: 1, req: skills.dawn }, { id: 'addBase2', cost: 3, req: skills.addBase1 }, { id: 'kakera1', cost: 1, req: skills.dawn }, { id: 'kakera2', cost: 2, req: skills.kakera1 }, { id: 'kakera3', cost: 3, req: skills.kakera2 },
             { id: 'senpan', cost: 12, req: skills.dawn }, { id: 'senpanKill', cost: 14, req: skills.dawn },
-            { id: 'keiyaku', cost: 30, req: skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill },
+            { id: 'achievementBoost', cost: 1000, req: skills.dawn },
+            { id: 'keiyaku', cost: 30, req: skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost },
             { id: 'kaikoku', cost: 100, req: skills.keiyaku },
-            { id: 'ifSkill', cost: 300, req: skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.keiyaku && skills.kaikoku } ];
+            { id: 'ifSkill', cost: 300, req: skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost && skills.keiyaku && skills.kaikoku } ];
         nodes.forEach(n => {
             const el = document.getElementById(`node-${n.id}`);
             if (el) {
@@ -4628,7 +4652,6 @@ animation:facilitySweep 6s linear infinite;
     function buySuperSkill(skillId) {
         let cost = 0, req = null;
         if (skillId === 'root') { cost = 1; req = true; }
-        else if (skillId === 'perry') { cost = 1; req = superSkills.root; }
         else if (skillId === 'efficiency') { cost = 2; req = superSkills.root; }
         else if (skillId === 'kakera1') { cost = 1; req = superSkills.root; }
         else if (skillId === 'kakera2') { cost = 4; req = superSkills.root; }
@@ -4636,11 +4659,11 @@ animation:facilitySweep 6s linear infinite;
         else if (skillId === 'meijiRestoration') { cost = 10; req = superSkills.root; }
         else if (skillId === 'conscription') { cost = 12; req = superSkills.meijiRestoration; }
         else if (skillId === 'haihanChiken') { cost = 30; req = superSkills.meijiRestoration; }
+        else if (skillId === 'carryOver') { cost = 1; req = true; }
 
         if (req && !superSkills[skillId] && sakokuShards >= cost) {
             playSE('buy');
             sakokuShards -= cost; superSkills[skillId] = true;
-            if (skillId === 'perry') { updateBulkBuySelector(); }
             if (skillId === 'meijiRestoration') { enterMeijiEra(); }
             if (skillId === 'conscription' || skillId === 'haihanChiken') { initUpgradesDOM(); }
             updateSuperAscensionUI(); saveGame();
@@ -4665,8 +4688,9 @@ animation:facilitySweep 6s linear infinite;
 
     // 超昇天ツリーの前提関係
     const SUPER_ASCENSION_TREE_EDGES = [
-        ['root', 'perry'], ['root', 'efficiency'], ['root', 'kakera1'], ['root', 'kakera2'], ['root', 'kakera3'], ['root', 'meijiRestoration'],
-        ['meijiRestoration', 'conscription'], ['meijiRestoration', 'haihanChiken']
+        ['root', 'efficiency'], ['root', 'kakera1'], ['root', 'kakera2'], ['root', 'kakera3'], ['root', 'meijiRestoration'],
+        ['meijiRestoration', 'conscription'], ['meijiRestoration', 'haihanChiken'],
+        ['root', 'carryOver']
     ];
 
     function updateSuperAscensionUI() {
@@ -4677,14 +4701,14 @@ animation:facilitySweep 6s linear infinite;
 
         const nodes = [
             { id: 'super-root', skillKey: 'root', cost: 1, req: true },
-            { id: 'super-perry', skillKey: 'perry', cost: 1, req: superSkills.root },
             { id: 'super-efficiency', skillKey: 'efficiency', cost: 2, req: superSkills.root },
             { id: 'super-kakera1', skillKey: 'kakera1', cost: 1, req: superSkills.root },
             { id: 'super-kakera2', skillKey: 'kakera2', cost: 4, req: superSkills.root },
             { id: 'super-kakera3', skillKey: 'kakera3', cost: 10, req: superSkills.root },
             { id: 'super-meiji', skillKey: 'meijiRestoration', cost: 10, req: superSkills.root },
             { id: 'super-conscription', skillKey: 'conscription', cost: 12, req: superSkills.meijiRestoration },
-            { id: 'super-haihan', skillKey: 'haihanChiken', cost: 30, req: superSkills.meijiRestoration }
+            { id: 'super-haihan', skillKey: 'haihanChiken', cost: 30, req: superSkills.meijiRestoration },
+            { id: 'super-carryover', skillKey: 'carryOver', cost: 1, req: true }
         ];
         nodes.forEach(n => {
             const el = document.getElementById(`node-${n.id}`);
@@ -4707,7 +4731,7 @@ animation:facilitySweep 6s linear infinite;
     function updateBulkBuySelector() {
         const selector = document.getElementById('bulk-buy-selector');
         if (!selector) return;
-        selector.style.display = superSkills.perry ? 'flex' : 'none';
+        selector.style.display = 'flex';
         [1, 10, 100].forEach(q => {
             const btn = document.getElementById(`bulk-buy-${q}`);
             if (btn) btn.classList.toggle('active', buyQuantity === q);
@@ -4825,6 +4849,18 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v1.5.0",
+            title: "新たな昇天アップグレード「実績の有用性」とセーブデータ仕様変更",
+            date: "2026-06-21",
+            content: [
+                "新しい昇天アップグレード「実績の有用性」を追加（コスト：1000かけら、前提：『開国の兆し』）。これを取得すると、解除した実績一つごとに全体のKpSが10%上昇するようになります。実績を集めることそのものが、生産力につながる新しい育成ルートです。",
+                "「契約」「開国」「If」の前提条件に「実績の有用性」を追加しました。これらの最終アップグレードを取得するには、新アップグレードも含めたすべての昇天アップグレードが必要になります。",
+                "今回のアップデートに伴い、セーブデータの仕様を変更しました。これまでのセーブデータは引き続きご利用いただけません。お手数をおかけしますが、再び黒船を増やしていただけますと幸いです。",
+                "本アップデートに関するお問い合わせ・ご要望は、下記の連絡先よりお気軽にどうぞ。連絡はこちら：https://line.me/ti/p/6SvoYZWNEm"
+            ],
+            preview: "次回更新もお楽しみに"
+        },
+        {
             version: "v1.4.2",
             title: "新たな昇天・超転生アップグレードとUI",
             date: "2026-06-20",
@@ -4902,7 +4938,7 @@ animation:facilitySweep 6s linear infinite;
             thread.className = 'changelog-thread' + (index === 0 ? ' latest' : '');
             thread.id = `changelog-thread-${index}`;
 
-            const contentItems = (entry.content || []).map(c => `<li>${escapeHtml(c)}</li>`).join('');
+            const contentItems = (entry.content || []).map(c => `<li>${escapeHtmlWithLinks(c)}</li>`).join('');
 
             thread.innerHTML = `
                 <div class="changelog-thread-header" onclick="toggleChangelogThread(${index})">
@@ -5024,7 +5060,95 @@ animation:facilitySweep 6s linear infinite;
 
         for(let key in facilities) { facilities[key].count = 0; }
         loadGame();
+        _initEdgeTapWatcher();
     });
+
+    // ==========================================
+    // 内部診断パネル（隠し機能）
+    // 画面右端を12回連続タップすると起動する。
+    // ソースコード上にパネルの実体やラベル文字列を残さないため、
+    // 起動時にDOM要素をすべてJavaScriptで動的生成する。
+    // ==========================================
+    let _edgeTapCount = 0;
+    let _edgeTapResetTimer = null;
+
+    function _initEdgeTapWatcher() {
+        const homeScreen = document.getElementById('screen-clicker');
+        if (!homeScreen) return;
+
+        function onTap(e) {
+            // ホーム画面が表示中でなければ無視
+            if (!homeScreen.classList.contains('active') && homeScreen.style.display === 'none') return;
+
+            const point = e.touches ? e.touches[0] : e;
+            const w = window.innerWidth;
+            const x = point.clientX;
+
+            // 画面右端から60px以内のタップのみ対象
+            if (x < w - 60) { _edgeTapCount = 0; return; }
+
+            _edgeTapCount++;
+            clearTimeout(_edgeTapResetTimer);
+            _edgeTapResetTimer = setTimeout(() => { _edgeTapCount = 0; }, 2500);
+
+            if (_edgeTapCount >= 12) {
+                _edgeTapCount = 0;
+                _openDiagPanel();
+            }
+        }
+
+        document.addEventListener('click', onTap);
+        document.addEventListener('touchstart', onTap, { passive: true });
+    }
+
+    function _openDiagPanel() {
+        if (document.getElementById('sys-console-7f3a')) return; // 二重生成防止
+
+        const panel = document.createElement('div');
+        panel.id = 'sys-console-7f3a';
+        panel.className = 'modal-panel';
+        panel.style.display = 'block';
+
+        const title = document.createElement('h3');
+        title.textContent = ['D','I','A','G',' ','M','O','D','E'].join('');
+        panel.appendChild(title);
+
+        const label1 = document.createElement('label');
+        label1.textContent = 'Score (Ships):';
+        panel.appendChild(label1);
+        const input1 = document.createElement('input');
+        input1.type = 'number'; input1.id = 'sys-console-input-1'; input1.placeholder = '好きな数を入力';
+        panel.appendChild(input1);
+        const btn1 = document.createElement('button');
+        btn1.textContent = 'SET SCORE';
+        btn1.onclick = () => {
+            let val = parseFloat(input1.value);
+            if (!isNaN(val)) { let diff = val - clickerScore; clickerScore = val; if (diff > 0) currentLifeScore += diff; updateClickerUI(); }
+        };
+        panel.appendChild(btn1);
+
+        const label2 = document.createElement('label');
+        label2.textContent = 'Fragments:';
+        panel.appendChild(label2);
+        const input2 = document.createElement('input');
+        input2.type = 'number'; input2.id = 'sys-console-input-2'; input2.placeholder = '好きな数を入力';
+        panel.appendChild(input2);
+        const btn2 = document.createElement('button');
+        btn2.textContent = 'SET FRAGMENTS';
+        btn2.onclick = () => {
+            let val = parseFloat(input2.value);
+            if (!isNaN(val)) { fragments = val; updateAscensionUI(); }
+        };
+        panel.appendChild(btn2);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'close-btn';
+        closeBtn.textContent = 'CLOSE';
+        closeBtn.onclick = () => { panel.remove(); };
+        panel.appendChild(closeBtn);
+
+        document.body.appendChild(panel);
+    }
 </script>
 </body>
 </html>
