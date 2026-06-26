@@ -2758,16 +2758,16 @@ animation:facilitySweep 6s linear infinite;
      ============================================ -->
 <script>
     // ==========================================
-    // Netlify Functions 設定
+    // Vercel API 設定
     // ==========================================
-    // NetlifyサイトのURLを設定してください（例: "https://your-site.netlify.app"）
+    // Vercelにデプロイすると /api/関数名 のエンドポイントが自動的に有効になります
     // 空文字の場合は現在のサイトのURLを自動的に使用します
     const NETLIFY_SITE_URL = ""; 
     
-    // Netlify FunctionsのベースURLを自動的に設定
+    // Vercel APIのエンドポイントを返す（/api/関数名 の形式）
     const getNetlifyFunctionUrl = (functionName) => {
         const baseUrl = NETLIFY_SITE_URL || window.location.origin;
-        return `${baseUrl}/.netlify/functions/${functionName}`;
+        return `${baseUrl}/api/${functionName}`;
     };
 
     let netlifyEnabled = true;
