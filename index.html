@@ -1940,7 +1940,6 @@
         .modal-panel button.close-btn { background: #95a5a6; margin-top: 15px;}
         .modal-panel button.danger-btn { background: #e74c3c; margin-top: 20px;}
 
-        #sys-console-7f3a { background: #000; color: #0f0; border-color: #0f0; box-shadow: 0 0 40px #0f0;} #sys-console-7f3a h3 { border-bottom-color: #0f0; color: #0f0;} #sys-console-7f3a label { color: #0f0;} #sys-console-7f3a input { background: #111; color: #0f0; border-color: #0f0;} #sys-console-7f3a button { background: #0f0; color: #000;}
         #offline-popup { position: absolute; top: 20px; right: -400px; background: rgba(41, 128, 185, 0.95); color: white; padding: 20px 30px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 99999; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid var(--gold-color); }
         #offline-popup.show { right: 20px; }
 
@@ -2490,7 +2489,7 @@ animation:facilitySweep 6s linear infinite;
                     </div>
 
                     <div class="top-ui-wrapper">
-                        <input type="text" class="ship-name-input" id="ship-name" placeholder="黒船に名前を付ける..." oninput="checkCheatCode(this.value); if(this.value!=='') unlockAchievement('name');">
+                        <input type="text" class="ship-name-input" id="ship-name" placeholder="黒船に名前を付ける..." oninput="if(this.value!=='') unlockAchievement('name');">
                         <div class="clicker-score-board">
                             <p class="kurofune-count-title serif-font">現在の黒船保有量</p>
                             <div class="kurofune-count" id="clicker-total-score">0 隻</div>
@@ -3449,11 +3448,6 @@ animation:facilitySweep 6s linear infinite;
         }
         for(let i=explosions.length-1;i>=0;i--){ let ex=explosions[i]; ctx.font=`${ex.size}px Arial`; ctx.fillText(ex.emoji,ex.x,ex.y); ex.life--; if(ex.life<=0) explosions.splice(i,1); }
         if(isPlaying) gameReq = requestAnimationFrame(gameLoop);
-    }
-
-    function checkCheatCode(val) { 
-        if (val === "ペリー") { unlockAchievement('perryFan'); }
-        if (val === "ペリーカツラハゲ") { unlockAchievement('perryAnti'); }
     }
 
     function flashEffect(elementId) {
@@ -5061,95 +5055,8 @@ animation:facilitySweep 6s linear infinite;
 
         for(let key in facilities) { facilities[key].count = 0; }
         loadGame();
-        _initEdgeTapWatcher();
     });
 
-    // ==========================================
-    // 内部診断パネル（隠し機能）
-    // 画面右端を12回連続タップすると起動する。
-    // ソースコード上にパネルの実体やラベル文字列を残さないため、
-    // 起動時にDOM要素をすべてJavaScriptで動的生成する。
-    // ==========================================
-    let _edgeTapCount = 0;
-    let _edgeTapResetTimer = null;
-
-    function _initEdgeTapWatcher() {
-        const homeScreen = document.getElementById('screen-clicker');
-        if (!homeScreen) return;
-
-        function onTap(e) {
-            // ホーム画面が表示中でなければ無視
-            if (!homeScreen.classList.contains('active') && homeScreen.style.display === 'none') return;
-
-            const point = e.touches ? e.touches[0] : e;
-            const w = window.innerWidth;
-            const x = point.clientX;
-
-            // 画面右端から60px以内のタップのみ対象
-            if (x < w - 60) { _edgeTapCount = 0; return; }
-
-            _edgeTapCount++;
-            clearTimeout(_edgeTapResetTimer);
-            _edgeTapResetTimer = setTimeout(() => { _edgeTapCount = 0; }, 2500);
-
-            if (_edgeTapCount >= 12) {
-                _edgeTapCount = 0;
-                _openDiagPanel();
-            }
-        }
-
-        document.addEventListener('click', onTap);
-        document.addEventListener('touchstart', onTap, { passive: true });
-    }
-
-    function _openDiagPanel() {
-        if (document.getElementById('sys-console-7f3a')) return; // 二重生成防止
-
-        const panel = document.createElement('div');
-        panel.id = 'sys-console-7f3a';
-        panel.className = 'modal-panel';
-        panel.style.display = 'block';
-
-        const title = document.createElement('h3');
-        title.textContent = ['D','I','A','G',' ','M','O','D','E'].join('');
-        panel.appendChild(title);
-
-        const label1 = document.createElement('label');
-        label1.textContent = 'Score (Ships):';
-        panel.appendChild(label1);
-        const input1 = document.createElement('input');
-        input1.type = 'number'; input1.id = 'sys-console-input-1'; input1.placeholder = '好きな数を入力';
-        panel.appendChild(input1);
-        const btn1 = document.createElement('button');
-        btn1.textContent = 'SET SCORE';
-        btn1.onclick = () => {
-            let val = parseFloat(input1.value);
-            if (!isNaN(val)) { let diff = val - clickerScore; clickerScore = val; if (diff > 0) currentLifeScore += diff; updateClickerUI(); }
-        };
-        panel.appendChild(btn1);
-
-        const label2 = document.createElement('label');
-        label2.textContent = 'Fragments:';
-        panel.appendChild(label2);
-        const input2 = document.createElement('input');
-        input2.type = 'number'; input2.id = 'sys-console-input-2'; input2.placeholder = '好きな数を入力';
-        panel.appendChild(input2);
-        const btn2 = document.createElement('button');
-        btn2.textContent = 'SET FRAGMENTS';
-        btn2.onclick = () => {
-            let val = parseFloat(input2.value);
-            if (!isNaN(val)) { fragments = val; updateAscensionUI(); }
-        };
-        panel.appendChild(btn2);
-
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'close-btn';
-        closeBtn.textContent = 'CLOSE';
-        closeBtn.onclick = () => { panel.remove(); };
-        panel.appendChild(closeBtn);
-
-        document.body.appendChild(panel);
-    }
 </script>
 </body>
 </html>
