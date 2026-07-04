@@ -1943,6 +1943,64 @@
         #offline-popup { position: absolute; top: 20px; right: -400px; background: rgba(41, 128, 185, 0.95); color: white; padding: 20px 30px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 99999; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid var(--gold-color); }
         #offline-popup.show { right: 20px; }
 
+        /* ── 実績ページ ── */
+        #screen-achievements { overflow-y: auto; }
+        .ach-page-wrap { padding: 32px 48px 60px; max-width: 1100px; margin: 0 auto; }
+        .ach-page-title { font-size: 1.5rem; font-weight: 800; color: var(--primary-color); letter-spacing: .12em; margin-bottom: 6px; }
+        .ach-page-sub { font-size: .88rem; color: #888; margin-bottom: 28px; letter-spacing: .06em; }
+        .ach-section-label {
+            font-size: .78rem; font-weight: 800; letter-spacing: .18em;
+            padding: 5px 0 8px; margin: 24px 0 14px;
+            border-bottom: 2px solid rgba(0,0,0,.1);
+            color: #666;
+        }
+        .ach-section-label.rare  { color: #2980b9; border-bottom-color: #2980b9; }
+        .ach-section-label.final { color: #c0392b; border-bottom-color: #c0392b; }
+        .ach-grid {
+            display: flex; flex-wrap: wrap; gap: 12px;
+        }
+        /* カード */
+        .ach-card {
+            width: 110px; display: flex; flex-direction: column; align-items: center;
+            padding: 14px 8px 12px; border-radius: 14px; border: 2px solid #e0dbd0;
+            background: #fff; cursor: default; transition: transform .18s, box-shadow .18s;
+            position: relative; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,.07);
+        }
+        .ach-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.13); }
+        .ach-card.locked { background: #f4f4f4; border-color: #ddd; filter: saturate(.15) brightness(.95); }
+        .ach-card.rare   { border-color: #3498db; background: linear-gradient(160deg,#f0f8ff,#e8f4fd); }
+        .ach-card.final  { border-color: #c0392b; background: linear-gradient(160deg,#fff5f5,#ffe8e8); box-shadow: 0 0 14px rgba(192,57,43,.18); }
+        .ach-icon { font-size: 2.4rem; margin-bottom: 8px; line-height: 1; }
+        .ach-card.locked .ach-icon { filter: grayscale(1); opacity: .4; }
+        .ach-name {
+            font-size: .70rem; font-weight: 800; color: var(--primary-color);
+            line-height: 1.3; margin-bottom: 4px;
+            -webkit-text-stroke: .4px currentColor;
+        }
+        .ach-card.locked .ach-name { color: #aaa; }
+        .ach-flavor {
+            font-size: .60rem; color: #999; font-style: italic; line-height: 1.3;
+        }
+        /* 未解除は名前を隠す */
+        .ach-card.locked .ach-flavor { display: none; }
+        /* バッジ（NEW） */
+        .ach-new-badge {
+            position: absolute; top: -6px; right: -6px;
+            background: #e74c3c; color: #fff;
+            font-size: .55rem; font-weight: 900; letter-spacing: .06em;
+            border-radius: 999px; padding: 2px 6px;
+        }
+        /* 実績ページのトップに達成数バー */
+        .ach-progress-bar-wrap {
+            background: rgba(0,0,0,.08); border-radius: 999px;
+            height: 8px; margin-bottom: 6px; overflow: hidden;
+        }
+        .ach-progress-bar {
+            height: 100%; background: linear-gradient(90deg, var(--gold-color), #f8d16d);
+            border-radius: 999px; transition: width .6s ease;
+        }
+        .ach-progress-text { font-size: .80rem; color: #555; margin-bottom: 24px; }
+
         /* 実績トースト通知 */
         #achievement-toast-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 100000; pointer-events: none; }
         .achievement-toast { background: rgba(44, 62, 80, 0.95); color: white; border-left: 5px solid var(--gold-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 15px; pointer-events: auto; animation: slideUpToast 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; width: 350px; }
@@ -2466,7 +2524,7 @@ animation:facilitySweep 6s linear infinite;
             <div class="clicker-top-bar">
                 <div class="clicker-top-left">
                     <div class="clicker-top-btn" onclick="document.getElementById('settings-modal').style.display='block'">⚙️ 設定</div>
-                    <div class="clicker-top-btn" onclick="document.getElementById('achievements-modal').style.display='block'">🏆 実績</div>
+                    <div class="clicker-top-btn" onclick="openAchievementsScreen()">🏆 実績</div>
                     <div class="clicker-top-btn" id="btn-to-ascension" style="display: none; color: var(--gold-color); border-color: var(--gold-color);" onclick="switchScreen('screen-ascension')">🌟 昇天ゾーン</div>
                     <div class="clicker-top-btn" id="btn-to-super-ascension" style="display: none; color: #e6cfff; border-color: #b388ff;" onclick="switchScreen('screen-super-ascension')">👑 超昇天ゾーン</div>
                 </div>
@@ -2490,7 +2548,7 @@ animation:facilitySweep 6s linear infinite;
                     </div>
 
                     <div class="top-ui-wrapper">
-                        <input type="text" class="ship-name-input" id="ship-name" placeholder="黒船に名前を付ける..." oninput="if(this.value!=='') unlockAchievement('name');">
+                        <input type="text" class="ship-name-input" id="ship-name" placeholder="黒船に名前を付ける..." oninput="if(this.value!=='') unlockAchievement('name'); if(this.value==='ペリー') unlockAchievement('perryFan'); if(this.value==='ペリーカツラハゲ') unlockAchievement('perryAnti');">
                         <div class="clicker-score-board">
                             <p class="kurofune-count-title serif-font">現在の黒船保有量</p>
                             <div class="kurofune-count" id="clicker-total-score">0 隻</div>
@@ -2701,6 +2759,25 @@ animation:facilitySweep 6s linear infinite;
             </div>
         </div>
 
+        <!-- 実績ページ -->
+        <div id="screen-achievements" class="screen">
+            <div class="ach-page-wrap">
+                <div class="ach-page-title serif-font">🏆 実績一覧</div>
+                <div class="ach-page-sub">解除した実績はカード形式で表示されます。「実績の有用性」を取得すると、実績数がKpSに直結します。</div>
+                <div class="ach-progress-bar-wrap"><div class="ach-progress-bar" id="ach-prog-bar" style="width:0%"></div></div>
+                <div class="ach-progress-text" id="ach-prog-text">0 / 0 解除</div>
+                <div class="ach-section-label">▸ 通常実績</div>
+                <div class="ach-grid" id="ach-grid-normal"></div>
+                <div class="ach-section-label rare">✦ 特殊実績</div>
+                <div class="ach-grid" id="ach-grid-rare"></div>
+                <div class="ach-section-label final">🔴 最終実績</div>
+                <div class="ach-grid" id="ach-grid-final"></div>
+                <div style="margin-top:32px; text-align:center;">
+                    <button class="btn-primary" onclick="switchScreen('screen-clicker',null)">← ゲームに戻る</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -2735,18 +2812,6 @@ animation:facilitySweep 6s linear infinite;
     <button class="danger-btn" onclick="resetSaveData()">💀 セーブデータを全消去する</button>
 </div>
 
-<div id="achievements-modal" class="modal-panel" style="width: 450px; max-height: 80vh; overflow-y: auto;">
-    <h3 class="serif-font">🏆 実績一覧</h3>
-    <div id="achievements-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-        <div style="font-size:0.85rem; font-weight:700; letter-spacing:0.1em; color:#888; padding: 4px 2px; border-bottom: 1px solid #ddd; margin-bottom:4px;">通常実績</div>
-        <div id="achievements-normal" style="display:flex; flex-direction:column; gap:10px;"></div>
-        <div style="font-size:0.85rem; font-weight:700; letter-spacing:0.1em; color:#3498db; padding: 4px 2px; border-bottom: 1px solid #3498db; margin-top:10px; margin-bottom:4px;">✦ 特殊実績</div>
-        <div id="achievements-rare" style="display:flex; flex-direction:column; gap:10px;"></div>
-        <div style="font-size:0.85rem; font-weight:700; letter-spacing:0.1em; color:#c0392b; padding: 4px 2px; border-bottom: 2px solid #c0392b; margin-top:14px; margin-bottom:4px;">🔴 最終実績</div>
-        <div id="achievements-final" style="display:flex; flex-direction:column; gap:10px;"></div>
-    </div>
-    <button class="close-btn" onclick="document.getElementById('achievements-modal').style.display='none'">閉じる</button>
-</div>
 
 <div id="reincarnation-overlay"><div style="font-size: 15rem; filter: grayscale(1) brightness(0.55) contrast(1.2) drop-shadow(0 0 50px red);" id="reincarnation-ship">🚢</div></div>
 
@@ -2813,24 +2878,32 @@ animation:facilitySweep 6s linear infinite;
 
     // 実績データ (レア実績フラグ isRare を追加し、新しい実績を追加)
     const achievementsData = {
-        start: { title: "開国の始まり", desc: "ゲームを起動する。", flavor: "すべての始まり。", unlocked: false, isRare: false },
-        name: { title: "名前を付けてる暇はない", desc: "黒船に名前を付ける。", flavor: "他にやることがあるだろう？", unlocked: false, isRare: false },
-        golden: { title: "黄金時代", desc: "1回金船をクリックする。", flavor: "ラッキー！", unlocked: false, isRare: false },
-        space: { title: "黒船スペーサー", desc: "スペースで黒船を生産する。", flavor: "クリッカーなのに？", unlocked: false, isRare: false },
-        music: { title: "音楽の力", desc: "音楽を流しながらゲームをプレイ。", flavor: "船も踊る。", unlocked: false, isRare: true },
-        facility: { title: "自動生産", desc: "施設を購入する。", flavor: "工業の時代。", unlocked: false, isRare: false },
-        upgrade: { title: "クリックこそ至高", desc: "近代ドック拡張を購入する。", flavor: "これがないと始まらないだろう？", unlocked: false, isRare: false },
-        reincarnation: { title: "鎖国へ", desc: "転生をする。", flavor: "さようなら、黒船。", unlocked: false, isRare: false },
-        ship1000: { title: "たくさんの船", desc: "1000個の船を作る。", flavor: "うわー、船がいっぱい！", unlocked: false, isRare: false },
-        ship10000: { title: "もっとたくさんの船", desc: "10000個の船を作る。", flavor: "海が見えない。", unlocked: false, isRare: false },
-        ship100000: { title: "船が！", desc: "黒船の数が100000を超える。", flavor: "もはや防波堤。", unlocked: false, isRare: false },
-
-        noEasy: { title: "楽はできません", desc: "黒船を長押し(五秒間)する。", flavor: "クリックだ。", unlocked: false, isRare: true },
-        perryFan: { title: "ペリーファン", desc: "黒船の名前を「ペリー」にする。", flavor: "ペリー：ありがとう！", unlocked: false, isRare: true },
-        perryAnti: { title: "ペリーアンチ", desc: "黒船の名前を「ペリーカツラハゲ」にする。", flavor: "ペリー：許さん。", unlocked: false, isRare: true },
-        fastClick: { title: "奇怪なクリック", desc: "0.001秒に一回のスピードでクリックする。", flavor: "チート？", unlocked: false, isRare: true },
-        deleteSave: { title: "やめてくれ！", desc: "セーブデータを消去するボタンを押す。", flavor: "本当にやるのか？", unlocked: false, isRare: true },
-        kaikokuFinal: { title: "開国", desc: "日米修好通商条約を締結し、ペリーを帰国させる。", flavor: "さようなら、ペリー", unlocked: false, isRare: false, isFinal: true }
+        start:        { title:"開国の始まり",      icon:"⛩️",  desc:"ゲームを起動する。",               flavor:"すべての始まり。",         unlocked:false, isRare:false },
+        name:         { title:"名前を付けてる暇はない",icon:"✏️", desc:"黒船に名前を付ける。",              flavor:"他にやることがあるだろう？", unlocked:false, isRare:false },
+        golden:       { title:"黄金時代",          icon:"✨",  desc:"1回金船をクリックする。",           flavor:"ラッキー！",               unlocked:false, isRare:false },
+        space:        { title:"黒船スペーサー",     icon:"⌨️",  desc:"スペースで黒船を生産する。",        flavor:"クリッカーなのに？",         unlocked:false, isRare:false },
+        music:        { title:"音楽の力",           icon:"🎵",  desc:"音楽を流しながらゲームをプレイ。",  flavor:"船も踊る。",               unlocked:false, isRare:true  },
+        facility:     { title:"自動生産",           icon:"⚙️",  desc:"施設を購入する。",                 flavor:"工業の時代。",             unlocked:false, isRare:false },
+        upgrade:      { title:"クリックこそ至高",   icon:"🔧",  desc:"近代ドック拡張を購入する。",        flavor:"これがないと始まらないだろう？", unlocked:false, isRare:false },
+        reincarnation:{ title:"鎖国へ",            icon:"🌀",  desc:"転生をする。",                     flavor:"さようなら、黒船。",         unlocked:false, isRare:false },
+        ship1000:     { title:"たくさんの船",       icon:"🚢",  desc:"1000個の船を作る。",               flavor:"うわー、船がいっぱい！",    unlocked:false, isRare:false },
+        ship10000:    { title:"もっとたくさんの船", icon:"🛳️",  desc:"10000個の船を作る。",              flavor:"海が見えない。",            unlocked:false, isRare:false },
+        ship100000:   { title:"船が！",             icon:"🌊",  desc:"黒船の数が100000を超える。",        flavor:"もはや防波堤。",            unlocked:false, isRare:false },
+        // 新規通常実績
+        count100k:    { title:"船が一隻、船が二隻…",icon:"💤",  desc:"黒船の保有数が100,000を超える。",   flavor:"眠くなりそうだ。",          unlocked:false, isRare:false },
+        count1m:      { title:"日本を超えて",       icon:"🗾",  desc:"黒船の保有数が100万を超える。",     flavor:"日本をも凌駕する。",        unlocked:false, isRare:false },
+        count10m:     { title:"世界を超えて",       icon:"🌍",  desc:"黒船の保有数が1000万を超える。",    flavor:"世界をも凌駕する。",        unlocked:false, isRare:false },
+        count1t:      { title:"宇宙を超えて",       icon:"🌌",  desc:"黒船の保有数が1兆を超える。",       flavor:"宇宙をも凌駕する。",        unlocked:false, isRare:false },
+        count1q:      { title:"次元を超えて",       icon:"🔮",  desc:"黒船の保有数が1京を超える。",       flavor:"次元をも凌駕する。",        unlocked:false, isRare:false },
+        noEasy:       { title:"楽はできません",     icon:"👊",  desc:"黒船を長押し(五秒間)する。",        flavor:"クリックだ。",             unlocked:false, isRare:true  },
+        perryFan:     { title:"ペリーファン",       icon:"🎩",  desc:"黒船の名前を「ペリー」にする。",    flavor:"ペリー：ありがとう！",      unlocked:false, isRare:true  },
+        perryAnti:    { title:"ペリーアンチ",       icon:"😤",  desc:"黒船の名前を「ペリーカツラハゲ」にする。", flavor:"ペリー：許さん。",   unlocked:false, isRare:true  },
+        fastClick:    { title:"奇怪なクリック",     icon:"⚡",  desc:"0.001秒に一回のスピードでクリックする。", flavor:"チート？",          unlocked:false, isRare:true  },
+        deleteSave:   { title:"やめてくれ！",       icon:"💀",  desc:"セーブデータを消去するボタンを押す。", flavor:"本当にやるのか？",     unlocked:false, isRare:true  },
+        // 新規特殊実績
+        flagLover:    { title:"旗が大好き",         icon:"🏴",  desc:"合衆国の国旗を100万枚買う。",       flavor:"チート？？",               unlocked:false, isRare:true  },
+        clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船なしで一回のクリックで100隻の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
+        kaikokuFinal: { title:"開国",               icon:"🔴",  desc:"日米修好通商条約を締結し、ペリーを帰国させる。", flavor:"さようなら、ペリー", unlocked:false, isRare:false, isFinal:true },
     };
     let achievements = JSON.parse(JSON.stringify(achievementsData));
 
@@ -3005,45 +3078,56 @@ animation:facilitySweep 6s linear infinite;
         }
     }
 
+    function openAchievementsScreen() {
+        switchScreen('screen-achievements', null);
+        updateAchievementsModal();
+    }
+
     function updateAchievementsModal() {
-        const normalList = document.getElementById('achievements-normal');
-        const rareList = document.getElementById('achievements-rare');
-        const finalList = document.getElementById('achievements-final');
-        if (!normalList || !rareList) return;
-        normalList.innerHTML = '';
-        rareList.innerHTML = '';
-        if (finalList) finalList.innerHTML = '';
+        const normalGrid = document.getElementById('ach-grid-normal');
+        const rareGrid   = document.getElementById('ach-grid-rare');
+        const finalGrid  = document.getElementById('ach-grid-final');
+        if (!normalGrid) return;
+
+        normalGrid.innerHTML = '';
+        rareGrid.innerHTML   = '';
+        finalGrid.innerHTML  = '';
+
+        let total = 0, unlocked = 0;
+
         for (let key in achievements) {
-            let ach = achievements[key];
-            let item = document.createElement('div');
-            item.style.padding = '10px'; item.style.borderRadius = '5px'; item.style.border = '1px solid #ccc'; item.style.display = 'flex'; item.style.alignItems = 'center'; item.style.gap = '10px';
+            const ach = achievements[key];
+            total++;
+            if (ach.unlocked) unlocked++;
+
+            const card = document.createElement('div');
+            const typeClass = ach.isFinal ? 'final' : ach.isRare ? 'rare' : '';
+            card.className = 'ach-card' + (typeClass ? ' ' + typeClass : '') + (ach.unlocked ? '' : ' locked');
+
+            // ツールチップ
+            card.title = ach.unlocked ? `${ach.title}\n${ach.desc}\n"${ach.flavor}"` : '????（未解除）';
+
             if (ach.unlocked) {
-                if (ach.isFinal) {
-                    item.style.background = '#fff0f0';
-                    item.style.border = '2px solid #c0392b';
-                    item.style.boxShadow = '0 0 10px rgba(192,57,43,0.4)';
-                    item.innerHTML = `<div style="font-size: 1.5rem;">🔴</div><div><h4 style="margin:0; color:#c0392b; font-weight:900;">${ach.title}</h4><p style="margin:0; font-size:0.8rem; color:#555;">${ach.desc}</p><p style="margin:2px 0 0 0; font-size:0.75rem; font-style:italic; color:#c0392b;">"${ach.flavor}"</p></div>`;
-                } else if (ach.isRare) {
-                    item.className = 'unlocked-ach-card rare';
-                    item.style.border = '1px solid #3498db';
-                    item.innerHTML = `<div style="font-size: 1.5rem;">✅</div><div><h4 style="margin:0; color:var(--primary-color);">${ach.title}</h4><p style="margin:0; font-size:0.8rem; color:#555;">${ach.desc}</p><p style="margin:2px 0 0 0; font-size:0.75rem; font-style:italic; color:#888;">"${ach.flavor}"</p></div>`;
-                } else {
-                    item.className = 'unlocked-ach-card';
-                    item.style.border = '1px solid var(--gold-color)';
-                    item.innerHTML = `<div style="font-size: 1.5rem;">✅</div><div><h4 style="margin:0; color:var(--primary-color);">${ach.title}</h4><p style="margin:0; font-size:0.8rem; color:#555;">${ach.desc}</p><p style="margin:2px 0 0 0; font-size:0.75rem; font-style:italic; color:#888;">"${ach.flavor}"</p></div>`;
-                }
+                card.innerHTML = `
+                    <div class="ach-icon">${ach.icon || '🏆'}</div>
+                    <div class="ach-name">${ach.title}</div>
+                    <div class="ach-flavor">"${ach.flavor}"</div>`;
             } else {
-                item.style.background = '#eee'; item.style.opacity = '0.6';
-                item.innerHTML = `<div style="font-size: 1.5rem;">${ach.isFinal ? '🔒' : '🔒'}</div><div><h4 style="margin:0; color:#777;">????</h4><p style="margin:0; font-size:0.8rem; color:#777;">未解除</p></div>`;
+                card.innerHTML = `
+                    <div class="ach-icon">🔒</div>
+                    <div class="ach-name">????</div>`;
             }
-            if (ach.isFinal) {
-                if (finalList) finalList.appendChild(item);
-            } else if (ach.isRare) {
-                rareList.appendChild(item);
-            } else {
-                normalList.appendChild(item);
-            }
+
+            if (ach.isFinal) finalGrid.appendChild(card);
+            else if (ach.isRare) rareGrid.appendChild(card);
+            else normalGrid.appendChild(card);
         }
+
+        // 進捗バー更新
+        const bar  = document.getElementById('ach-prog-bar');
+        const text = document.getElementById('ach-prog-text');
+        if (bar)  bar.style.width  = total ? Math.round(unlocked / total * 100) + '%' : '0%';
+        if (text) text.textContent = `${unlocked} / ${total} 解除 （KpS ×${skills.achievementBoost ? (1 + unlocked * 0.1).toFixed(1) : '1.0'}）`;
     }
 
     // セーブデータの仕様バージョン。これを上げると、古いバージョンのセーブデータは
@@ -4035,7 +4119,15 @@ animation:facilitySweep 6s linear infinite;
             let currentKps = getKPS(); if (!isNaN(currentKps)) { let added = currentKps / 10; clickerScore += added; currentLifeScore += added; }
             if (clickerScore >= 1000) unlockAchievement('ship1000');
             if (clickerScore >= 10000) unlockAchievement('ship10000');
-            if (clickerScore >= 100000) unlockAchievement('ship100000');
+            if (clickerScore >= 100000) { unlockAchievement('ship100000'); unlockAchievement('count100k'); }
+            if (clickerScore >= 1000000) unlockAchievement('count1m');
+            if (clickerScore >= 10000000) unlockAchievement('count10m');
+            if (clickerScore >= 1e12) unlockAchievement('count1t');
+            if (clickerScore >= 1e16) unlockAchievement('count1q');
+            // 旗100万枚チェック
+            if (typeof facilities !== 'undefined' && facilities.flag && facilities.flag.count >= 1000000) unlockAchievement('flagLover');
+            // クリック100隻チェック（通常クリック力のみ・金船ボーナスなし）
+            if (clickPower >= 100) unlockAchievement('clickLover');
             updateClickerUI(); 
             if (Math.random() < 0.1) saveGame(); 
         }, 100);
@@ -4141,7 +4233,13 @@ animation:facilitySweep 6s linear infinite;
         
         if (clickerScore >= 1000) unlockAchievement('ship1000');
         if (clickerScore >= 10000) unlockAchievement('ship10000');
-        if (clickerScore >= 100000) unlockAchievement('ship100000');
+        if (clickerScore >= 100000) { unlockAchievement('ship100000'); unlockAchievement('count100k'); }
+        if (clickerScore >= 1000000) unlockAchievement('count1m');
+        if (clickerScore >= 10000000) unlockAchievement('count10m');
+        if (clickerScore >= 1e12) unlockAchievement('count1t');
+        if (clickerScore >= 1e16) unlockAchievement('count1q');
+        if (typeof facilities !== 'undefined' && facilities.flag && facilities.flag.count >= 1000000) unlockAchievement('flagLover');
+        if (clickPower >= 100) unlockAchievement('clickLover');
 
         updateClickerUI();
     }
@@ -4845,6 +4943,18 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v1.6.0",
+            title: "実績ページ刷新・新実績追加・談話室・ランキング修正",
+            date: "2026-07-04",
+            content: [
+                "実績画面を全面刷新しました。これまで縦に並ぶリスト形式だったものを、実績ごとにアイコンが付いたカード形式に変更し、横に並べて一覧できる新ページとして独立させました。解除済みの実績はカラーで、未解除はグレーアウトで表示されます。",
+                "新しい実績を追加しました。通常実績・特殊実績ともに内容はゲーム内でのお楽しみ。「実績の有用性」アップグレードと連動して、実績を集めるほどKpSが上昇します。解除ごとの倍率も実績ページに表示されます。",
+                "「黒船談話室」を新設しました。黒船クリッカー・勉強・雑談・ゲーム・要望の5チャンネルで話し合えます。chat.htmlからアクセスしてください。",
+                "世界ランキングのオンライン反映が正常に動作するよう修正しました。プレイ中のスコアがリアルタイムでランキングに反映されます。"
+            ],
+            preview: "大型アップデート「カスタマイズ式黒船」"
+        },
+        {
             version: "v1.5.0",
             title: "新たな昇天アップグレード「実績の有用性」とセーブデータ仕様変更",
             date: "2026-06-21",
@@ -4925,8 +5035,6 @@ animation:facilitySweep 6s linear infinite;
     function renderChangelog() {
         const container = document.getElementById('changelog-list');
         if (!container) return;
-        if (container.dataset.rendered === '1') return; // 二重描画防止
-        container.dataset.rendered = '1';
 
         container.innerHTML = '';
         changelogData.forEach((entry, index) => {
@@ -4957,21 +5065,23 @@ animation:facilitySweep 6s linear infinite;
             container.appendChild(thread);
         });
 
-        // 最新スレッドはデフォルトで開いておく
-        if (changelogData.length > 0) toggleChangelogThread(0, true);
+        // 最新スレッドをデフォルトで開く
+        if (changelogData.length > 0) {
+            toggleChangelogThread(0, true);
+        }
     }
 
     function toggleChangelogThread(index, forceOpen) {
         const thread = document.getElementById(`changelog-thread-${index}`);
-        const body = document.getElementById(`changelog-body-${index}`);
+        const body   = document.getElementById(`changelog-body-${index}`);
         if (!thread || !body) return;
 
-        const isExpanded = thread.classList.contains('expanded');
-        const willExpand = forceOpen === true ? true : !isExpanded;
+        const isExpanded  = thread.classList.contains('expanded');
+        const willExpand  = forceOpen === true ? true : !isExpanded;
 
         if (willExpand) {
             thread.classList.add('expanded');
-            body.style.maxHeight = body.scrollHeight + 'px';
+            body.style.maxHeight = '3000px'; // scrollHeightに依存しない固定値
         } else {
             thread.classList.remove('expanded');
             body.style.maxHeight = '0px';
