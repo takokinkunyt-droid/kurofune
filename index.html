@@ -2309,15 +2309,47 @@
         }
 
         /* 音楽室・歴史資料室 */
-        .music-layout { padding: 0 60px; display: flex; height: calc(100% - 130px); align-items: center; justify-content: center; gap: 60px; flex-direction: row;}
+        .music-layout { padding: 0 60px; display: flex; flex-direction: column; height: calc(100% - 130px); }
+
+        /* ── 画面ごとスライド切替 ── */
+        .music-pages-viewport { position: relative; flex: 1; overflow: hidden; }
+        .music-pages-strip {
+            display: flex; height: 100%; width: 200%;
+            transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .music-page {
+            width: 50%; flex-shrink: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 10px; padding: 0 20px;
+        }
+        .music-nav-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(0,0,0,0.55); color: var(--gold-color);
+            border: 2px solid var(--gold-color); font-size: 1.4rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 20; transition: all 0.2s ease;
+            user-select: none;
+        }
+        .music-nav-arrow:hover { background: var(--gold-color); color: #1a1a1a; transform: translateY(-50%) scale(1.1); }
+        .music-nav-arrow.prev { left: 6px; }
+        .music-nav-arrow.next { right: 6px; }
+        .music-dots-fixed { display: flex; gap: 8px; justify-content: center; padding: 14px 0 4px; }
+        .music-dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(0,0,0,0.2); cursor: pointer; transition: all 0.25s ease; }
+        .music-dot.active { background: var(--gold-color); width: 22px; border-radius: 5px; }
+        .music-info-static { text-align: center; margin-top: 20px; }
+        .music-controls-fixed { max-width: 500px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 20px; padding-top: 6px; }
         .vinyl-container { position: relative; width: 320px; height: 320px; display: flex; align-items: center; justify-content: center; }
         .vinyl { width: 300px; height: 300px; background: radial-gradient(circle, #333 15%, #111 16%, #111 25%, #222 26%, #111 35%, #111 60%, #000 100%); border-radius: 50%; box-shadow: 0 15px 35px rgba(0,0,0,0.5); position: relative; display: flex; align-items: center; justify-content: center; border: 4px solid #000; animation: spin 6s linear infinite; animation-play-state: paused; }
         .vinyl-label { width: 100px; height: 100px; background-color: var(--accent-color); border: 2px solid var(--gold-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; text-align: center; font-weight: bold; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .vinyl2 { background: radial-gradient(circle, #3a2416 15%, #1a0f08 16%, #1a0f08 25%, #2e1c10 26%, #1a0f08 35%, #1a0f08 60%, #0a0503 100%); }
+        .vinyl2-label { background: linear-gradient(135deg, #8b1a1a, #4a0d0d); border-color: #d4af37; }
         .vinyl-center-hole { width: 15px; height: 15px; background-color: var(--bg-color); border-radius: 50%; position: absolute; z-index: 5; }
         .tonearm { position: absolute; top: -20px; right: 0px; width: 100px; height: 180px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="180" viewBox="0 0 100 180"><path d="M50 0 L50 20 L20 120 L25 150" fill="none" stroke="%23888" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="15" r="12" fill="%23444"/><rect x="18" y="145" width="14" height="25" rx="3" fill="%23c5a059"/></svg>'); background-repeat: no-repeat; transform-origin: 50% 15px; transform: rotate(-30deg); transition: transform 0.5s ease; pointer-events: none; z-index: 10; }
         .music-info { flex-grow: 1; max-width: 500px; display: flex; flex-direction: column; gap: 20px;}
         .track-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 5px; letter-spacing: 2px; }
         .track-artist { font-size: 1.1rem; color: var(--accent-color); letter-spacing: 3px; }
+
         .audio-error-msg { font-size: 0.9rem; color: var(--accent-color); background-color: rgba(192, 57, 43, 0.1); padding: 10px; border-radius: 5px; display: none; border: 1px solid var(--accent-color); }
         .audio-controls { display: flex; align-items: center; gap: 20px; }
         .btn-circle { width: 70px; height: 70px; border-radius: 50%; background-color: var(--primary-color); color: white; border: 2px solid var(--gold-color); font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: all 0.3s; }
@@ -2639,7 +2671,7 @@ animation:facilitySweep 6s linear infinite;
                 <div class="circle-node" id="node-senpanKill" onclick="buySkill('senpanKill')" style="left:38%; top:88%; border-color:#7f5a2e; background: radial-gradient(circle at 35% 30%, #4a3520, #221708 80%);">
                     <div class="skill-name" style="color:#e0b97a;">戦犯殺害</div><div class="skill-cost">コスト: 14 かけら</div><div class="skill-desc">アップグレードに「桜田門外の変」を追加。すべての施設のKpSを2倍（1回限り）。</div>
                 </div>
-                <div class="circle-node is-far is-special" id="node-achievementBoost" onclick="buySkill('achievementBoost')" style="left:14%; top:88%; border-color:#3f9c6a; background: radial-gradient(circle at 35% 30%, #1f4a35, #0a1f16 80%);">
+                <div class="circle-node is-far is-special" id="node-achievementBoost" onclick="buySkill('achievementBoost')" style="left:92%; top:70%; border-color:#3f9c6a; background: radial-gradient(circle at 35% 30%, #1f4a35, #0a1f16 80%);">
                     <div class="skill-name" style="color:#7fe0b0;">実績の有用性</div><div class="skill-cost">コスト: 1000 かけら</div><div class="skill-desc">解除した実績一つごとに、全体のKpSが10%上昇する。</div>
                 </div>
 
@@ -2707,10 +2739,26 @@ animation:facilitySweep 6s linear infinite;
         <div id="screen-music" class="screen">
             <div class="screen-header"><h2 class="serif-font">浦賀音楽堂 (DJ Perry Mode)</h2></div>
             <div class="music-layout">
-                <div class="vinyl-container"><div class="vinyl" id="vinyl-disc"><div class="vinyl-label serif-font">黒船来航<br>BGM</div><div class="vinyl-center-hole"></div></div><div class="tonearm" id="vinyl-arm"></div></div>
-                <div class="music-info">
-                    <div><h3 class="track-title serif-font">浦賀黒船顛末記</h3><p class="track-artist serif-font">歌唱・演奏：レッツゴーペリー</p></div>
-                    <div class="audio-error-msg" id="audio-error-box">⚠️ 再生に失敗しました。<br>同じフォルダに<strong>「れつごーぺりー.mp3」</strong>が置かれているか確認してね！</div>
+                <div class="music-pages-viewport">
+                    <div class="music-nav-arrow prev" onclick="switchTrack(-1)">◀</div>
+                    <div class="music-pages-strip" id="music-pages-strip">
+                        <div class="music-page" id="music-page-0">
+                            <div class="vinyl-container"><div class="vinyl" id="vinyl-disc-0"><div class="vinyl-label serif-font">黒船来航<br>BGM</div><div class="vinyl-center-hole"></div></div><div class="tonearm" id="vinyl-arm-0"></div></div>
+                            <div class="music-info-static"><h3 class="track-title serif-font">浦賀黒船顛末記</h3><p class="track-artist serif-font">歌唱・演奏：レッツゴーペリー</p></div>
+                        </div>
+                        <div class="music-page" id="music-page-1">
+                            <div class="vinyl-container"><div class="vinyl vinyl2" id="vinyl-disc-1"><div class="vinyl-label vinyl2-label serif-font">明治維新<br>顛末記</div><div class="vinyl-center-hole"></div></div><div class="tonearm" id="vinyl-arm-1"></div></div>
+                            <div class="music-info-static"><h3 class="track-title serif-font">明治維新顛末記</h3><p class="track-artist serif-font">歌唱・演奏：レツゴーペリー</p></div>
+                        </div>
+                    </div>
+                    <div class="music-nav-arrow next" onclick="switchTrack(1)">▶</div>
+                </div>
+                <div class="music-dots-fixed">
+                    <div class="music-dot active" id="music-dot-0" onclick="goToTrack(0)"></div>
+                    <div class="music-dot" id="music-dot-1" onclick="goToTrack(1)"></div>
+                </div>
+                <div class="music-controls-fixed">
+                    <div class="audio-error-msg" id="audio-error-box">⚠️ 再生に失敗しました。<br>同じフォルダに音源ファイルが置かれているか確認してね！</div>
                     <div class="audio-controls"><button class="btn-circle" id="play-pause-btn" onclick="toggleAudio()">▶</button><span id="playback-status" style="font-size: 1.1rem; font-weight: bold; color: #555;">停止中</span></div>
                     <div class="progress-group"><span class="time-display" id="current-time">0:00</span><input type="range" id="seek-bar" value="0" min="0" max="100" step="0.1"><span class="time-display" id="duration-time">0:00</span></div>
                     <div class="dj-controls">
@@ -3503,12 +3551,6 @@ animation:facilitySweep 6s linear infinite;
         player.x = cw/2; player.y = ch-120; bullets=[]; enemies=[]; explosions=[]; boss=null; score=0; enemiesDefeated=0; frameCount=0; 
         if(ownedItems.whiskey){isInvincible=true;invincibilityTimer=600;}else{isInvincible=false;invincibilityTimer=0;} 
         player.bulletEmoji=ownedItems.train?'🚂':'💣'; player.bulletPower=ownedItems.train?3:1; isPlaying=true; gameLoop(); 
-
-        // 音楽の力 実績判定：音楽が流れている状態でゲームをスタートしたら解除
-        const bgm = document.getElementById('bgm-player');
-        if (bgm && !bgm.paused) {
-            unlockAchievement('music');
-        }
     }
     function stopGame() { 
         isPlaying = false; 
@@ -4103,6 +4145,8 @@ animation:facilitySweep 6s linear infinite;
         window.addEventListener('keydown', handleSpaceBarClick);
         clickerInterval = setInterval(() => {
             ensureDataIntegrity();
+            // 音楽の力 実績判定：黒船クリッカーをプレイ中に音楽が流れていたら解除
+            if (audio && !audio.paused) unlockAchievement('music');
             if (frenzyTimer > 0) {
                 frenzyTimer--; 
                 const bs = document.getElementById('clicker-buff-status');
@@ -4522,16 +4566,16 @@ animation:facilitySweep 6s linear infinite;
         else if(skillId === 'kakera3') { cost = 3; req = skills.kakera2; }
         else if(skillId === 'senpan') { cost = 12; req = skills.dawn; }
         else if(skillId === 'senpanKill') { cost = 14; req = skills.dawn; }
-        else if(skillId === 'achievementBoost') { cost = 1000; req = skills.dawn; }
+        else if(skillId === 'achievementBoost') { cost = 1000; req = skills.kaikoku; }
         else if(skillId === 'keiyaku') {
             cost = 30;
-            // 前提：「契約」以外のすべての昇天スキルを所持していること
-            req = skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost;
+            // 前提：「契約」「実績の有用性」以外のすべての昇天スキルを所持していること
+            req = skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill;
         }
         else if(skillId === 'kaikoku') { cost = 100; req = skills.keiyaku; }
         else if(skillId === 'ifSkill') {
             cost = 300;
-            // 前提：他のすべての昇天スキルを所持していること
+            // 前提：他のすべての昇天スキルを所持していること（実績の有用性を含む）
             req = skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost && skills.keiyaku && skills.kaikoku;
         }
         
@@ -4554,8 +4598,8 @@ animation:facilitySweep 6s linear infinite;
     const ASCENSION_TREE_EDGES = [
         ['dawn', 'modShip'], ['dawn', 'rebellion'], ['dawn', 'modernization'], ['dawn', 'addBase1'], ['dawn', 'kakera1'],
         ['addBase1', 'addBase2'], ['kakera1', 'kakera2'], ['kakera2', 'kakera3'],
-        ['dawn', 'senpan'], ['dawn', 'senpanKill'], ['dawn', 'achievementBoost'],
-        ['dawn', 'keiyaku'], ['keiyaku', 'kaikoku'], ['dawn', 'ifSkill']
+        ['dawn', 'senpan'], ['dawn', 'senpanKill'],
+        ['dawn', 'keiyaku'], ['keiyaku', 'kaikoku'], ['kaikoku', 'achievementBoost'], ['dawn', 'ifSkill']
     ];
 
     function drawAscensionLines(svgId, wrapId, edges, isPurchasedFn) {
@@ -4724,8 +4768,8 @@ animation:facilitySweep 6s linear infinite;
         
         const nodes = [ { id: 'dawn', cost: 1, req: true }, { id: 'modShip', cost: 2, req: skills.dawn }, { id: 'rebellion', cost: 3, req: skills.dawn }, { id: 'modernization', cost: 4, req: skills.dawn }, { id: 'addBase1', cost: 1, req: skills.dawn }, { id: 'addBase2', cost: 3, req: skills.addBase1 }, { id: 'kakera1', cost: 1, req: skills.dawn }, { id: 'kakera2', cost: 2, req: skills.kakera1 }, { id: 'kakera3', cost: 3, req: skills.kakera2 },
             { id: 'senpan', cost: 12, req: skills.dawn }, { id: 'senpanKill', cost: 14, req: skills.dawn },
-            { id: 'achievementBoost', cost: 1000, req: skills.dawn },
-            { id: 'keiyaku', cost: 30, req: skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost },
+            { id: 'achievementBoost', cost: 1000, req: skills.kaikoku },
+            { id: 'keiyaku', cost: 30, req: skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill },
             { id: 'kaikoku', cost: 100, req: skills.keiyaku },
             { id: 'ifSkill', cost: 300, req: skills.dawn && skills.modShip && skills.rebellion && skills.modernization && skills.addBase1 && skills.addBase2 && skills.kakera1 && skills.kakera2 && skills.kakera3 && skills.senpan && skills.senpanKill && skills.achievementBoost && skills.keiyaku && skills.kaikoku } ];
         nodes.forEach(n => {
@@ -4835,12 +4879,70 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 音楽室 & DJプレイ
     // ==========================================
+    const musicTracks = [
+        { src: 'れつごーぺりー.mp3', title: '浦賀黒船顛末記', artist: '歌唱・演奏：レッツゴーペリー' },
+        { src: '明治維新顛末記.mp3', title: '明治維新顛末記', artist: '歌唱・演奏：レツゴーペリー' },
+    ];
+    let currentTrackIndex = 0;
+
+    function getCurrentVinylDisc() { return document.getElementById(`vinyl-disc-${currentTrackIndex}`); }
+    function getCurrentVinylArm()  { return document.getElementById(`vinyl-arm-${currentTrackIndex}`); }
+
+    function switchTrack(dir) {
+        const newIndex = (currentTrackIndex + dir + musicTracks.length) % musicTracks.length;
+        goToTrack(newIndex);
+    }
+
+    function goToTrack(newIndex) {
+        if (newIndex === currentTrackIndex) return;
+        const wasPlaying = audio && !audio.paused;
+
+        // 現在再生中の音を止める
+        if (audio) {
+            audio.pause();
+            const oldDisc = getCurrentVinylDisc(); const oldArm = getCurrentVinylArm();
+            if (oldDisc) oldDisc.style.animationPlayState = 'paused';
+            if (oldArm) oldArm.style.transform = 'rotate(-30deg)';
+        }
+        stopVisualizer();
+
+        // 画面全体（レコード+曲情報）をスライドさせる
+        const strip = document.getElementById('music-pages-strip');
+        if (strip) strip.style.transform = `translateX(-${newIndex * 50}%)`;
+
+        // ドット更新
+        document.querySelectorAll('.music-dot').forEach((d, i) => d.classList.toggle('active', i === newIndex));
+
+        currentTrackIndex = newIndex;
+        const track = musicTracks[currentTrackIndex];
+
+        // audio要素のsrcを切り替え
+        if (audio) {
+            audio.src = track.src;
+            audio.currentTime = 0;
+            audio.load();
+        }
+
+        // UIリセット
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playbackStatus = document.getElementById('playback-status');
+        if (playPauseBtn) playPauseBtn.textContent = '▶';
+        if (playbackStatus) playbackStatus.textContent = '停止中';
+        const audioErrorBox = document.getElementById('audio-error-box');
+        if (audioErrorBox) audioErrorBox.style.display = 'none';
+
+        // 元々再生中だった場合は新しい曲を自動再生
+        if (wasPlaying) {
+            setTimeout(() => toggleAudio(), 350);
+        }
+    }
+
     function showAudioError(errMsg) {
         const audioErrorBox = document.getElementById('audio-error-box');
         const playbackStatus = document.getElementById('playback-status');
         const playPauseBtn = document.getElementById('play-pause-btn');
-        const vinylDisc = document.getElementById('vinyl-disc');
-        const vinylArm = document.getElementById('vinyl-arm');
+        const vinylDisc = getCurrentVinylDisc();
+        const vinylArm = getCurrentVinylArm();
 
         if(audioErrorBox) {
             audioErrorBox.style.display = 'block';
@@ -4851,7 +4953,8 @@ animation:facilitySweep 6s linear infinite;
             } else if (errMsg) {
                 detail = `<br><span style="font-size:0.8rem; color:#888;">エラー詳細: ${errMsg}</span>`;
             }
-            audioErrorBox.innerHTML = `⚠️ 再生に失敗しました。<br>同じフォルダに<strong>「れつごーぺりー.mp3」</strong>が置かれているか確認してね！${detail}`;
+            const trackFile = musicTracks[currentTrackIndex].src;
+            audioErrorBox.innerHTML = `⚠️ 再生に失敗しました。<br>同じフォルダに<strong>「${trackFile}」</strong>が置かれているか確認してね！${detail}`;
         }
         if (playbackStatus) playbackStatus.textContent = '再生エラー'; 
         if (playPauseBtn) playPauseBtn.textContent = '▶'; 
@@ -4873,11 +4976,12 @@ animation:facilitySweep 6s linear infinite;
         const audioErrorBox = document.getElementById('audio-error-box');
         const playPauseBtn = document.getElementById('play-pause-btn');
         const playbackStatus = document.getElementById('playback-status');
-        const vinylDisc = document.getElementById('vinyl-disc');
-        const vinylArm = document.getElementById('vinyl-arm');
+        const vinylDisc = getCurrentVinylDisc();
+        const vinylArm = getCurrentVinylArm();
 
         if (!audio) { audio = document.getElementById('bgm-player'); }
         if (!audio) { console.error('bgm-player要素が見つかりません'); return; }
+        if (!audio.src || audio.src === window.location.href) { audio.src = musicTracks[currentTrackIndex].src; }
 
         if (audio.paused) {
             initAudioEffects(); if (audioContext && audioContext.state === 'suspended') { audioContext.resume(); }
@@ -4906,6 +5010,8 @@ animation:facilitySweep 6s linear infinite;
         }
     }
     window.toggleAudio = toggleAudio;
+    window.switchTrack = switchTrack;
+    window.goToTrack = goToTrack;
 
     function formatTime(seconds) { if (isNaN(seconds)) return "0:00"; const m = Math.floor(seconds / 60), s = Math.floor(seconds % 60); return `${m}:${s.toString().padStart(2, '0')}`; }
     
@@ -4942,6 +5048,17 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v1.6.1",
+            title: "音楽室に新曲追加・昇天ツリー調整・実績修正",
+            date: "2026-07-05",
+            content: [
+                "音楽室（浦賀音楽堂）に新曲「明治維新顛末記」（歌唱・演奏：レツゴーペリー）を追加しました。レコード盤の左右に矢印ボタンが付き、クリックするとスライドアニメーションで曲を切り替えられます。",
+                "昇天アップグレード「実績の有用性」の前提を「開国」に変更しました。あわせて「契約」「開国」は、「実績の有用性」を除くすべての昇天アップグレードを取得すれば解放されるよう、前提条件とスキルツリーの接続を調整しました。",
+                "とある特殊実績が正しく解除されない不具合を修正しました。心当たりのある方は、もう一度条件を満たしてみてください。"
+            ],
+            preview: "大型アップデート「カスタマイズ式黒船」"
+        },
         {
             version: "v1.6.0",
             title: "実績ページ刷新・新実績追加・談話室・ランキング修正",
@@ -5127,7 +5244,7 @@ animation:facilitySweep 6s linear infinite;
             seekBar.addEventListener('input', () => { if (audio) audio.currentTime = seekBar.value; });
         }
 
-        if(speedSlider) speedSlider.addEventListener('input', (e) => { if (audio) audio.playbackRate = parseFloat(e.target.value); if (speedVal) speedVal.textContent = `x${audio.playbackRate.toFixed(1)}`; const vinylDisc = document.getElementById('vinyl-disc'); if (vinylDisc) vinylDisc.style.animationDuration = `${6 / audio.playbackRate}s`; });
+        if(speedSlider) speedSlider.addEventListener('input', (e) => { if (audio) audio.playbackRate = parseFloat(e.target.value); if (speedVal) speedVal.textContent = `x${audio.playbackRate.toFixed(1)}`; const vinylDisc = getCurrentVinylDisc(); if (vinylDisc) vinylDisc.style.animationDuration = `${6 / audio.playbackRate}s`; });
         if(bassSlider) bassSlider.addEventListener('input', (e) => { const gain = parseInt(e.target.value); if (bassEQ) { bassEQ.gain.value = gain; } if (bassVal) bassVal.textContent = gain > 0 ? `+${gain}dB` : `${gain}dB`; });
 
         const gameCanvasElement = document.getElementById('gameCanvas');
