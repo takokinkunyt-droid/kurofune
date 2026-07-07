@@ -1,112 +1,75 @@
-const https = require('https');
-
-function redis(command) {
-  return new Promise((resolve, reject) => {
-    const url   = new URL(process.env.UPSTASH_REDIS_REST_URL);
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-    const data  = JSON.stringify(command);
-    const req   = https.request({
-      hostname: url.hostname, port: 443,
-      path: url.pathname + (url.search || ''),
-      method: 'POST',
-      headers: {
-        'Authorization':  `Bearer ${token}`,
-        'Content-Type':   'application/json',
-        'Content-Length': Buffer.byteLength(data),
-      },
-    }, (r) => {
-      let body = '';
-      r.on('data', c => { body += c; });
-      r.on('end', () => { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });
-    });
-    req.on('error', reject);
-    req.write(data);
-    req.end();
-  });
-}
-
-function setCORS(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Max-Age', '86400');
-  res.setHeader('Content-Type', 'application/json');
-}
-
-function readBody(req) {
-  if (req.body && typeof req.body === 'object') return Promise.resolve(req.body);
-  return new Promise((resolve, reject) => {
-    let raw = '';
-    req.on('data', c => { raw += c; });
-    req.on('end', () => { try { resolve(JSON.parse(raw || '{}')); } catch (e) { reject(e); } });
-    req.on('error', reject);
-  });
-}
-
-function authCheck(secret) {
-  const adminSecret = process.env.ADMIN_SECRET;
-  if (!adminSecret) return false;
-  return secret === adminSecret;
-}
+/**
+ * /api/admin-ban
+ *
+ * 合言葉（ADMIN_SECRET環境変数）で保護された、シャドウBAN管理用API。
+ * ブラウザのコンソールや curl から直接叩いて使う想定。
+ *
+ * 使い方（ブラウザのコンソールから）:
+ *
+ *   // BANする
+ *   fetch('/api/admin-ban', {
+ *     method: 'POST',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({ secret: 'ここに合言葉', playerId: 'BANしたいplayerId', action: 'ban' })
+ *   }).then(r => r.json()).then(console.log);
+ *
+ *   // 解除する
+ *   fetch('/api/admin-ban', {
+ *     method: 'POST',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({ secret: 'ここに合言葉', playerId: '対象のplayerId', action: 'unban' })
+ *   }).then(r => r.json()).then(console.log);
+ *
+ *   // 現在シャドウBAN中の一覧を見る
+ *   fetch('/api/admin-ban', {
+ *     method: 'POST',
+ *     headers: { 'Content-Type': 'application/json' },
+ *     body: JSON.stringify({ secret: 'ここに合言葉', action: 'list' })
+ *   }).then(r => r.json()).then(console.log);
+ *
+ * Vercelの Environment Variables に ADMIN_SECRET を設定しておくこと。
+ */
+const { redisRequest, CORS, parseBody } = require('./_redis');
 
 module.exports = async (req, res) => {
-  // CORSヘッダーを必ず最初にセット
-  setCORS(res);
-
-  // OPTIONSプリフライトは即200で返す（ここが重要）
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    if (req.method === 'GET') {
-      const { secret } = req.query || {};
-      if (!authCheck(secret)) return res.status(403).json({ error: '認証エラー' });
+    const body = await parseBody(req);
+    const { secret, playerId, action } = body;
 
-      const result = await redis(['smembers', 'banned_players']);
-      const banned = result.result || [];
-      const details = await Promise.all(
-        banned.map(async (id) => {
-          const r = await redis(['get', `player:${id}`]);
-          const data = r.result ? JSON.parse(r.result) : null;
-          const reasonR = await redis(['get', `ban_reason:${id}`]);
-          return {
-            playerId: id,
-            playerName: data?.playerName || '不明',
-            score: data?.clickerScore || 0,
-            reason: reasonR.result || 'なし',
-          };
-        })
-      );
-      return res.status(200).json({ banned: details, count: details.length });
+    const ADMIN_SECRET = process.env.ADMIN_SECRET;
+    if (!ADMIN_SECRET) {
+      return res.status(500).json({ error: 'ADMIN_SECRET が設定されていません（Vercelの環境変数を確認してください）' });
+    }
+    if (!secret || secret !== ADMIN_SECRET) {
+      return res.status(403).json({ error: '合言葉が違います' });
     }
 
-    if (req.method === 'POST') {
-      const { secret, playerId, reason } = await readBody(req);
-      if (!authCheck(secret)) return res.status(403).json({ error: '認証エラー' });
-      if (!playerId)          return res.status(400).json({ error: 'playerId が必要です' });
-
-      await redis(['sadd', 'banned_players', playerId]);
-      await redis(['zrem', 'ranking', playerId]);
-      if (reason) await redis(['set', `ban_reason:${playerId}`, reason]);
-
-      return res.status(200).json({ success: true, message: `${playerId} をBANしました` });
+    if (action === 'list') {
+      const result = await redisRequest(['smembers', 'shadow_banned_players']);
+      return res.status(200).json({ success: true, banned: result.result || [] });
     }
 
-    if (req.method === 'DELETE') {
-      const { secret, playerId } = await readBody(req);
-      if (!authCheck(secret)) return res.status(403).json({ error: '認証エラー' });
-      if (!playerId)          return res.status(400).json({ error: 'playerId が必要です' });
+    if (!playerId) return res.status(400).json({ error: 'playerId が必要です' });
 
-      await redis(['srem', 'banned_players', playerId]);
-      await redis(['del', `ban_reason:${playerId}`]);
+    if (action === 'ban') {
+      await redisRequest(['sadd', 'shadow_banned_players', playerId]);
+      // 既にランキングに乗っている分は即座に非表示にする
+      await redisRequest(['zrem', 'ranking', playerId]);
+      return res.status(200).json({ success: true, message: `${playerId} をシャドウBANしました` });
+    }
 
+    if (action === 'unban') {
+      await redisRequest(['srem', 'shadow_banned_players', playerId]);
       return res.status(200).json({ success: true, message: `${playerId} のBANを解除しました` });
     }
 
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  } catch (e) {
-    console.error('[admin-ban]', e);
-    return res.status(500).json({ error: e.message });
+    return res.status(400).json({ error: 'action は ban / unban / list のいずれかを指定してください' });
+  } catch (error) {
+    console.error('[admin-ban]', error.message);
+    return res.status(500).json({ error: error.message });
   }
 };
