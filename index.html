@@ -2577,6 +2577,7 @@ animation:facilitySweep 6s linear infinite;
         <div class="nav-menu">
             <div class="nav-item" onclick="switchScreen('screen-home', null)"><span class="nav-icon">⛩️</span><span class="nav-text">ホームに戻る</span></div>
             <div class="nav-item" onclick="switchScreen('screen-music', this)"><span class="nav-icon">🎵</span><span class="nav-text">音（音楽室）</span></div>
+            <div class="nav-item" onclick="openShipGachaScreen(this)"><span class="nav-icon">🎁</span><span class="nav-text">貢ぎ物の蔵（ガチャ）</span></div>
             <div class="nav-item" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
             <div class="nav-item" onclick="switchScreen('screen-ranking', this); refreshRanking();"><span class="nav-icon">🏆</span><span class="nav-text">世界ランキング</span></div>
             <a class="nav-item" href="https://kurofunedanwashitsu.vercel.app/index.html" target="_blank" rel="noopener noreferrer" style="text-decoration: none;"><span class="nav-icon">⚓</span><span class="nav-text">黒船談話室</span></a>
@@ -2626,14 +2627,6 @@ animation:facilitySweep 6s linear infinite;
                             <p class="hgc-desc">黒船を操り、幕府の小舟を砲撃せよ！<br>30体撃破でボス要塞が出現する！</p>
                         </div>
                         <button class="hgc-btn hgc-btn--red">🔥 出撃する</button>
-                    </div>
-                    <div class="home-game-card home-game-card--gacha" onclick="openShipGachaScreen()">
-                        <div class="hgc-icon">🎁</div>
-                        <div class="hgc-body">
-                            <h3 class="hgc-title serif-font">貢ぎ物の蔵</h3>
-                            <p class="hgc-desc">かけらをチケットに交換してガチャを回そう！<br>黒船の見た目を変えるスキンを集めろ！</p>
-                        </div>
-                        <button class="hgc-btn hgc-btn--pink">🎁 蔵へ向かう</button>
                     </div>
                 </div>
             </div>
@@ -2956,20 +2949,21 @@ animation:facilitySweep 6s linear infinite;
 
         <!-- カスタマイズ式黒船：ガチャ画面 -->
         <div id="screen-gacha-shop" class="screen">
-            <div class="screen-header"><h2 class="serif-font">🎁 貢ぎ物の蔵（黒船カスタマイズ）</h2><p style="color:#888; font-size:0.9rem; margin-top:6px;">「開国のかけら」「鎖国のかけら」をチケットに交換し、黒船の見た目を変えるスキンを手に入れよう。</p></div>
+            <div class="screen-header"><h2 class="serif-font">🎁 貢ぎ物の蔵（黒船カスタマイズ）</h2><p style="color:#888; font-size:0.9rem; margin-top:6px;">保有している黒船の隻数をチケットに交換し、黒船の見た目を変えるスキンを手に入れよう。</p></div>
             <div class="gacha-shop-layout">
+                <div style="text-align:center; margin-bottom:18px; font-size:0.95rem; color:#555;">現在の黒船保有数：<span id="gacha-current-ships" style="font-weight:bold; color:var(--gold-color); font-size:1.1rem;">0</span> 隻</div>
                 <div class="gacha-ticket-bar">
                     <div class="gacha-ticket-card">
                         <div class="ticket-icon">🎫</div>
                         <div>Bチケット</div>
                         <div class="ticket-count" id="b-ticket-count">0</div>
-                        <button class="ticket-exchange-btn" id="exchange-b-btn" onclick="exchangeForBTicket()">開国のかけら 500 個 → 1枚</button>
+                        <button class="ticket-exchange-btn" id="exchange-b-btn" onclick="exchangeForBTicket()">黒船 5000億 隻 → 1枚</button>
                     </div>
                     <div class="gacha-ticket-card">
                         <div class="ticket-icon">🎟️</div>
                         <div>Pチケット <span style="font-size:0.65rem; color:#b568e8;">（超激レア10倍）</span></div>
                         <div class="ticket-count" id="p-ticket-count">0</div>
-                        <button class="ticket-exchange-btn" id="exchange-p-btn" onclick="exchangeForPTicket()">鎖国のかけら 500 個 → 1枚</button>
+                        <button class="ticket-exchange-btn" id="exchange-p-btn" onclick="exchangeForPTicket()">黒船 10兆 隻 → 1枚</button>
                     </div>
                 </div>
 
@@ -3340,24 +3334,29 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // カスタマイズ式黒船：ガチャシステム関数群
     // ==========================================
-    function openShipGachaScreen() {
-        switchScreen('screen-gacha-shop', null);
+    function openShipGachaScreen(navElement) {
+        switchScreen('screen-gacha-shop', navElement || null);
         renderShipGachaScreen();
     }
 
+    const B_TICKET_COST = 500000000000;   // 5000億隻
+    const P_TICKET_COST = 10000000000000; // 10兆隻
+
     function exchangeForBTicket() {
-        if (fragments >= 500) {
-            fragments -= 500; bTicket++;
+        if (clickerScore >= B_TICKET_COST) {
+            clickerScore -= B_TICKET_COST; bTicket++;
             playSE('buy');
+            updateClickerUI();
             renderShipGachaScreen();
             saveGame();
         }
     }
 
     function exchangeForPTicket() {
-        if (sakokuShards >= 500) {
-            sakokuShards -= 500; pTicket++;
+        if (clickerScore >= P_TICKET_COST) {
+            clickerScore -= P_TICKET_COST; pTicket++;
             playSE('buy');
+            updateClickerUI();
             renderShipGachaScreen();
             saveGame();
         }
@@ -3457,10 +3456,13 @@ animation:facilitySweep 6s linear infinite;
         if (bCountEl) bCountEl.textContent = bTicket;
         if (pCountEl) pCountEl.textContent = pTicket;
 
+        const currentShipsEl = document.getElementById('gacha-current-ships');
+        if (currentShipsEl) currentShipsEl.textContent = formatNumber(clickerScore);
+
         const exchangeBBtn = document.getElementById('exchange-b-btn');
         const exchangePBtn = document.getElementById('exchange-p-btn');
-        if (exchangeBBtn) exchangeBBtn.disabled = fragments < 500;
-        if (exchangePBtn) exchangePBtn.disabled = sakokuShards < 500;
+        if (exchangeBBtn) exchangeBBtn.disabled = clickerScore < B_TICKET_COST;
+        if (exchangePBtn) exchangePBtn.disabled = clickerScore < P_TICKET_COST;
 
         const pullBBtn = document.getElementById('pull-b-btn');
         const pullPBtn = document.getElementById('pull-p-btn');
@@ -4194,7 +4196,8 @@ animation:facilitySweep 6s linear infinite;
             const btnDetail = document.getElementById('reincarnation-btn-detail');
             if (btnDetail) {
                 if (skills.ifSkill) {
-                    btnDetail.textContent = `（鎖国のかけら +${getSuperShardGainPreview()} / 開国のかけら +${pending}）`;
+                    let equivalentFragments = calcEquivalentNormalFragments(currentLifeScore);
+                    btnDetail.textContent = `（鎖国のかけら +${getSuperShardGainPreview()} / 開国のかけら +${equivalentFragments}）`;
                 } else {
                     btnDetail.textContent = `（開国のかけら ${pending} 個 獲得可能）`;
                 }
@@ -4740,6 +4743,26 @@ animation:facilitySweep 6s linear infinite;
         } 
         return 0;  
     }
+
+    // 超転生時、達成した隻数を「通常の転生ペース（10万隻起点・1.4倍成長）」に換算し、
+    // 本来もらえるはずの「開国のかけら」を計算する。
+    // （超転生の閾値は1兆隻〜と桁が違いすぎるため、超転生専用の成長曲線で計算すると
+    // 　かけらがほとんど増えなくなってしまう問題への対処）
+    function calcEquivalentNormalFragments(shipCount) {
+        const base = 100000;
+        const growth = 1.4;
+        let currentCost = base;
+        let accumulatedRequired = 0;
+        let level = 0;
+        while (shipCount >= accumulatedRequired + currentCost) {
+            accumulatedRequired += currentCost;
+            currentCost *= growth;
+            level++;
+        }
+        if (level <= 0) return 0;
+        let baseFrags = (level * (level + 1)) / 2;
+        return baseFrags + getExtraFragments();
+    }
     
     function getNextFragmentReq() { 
         let base = getBaseReincarnationCost();
@@ -4895,17 +4918,25 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function doReincarnation() {
-        let pending = calcPendingFragments(); if (pending > 0) fragments += pending; reincarnationCount++;
+        reincarnationCount++;
 
         // 「If」昇天アップグレード所持時は、すべての転生が「超転生」となる
         let isSuperReincarnation = false;
         if (skills.ifSkill) {
+            // 開国のかけらは、達成した隻数を通常の転生ペースに換算して計算する
+            // （超転生の成長曲線のまま計算すると、かけらがほとんど増えなくなってしまうため）
+            let equivalentFragments = calcEquivalentNormalFragments(currentLifeScore);
+            if (equivalentFragments > 0) fragments += equivalentFragments;
+
             let shardsGained = getSuperShardGainPreview();
             sakokuShards += shardsGained;
             superReincarnationCount++;
             isSuperReincarnation = true;
             const btnSuperAsc = document.getElementById('btn-to-super-ascension');
             if (btnSuperAsc) btnSuperAsc.style.display = 'block';
+        } else {
+            let pending = calcPendingFragments();
+            if (pending > 0) fragments += pending;
         }
 
         // 「持ち越し」超昇天アップグレード所持時、超転生では隻の数を維持する（施設はリセット）
@@ -5430,6 +5461,18 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v2.0.1",
+            title: "ガチャ導線の整理と交換方式の変更",
+            date: "2026-07-11",
+            content: [
+                "「貢ぎ物の蔵（ガチャ）」へのアクセス場所を、ホーム画面のカードから左メニューに移動しました。「音（音楽室）」「アップデートログ」と同じ並びから、いつでもすぐに立ち寄れるようになります。",
+                "チケットの交換方法を変更しました。これまで「開国のかけら」「鎖国のかけら」で交換していましたが、これからは保有している黒船の隻数で直接交換します。Bチケットは黒船5000億隻、Pチケットは黒船10兆隻と交換可能です。",
+                "貢ぎ物の蔵の画面に、現在の黒船保有数を表示するようにしました。あといくつでチケットに交換できるか、一目で確認できます。",
+                "超転生を行った際にもらえる「開国のかけら」が、超転生の成長曲線でそのまま計算されていたため極端に少なくなってしまう不具合を修正しました。今後は、達成した隻数を通常の輪廻転生のペースに換算して計算するようになり、超転生でも適正な量の開国のかけらを受け取れます。"
+            ],
+            preview: "次回更新もお楽しみに"
+        },
         {
             version: "SP",
             title: "黒船クリッカーPV公開！",
