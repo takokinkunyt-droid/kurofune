@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="/kurofune.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;800&family=Noto+Sans+JP:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         /* =========================================
            基本設定・リセット
@@ -23,18 +23,148 @@
             --gold-color: #d4af37;
         }
 
-        /* 明治維新後のテーマ（文明開化・洋館調） */
+        /* ============================================================
+           明治維新後のテーマ（鹿鳴館調・文明開化の大改装）
+           江戸の武骨な意匠から一転、西洋文化を取り入れた
+           エメラルドグリーン＋金の豪奢なロクメイカン様式へ。
+           ============================================================ */
         #app-container.meiji-era {
-            --gold-color: #c9963f;
-            --accent-color: #2f6b52;
+            --gold-color: #d9b872;
+            --accent-color: #1f6b52;
+            --primary-color: #0e1a16;
+            --secondary-color: #163c30;
+            --bg-color: #f3efe2;
         }
+
+        /* 背景：大理石調＋金の唐草模様 */
+        #app-container.meiji-era {
+            background:
+                repeating-linear-gradient(135deg, rgba(217,184,114,0.05) 0px, rgba(217,184,114,0.05) 2px, transparent 2px, transparent 40px),
+                radial-gradient(circle at 15% 10%, rgba(217,184,114,0.08), transparent 45%),
+                radial-gradient(circle at 85% 90%, rgba(31,107,82,0.10), transparent 50%),
+                var(--bg-color);
+        }
+
         #app-container.meiji-era .clicker-col-left,
         #app-container.meiji-era .clicker-col-center,
         #app-container.meiji-era .clicker-col-right {
-            filter: sepia(0.16) hue-rotate(-6deg) saturate(1.08);
+            filter: saturate(1.05) contrast(1.02);
+        }
+
+        /* サイドバー：漆黒×深緑×金のロクメイカン装飾 */
+        #app-container.meiji-era #sidebar {
+            border-right: 2px solid #d9b872;
+            background:
+                repeating-linear-gradient(45deg, rgba(217,184,114,0.045) 0px, rgba(217,184,114,0.045) 1px, transparent 1px, transparent 22px),
+                radial-gradient(circle at 30% 0%, rgba(31,107,82,0.35), transparent 45%),
+                linear-gradient(180deg, #0a1512 0%, #0d1f1a 45%, #060b09 100%);
+        }
+        #app-container.meiji-era .sidebar-header {
+            border-bottom: 1px solid rgba(217,184,114,0.35);
+            position: relative;
+        }
+        #app-container.meiji-era .sidebar-header::after {
+            content: '❦';
+            display: block;
+            margin-top: 10px;
+            color: rgba(217,184,114,0.55);
+            font-size: 1.1rem;
+            letter-spacing: 0.4em;
+        }
+        #app-container.meiji-era .sidebar-header h1 {
+            font-family: 'Cormorant Garamond', 'Shippori Mincho', serif;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #e8cf94;
+            text-shadow: 0 0 18px rgba(217,184,114,0.35), 0 2px 8px rgba(0,0,0,0.5);
+        }
+        #app-container.meiji-era .sidebar-header h1 span {
+            font-family: 'Shippori Mincho', serif;
+            color: rgba(232, 207, 148, 0.65);
+        }
+        #app-container.meiji-era .nav-item {
+            color: rgba(232, 207, 148, 0.55);
+        }
+        #app-container.meiji-era .nav-item:hover {
+            color: #fff8ea;
+            background-color: rgba(31,107,82,0.22);
+        }
+        #app-container.meiji-era .nav-item.active {
+            color: #e8cf94;
+            background: linear-gradient(90deg, rgba(31,107,82,0.30), rgba(217,184,114,0.10));
+            border-left-color: #d9b872;
+            box-shadow: inset 0 0 14px rgba(31,107,82,0.25);
+        }
+
+        /* 画面ヘッダー：金の唐草二重罫線と装飾フラリッシュ */
+        #app-container.meiji-era .screen-header {
+            border-bottom: 2px solid transparent;
+            border-image: linear-gradient(90deg, transparent, #d9b872 15%, #d9b872 85%, transparent) 1;
+            position: relative;
+            padding-bottom: 28px !important;
+        }
+        #app-container.meiji-era .screen-header::after {
+            content: '❦ ROKUMEIKAN ERA ❦';
+            display: block;
+            margin-top: 10px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.35em;
+            color: rgba(31,107,82,0.55);
+            text-align: center;
         }
         #app-container.meiji-era .screen-header h2 {
-            color: #c9963f;
+            font-family: 'Cormorant Garamond', 'Shippori Mincho', serif;
+            color: #b8862f;
+            text-shadow: 0 0 20px rgba(217,184,114,0.25);
+            letter-spacing: 1px;
+        }
+
+        /* ボタン類：真鍮・金メッキ調の艶やかな仕上げ */
+        #app-container.meiji-era .btn-primary,
+        #app-container.meiji-era .hgc-btn--gold {
+            background: linear-gradient(160deg, #f0dca0, #d9b872 45%, #a9822f 100%);
+            color: #12241d;
+            border: 1px solid #8a672a;
+            box-shadow: 0 4px 14px rgba(217,184,114,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+            text-shadow: none;
+        }
+        #app-container.meiji-era .home-game-card {
+            border-color: rgba(217,184,114,0.35);
+        }
+        #app-container.meiji-era .home-game-card--clicker {
+            background:
+                linear-gradient(135deg, rgba(31,107,82,0.22), rgba(217,184,114,0.10)),
+                linear-gradient(180deg, #0e1e18, #0e1e1800);
+            border-color: rgba(217,184,114,0.35);
+        }
+
+        /* 中央：黒船クリッカーのスコアボードも金のフレームへ */
+        #app-container.meiji-era .clicker-score-board {
+            border: 1px solid rgba(217,184,114,0.4);
+            box-shadow: 0 0 0 1px rgba(217,184,114,0.12), 0 10px 30px rgba(0,0,0,0.25);
+        }
+        #app-container.meiji-era .kurofune-count-title,
+        #app-container.meiji-era .ribbon-kicker,
+        #app-container.meiji-era .ribbon-title {
+            color: #e8cf94 !important;
+        }
+        #app-container.meiji-era .kurofune-count {
+            background: linear-gradient(180deg, #fff6de, #e8cf94 60%, #b8862f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            filter: drop-shadow(0 2px 10px rgba(217,184,114,0.35));
+        }
+
+        /* 施設・アップグレードカードにも金縁のアクセント */
+        #app-container.meiji-era .shop-card {
+            border-color: rgba(217,184,114,0.3) !important;
+        }
+        #app-container.meiji-era .shop-card:hover {
+            border-color: #d9b872 !important;
+            box-shadow: 0 4px 14px rgba(31,107,82,0.25);
         }
 
         body {
@@ -777,6 +907,13 @@
             text-shadow: 0 1px 0 rgba(0,0,0,0.5);
         }
 
+        .kurofune-count-wrap {
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
         .clicker-col-left .kurofune-count {
             font-size: clamp(1.5rem, 5vw, 2.4rem);
             line-height: 1;
@@ -788,8 +925,8 @@
             letter-spacing: 0.04em;
             margin-bottom: 6px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: inline-block;
+            transform-origin: center top;
         }
 
         .clicker-col-left .kps-display {
@@ -2699,7 +2836,7 @@ animation:facilitySweep 6s linear infinite;
                         <input type="text" class="ship-name-input" id="ship-name" placeholder="黒船に名前を付ける..." oninput="if(this.value!=='') unlockAchievement('name'); if(this.value==='ペリー') unlockAchievement('perryFan'); if(this.value==='ペリーカツラハゲ') unlockAchievement('perryAnti');">
                         <div class="clicker-score-board">
                             <p class="kurofune-count-title serif-font">現在の黒船保有量</p>
-                            <div class="kurofune-count" id="clicker-total-score">0 隻</div>
+                            <div class="kurofune-count-wrap"><div class="kurofune-count" id="clicker-total-score">0 隻</div></div>
                             <div class="kps-display" id="clicker-kps">毎秒増加量(KpS): 0 隻</div>
                         </div>
                         <div id="clicker-buff-status"></div>
@@ -3755,15 +3892,57 @@ animation:facilitySweep 6s linear infinite;
 
     function sanitizeNum(val, def) { let n = parseFloat(val); return (isNaN(n) || !isFinite(n)) ? def : n; }
     
+    // 短縮表記の単位テーブル（short scale）。3桁ごとに単位が変わる。
+    const SHORT_SCALE_UNITS = [
+        { value: 1e63, name: 'vigintillion' },
+        { value: 1e60, name: 'novemdecillion' },
+        { value: 1e57, name: 'octodecillion' },
+        { value: 1e54, name: 'septendecillion' },
+        { value: 1e51, name: 'sexdecillion' },
+        { value: 1e48, name: 'quindecillion' },
+        { value: 1e45, name: 'quattuordecillion' },
+        { value: 1e42, name: 'tredecillion' },
+        { value: 1e39, name: 'duodecillion' },
+        { value: 1e36, name: 'undecillion' },
+        { value: 1e33, name: 'decillion' },
+        { value: 1e30, name: 'nonillion' },
+        { value: 1e27, name: 'octillion' },
+        { value: 1e24, name: 'septillion' },
+        { value: 1e21, name: 'sextillion' },
+        { value: 1e18, name: 'quintillion' },
+        { value: 1e15, name: 'quadrillion' },
+        { value: 1e12, name: 'trillion' },
+        { value: 1e9,  name: 'billion' },
+        { value: 1e6,  name: 'million' },
+        { value: 1e3,  name: 'thousand' },
+    ];
+
     function formatNumber(n) {
         if (!shortNumbers) return Math.floor(n).toLocaleString();
         const abs = Math.abs(n);
         const decimals = 2;
-        if (abs >= 1e12) return (n / 1e12).toFixed(decimals) + ' trillion';
-        if (abs >= 1e9)  return (n / 1e9).toFixed(decimals) + ' billion';
-        if (abs >= 1e6)  return (n / 1e6).toFixed(decimals) + ' million';
-        if (abs >= 1e3)  return (n / 1e3).toFixed(decimals) + ' thousand';
+        for (let i = 0; i < SHORT_SCALE_UNITS.length; i++) {
+            const unit = SHORT_SCALE_UNITS[i];
+            if (abs >= unit.value) return (n / unit.value).toFixed(decimals) + ' ' + unit.name;
+        }
         return Math.floor(n).toLocaleString();
+    }
+
+    // 数字がどれだけ長くなっても省略せず、コンテナに収まるよう自動で縮小表示する。
+    // （「…」で切り捨てず、文字が小さくなっても全桁を表示し続けるための処理）
+    function fitScoreText(el) {
+        if (!el) return;
+        const wrap = el.parentElement;
+        if (!wrap) return;
+        el.style.transform = 'scale(1)';
+        const wrapWidth = wrap.clientWidth;
+        const contentWidth = el.scrollWidth;
+        if (wrapWidth > 0 && contentWidth > wrapWidth) {
+            const scale = wrapWidth / contentWidth;
+            el.style.transform = `scale(${scale})`;
+        } else {
+            el.style.transform = 'scale(1)';
+        }
     }
     
     function ensureDataIntegrity() {
@@ -4212,7 +4391,7 @@ animation:facilitySweep 6s linear infinite;
         }
 
         const totalScoreEl = document.getElementById('clicker-total-score');
-        if (totalScoreEl) totalScoreEl.textContent = `${formatNumber(clickerScore)} 隻`;
+        if (totalScoreEl) { totalScoreEl.textContent = `${formatNumber(clickerScore)} 隻`; fitScoreText(totalScoreEl); }
         const kpsEl = document.getElementById('clicker-kps');
         if (kpsEl) kpsEl.textContent = `毎秒増加量(KpS): ${getKPS().toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} 隻`;
         
@@ -5461,6 +5640,17 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v2.1",
+            title: "表示の改善と明治維新の大改装",
+            date: "2026-07-12",
+            content: [
+                "「数字を短く表記」がONのとき、trillion（兆）を超える桁の単位を新たに追加しました。quadrillion・quintillion・sextillion……と、vigintillion（10の63乗）まで対応し、どれだけ数字が大きくなっても短縮表記で読みやすく表示され続けます。",
+                "「数字を短く表記」がOFFのとき、桁数が多い数字が「…」で省略されてしまい読めなくなる問題を修正しました。今後は省略せず、必要に応じて文字を自動で縮小しながら、すべての桁を最後まで表示するようにしました。",
+                "明治維新後のUIを全面改装しました。これまでは色味が少し変わる程度でしたが、今回から「鹿鳴館」をイメージした、深緑と金を基調にした本格的な文明開化調のデザインへと生まれ変わります。サイドバー、画面ヘッダー、ボタン、黒船の保有数表示に至るまで、随所に金の唐草模様や豪奢な装飾を追加し、時代が進んだことをはっきりと感じられるようにしました。"
+            ],
+            preview: "次回更新もお楽しみに"
+        },
         {
             version: "v2.0.1",
             title: "ガチャ導線の整理と交換方式の変更",
