@@ -3286,7 +3286,7 @@ animation:facilitySweep 6s linear infinite;
                     <div class="skill-name" style="color:#f0cf8e;">明治維新</div><div class="skill-cost">コスト: 10 かけら</div><div class="skill-desc">明治時代に移行する。新施設「擬洋風建築」「東京駅」「鉄道」が追加される。</div>
                 </div>
                 <div class="circle-node is-far is-special" id="node-super-conscription" onclick="buySuperSkill('conscription')" style="left:24%; top:94%; border-color:#c9963f; background: radial-gradient(circle at 35% 30%, #5c3d1a, #2a1f0a 80%);">
-                    <div class="skill-name" style="color:#f0cf8e;">徴兵令</div><div class="skill-cost">コスト: 12 かけら</div><div class="skill-desc">新たな開国技術「徴兵」を追加。1つ買うごとに「幕府の帰順軍」のKpSが2倍になる。</div>
+                    <div class="skill-name" style="color:#f0cf8e;">徴兵令</div><div class="skill-cost">コスト: 12 かけら</div><div class="skill-desc">新たな開国技術「徴兵」を追加。1つ買うごとに「幕府の帰順軍」のKpSが+20%増加する。</div>
                 </div>
                 <div class="circle-node is-far is-special" id="node-super-haihan" onclick="buySuperSkill('haihanChiken')" style="left:76%; top:94%; border-color:#c9963f; background: radial-gradient(circle at 35% 30%, #5c3d1a, #2a1f0a 80%);">
                     <div class="skill-name" style="color:#f0cf8e;">廃藩置県</div><div class="skill-cost">コスト: 30 かけら</div><div class="skill-desc">新たな開国技術「廃藩置県」を追加。1回限り、全体のKpSを2倍にする。</div>
@@ -5107,7 +5107,7 @@ animation:facilitySweep 6s linear infinite;
         if (superSkills.conscription) {
             let conscriptCard = document.createElement('div'); conscriptCard.className = 'shop-card special-card'; conscriptCard.id = 'up-conscription'; conscriptCard.onclick = () => buyConscription();
             conscriptCard.innerHTML = `
-                <div class="shop-info-left"><span class="shop-icon">🎌</span><div class="shop-details"><h4>徴兵</h4><p>「幕府の帰順軍」のKpSが <strong>2倍</strong> になる</p></div></div>
+                <div class="shop-info-left"><span class="shop-icon">🎌</span><div class="shop-details"><h4>徴兵</h4><p>「幕府の帰順軍」のKpSが <strong>+20%</strong> 増加する</p></div></div>
                 <div class="shop-info-right"><div class="shop-cost" id="up-conscription-cost">${formatNumber(upConscriptionCost)} 隻</div><div class="shop-count" id="up-conscription-level">Lv.${conscriptionLevel}</div></div>
             `;
             container.appendChild(conscriptCard);
@@ -5389,7 +5389,7 @@ animation:facilitySweep 6s linear infinite;
                 let facKps = facilities[key].count * (facilities[key].kps * facilities[key].multiplier);
                 // 徴兵：1レベルごとに「幕府の帰順軍」のKpSが2倍になる
                 if (key === 'army' && conscriptionLevel > 0) {
-                    facKps *= Math.pow(2, conscriptionLevel);
+                    facKps *= (1 + 0.2 * conscriptionLevel);
                 }
                 sum += facKps;
             }
