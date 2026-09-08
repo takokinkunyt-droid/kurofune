@@ -1069,6 +1069,29 @@
             50% { transform: translateY(-6px) scale(1.02); }
         }
 
+        /* ============================================
+           軽量化モード（設定でONにすると適用される）
+           演出・アニメーション・重い視覚効果を停止する
+           ============================================ */
+        body.lite-mode .sunburst-bg { display: none !important; }
+        body.lite-mode .kurofune-click-target { animation: none !important; }
+        body.lite-mode .kurofune-click-target:hover { transform: none !important; }
+        body.lite-mode .click-pop { animation-duration: 0.35s !important; }
+        body.lite-mode .facility-row::before,
+        body.lite-mode .facility-row::after { display: none !important; }
+        body.lite-mode .facility-row:hover { transform: none !important; }
+        body.lite-mode .facility-row-icons span { animation: none !important; transition: none !important; }
+        body.lite-mode .shop-card::after { display: none !important; }
+        body.lite-mode .shop-card:hover { transform: none !important; }
+        body.lite-mode .circle-node { animation: none !important; }
+        body.lite-mode .circle-node.available { animation: none !important; }
+        body.lite-mode .home-game-card:hover { transform: none !important; }
+        body.lite-mode #clicker-base,
+        body.lite-mode .clicker-col-left,
+        body.lite-mode .clicker-col-center,
+        body.lite-mode .clicker-col-right { backdrop-filter: none !important; }
+        body.lite-mode * { backdrop-filter: none !important; }
+
         .kurofune-click-target:hover {
             transform: translateY(-2px) scale(1.03);
             filter:
@@ -1207,6 +1230,228 @@
         .skin-card .skin-icon { font-size: 2.6rem; margin-bottom: 6px; height: 2.6rem; display: flex; align-items: center; justify-content: center; }
         .skin-card .skin-name { font-size: 0.82rem; font-weight: bold; color: #444; }
         .skin-card .skin-equipped-badge { font-size: 0.65rem; color: var(--gold-color); font-weight: bold; margin-top: 4px; }
+        .skin-card .skin-effect-badge { font-size: 0.62rem; color: #2ecc71; font-weight: bold; margin-top: 4px; line-height: 1.3; }
+
+        /* ============================================
+           浦賀賭博室
+           ============================================ */
+        .gambling-layout { padding: 0 40px 60px; max-width: 1100px; margin: 0 auto; }
+        .gambling-balance {
+            text-align: center; font-size: 1.05rem; font-weight: bold; color: var(--primary-color);
+            margin-bottom: 18px;
+        }
+        .gambling-balance span { color: var(--gold-color); font-size: 1.25rem; }
+
+        .gambling-bet-bar {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            flex-wrap: wrap; margin-bottom: 30px; padding: 14px;
+            background: rgba(0,0,0,0.04); border-radius: 10px;
+        }
+        .gambling-bet-label { font-size: 0.85rem; font-weight: bold; color: #555; }
+        #gambling-bet-input {
+            width: 180px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px;
+            font-size: 0.95rem; font-family: inherit; text-align: right;
+        }
+        .gambling-bet-quick {
+            padding: 6px 12px; font-size: 0.78rem; border-radius: 6px; cursor: pointer;
+            border: 1px solid var(--gold-color); background: transparent; color: var(--gold-color);
+            transition: all 0.2s;
+        }
+        .gambling-bet-quick:hover { background: var(--gold-color); color: #1a140d; }
+
+        .gambling-section-title {
+            font-size: 1.15rem; color: var(--primary-color); margin: 26px 0 14px;
+            border-left: 4px solid var(--gold-color); padding-left: 12px;
+        }
+        .gambling-game-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px;
+        }
+        .gambling-game-card {
+            background: linear-gradient(160deg, #fffdf6, #f5eeda);
+            border: 1px solid rgba(184, 134, 47, 0.35); border-radius: 12px;
+            padding: 18px 16px; text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+        .gg-title { font-family: 'Shippori Mincho', serif; font-size: 1.05rem; font-weight: bold; color: var(--primary-color); margin-bottom: 6px; }
+        .gg-desc { font-size: 0.75rem; color: #777; line-height: 1.5; margin-bottom: 14px; min-height: 3em; }
+        .gg-btn {
+            padding: 9px 18px; font-size: 0.85rem; font-weight: bold; border-radius: 8px;
+            border: none; cursor: pointer; color: #fff; margin: 4px 3px;
+            background: linear-gradient(135deg, #3f6b52, #24483a);
+            transition: transform 0.15s, filter 0.15s;
+        }
+        .gg-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .gg-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+        .gg-btn-row { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+        .gg-btn-cashout { background: linear-gradient(135deg, #b8862f, #8a5f18); margin-top: 8px; }
+        .gg-result { font-size: 0.85rem; font-weight: bold; margin-top: 12px; min-height: 2.4em; line-height: 1.4; }
+        .gg-result.win { color: #1f8a4c; }
+        .gg-result.lose { color: #c0392b; }
+
+        .slot-display { display: flex; justify-content: center; gap: 10px; margin-bottom: 14px; }
+        .slot-reel {
+            font-size: 2.6rem; width: 64px; height: 72px; line-height: 72px;
+            background: #1a140d; border: 2px solid var(--gold-color); border-radius: 8px;
+        }
+        .slot-reel.spinning { animation: slotSpin 0.12s linear infinite; }
+        @keyframes slotSpin { 0% { transform: translateY(-4px); } 50% { transform: translateY(4px); } 100% { transform: translateY(-4px); } }
+
+        .dice-display { display: flex; justify-content: center; gap: 14px; margin-bottom: 14px; }
+        .dice-face { font-size: 3.4rem; color: var(--primary-color); }
+        .dice-face.rolling { animation: diceRoll 0.15s linear infinite; }
+        @keyframes diceRoll { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
+
+        .highlow-display { margin-bottom: 12px; }
+        .highlow-card {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 66px; height: 92px; margin-bottom: 8px;
+            background: #fff; border: 2px solid var(--primary-color); border-radius: 8px;
+            font-size: 2.2rem; font-weight: 900; color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .highlow-streak { font-size: 0.8rem; color: #666; }
+        .highlow-streak span { font-weight: bold; color: var(--gold-color); }
+
+        .gambling-online-note {
+            text-align: center; padding: 28px 20px; color: #888; font-size: 0.9rem;
+            background: rgba(0,0,0,0.03); border: 1px dashed #ccc; border-radius: 10px;
+        }
+
+        body.lite-mode .slot-reel.spinning,
+        body.lite-mode .dice-face.rolling { animation: none !important; }
+
+        /* ============================================
+           本当の転生（異質な白いボタン）
+           ============================================ */
+        .true-reincarnation-card {
+            background: #ffffff !important;
+            border: 2px solid #ffffff !important;
+            box-shadow: 0 0 24px rgba(255,255,255,0.85), 0 0 60px rgba(255,255,255,0.4) !important;
+            color: #111 !important;
+            animation: trueReincPulse 2.6s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        .true-reincarnation-card h4,
+        .true-reincarnation-card p,
+        .true-reincarnation-card .shop-cost {
+            color: #111 !important;
+            font-family: 'Noto Sans JP', sans-serif !important;
+            letter-spacing: 0.25em;
+        }
+        .true-reincarnation-card .shop-icon {
+            filter: grayscale(1) contrast(1.4);
+        }
+        @keyframes trueReincPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.7), 0 0 46px rgba(255,255,255,0.28); }
+            50%      { box-shadow: 0 0 34px rgba(255,255,255,1),   0 0 80px rgba(255,255,255,0.55); }
+        }
+        body.lite-mode .true-reincarnation-card { animation: none !important; }
+
+        /* 本当の転生：警告モーダル */
+        #true-reinc-overlay {
+            position: fixed; inset: 0; z-index: 99999; display: none;
+            align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.92);
+        }
+        #true-reinc-overlay.show { display: flex; }
+        #true-reinc-box {
+            max-width: 520px; width: 88%;
+            background: #ffffff; color: #111;
+            border-radius: 6px; padding: 34px 30px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255,255,255,0.5);
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        #true-reinc-box h3 { font-size: 1.05rem; letter-spacing: 0.2em; margin-bottom: 18px; }
+        #true-reinc-box p { font-size: 0.88rem; line-height: 1.9; color: #333; margin-bottom: 26px; }
+        #true-reinc-box .tr-btn {
+            padding: 12px 30px; margin: 0 8px; border-radius: 4px; cursor: pointer;
+            font-size: 0.9rem; font-weight: bold; font-family: inherit; letter-spacing: 0.15em;
+            border: 1px solid #111; background: #fff; color: #111; transition: all 0.2s;
+        }
+        #true-reinc-box .tr-btn:hover { background: #111; color: #fff; }
+        #true-reinc-box .tr-btn.tr-yes { border-color: #c0392b; color: #c0392b; }
+        #true-reinc-box .tr-btn.tr-yes:hover { background: #c0392b; color: #fff; }
+
+        /* 時間移動演出 */
+        #time-travel-overlay {
+            position: fixed; inset: 0; z-index: 100000; display: none;
+            align-items: center; justify-content: center; flex-direction: column;
+            background: #ffffff;
+        }
+        #time-travel-overlay.show { display: flex; }
+        #time-travel-text {
+            font-family: 'Shippori Mincho', serif;
+            font-size: 1.6rem; color: #111; letter-spacing: 0.3em;
+            opacity: 0;
+        }
+
+        /* ============================================================
+           縄文時代テーマ（土と炎、原始の色彩）
+           ============================================================ */
+        #app-container.jomon-era {
+            --gold-color: #c96a2b;
+            --accent-color: #6b4423;
+            --primary-color: #2b1a0e;
+            --secondary-color: #4a2f18;
+            --bg-color: #efe3d0;
+        }
+        #app-container.jomon-era {
+            background:
+                repeating-linear-gradient(90deg, rgba(107,68,35,0.04) 0px, rgba(107,68,35,0.04) 3px, transparent 3px, transparent 26px),
+                radial-gradient(circle at 20% 15%, rgba(201,106,43,0.10), transparent 50%),
+                var(--bg-color);
+        }
+        #app-container.jomon-era #sidebar {
+            border-right: 3px solid #8a5a2b;
+            background:
+                repeating-linear-gradient(0deg, rgba(201,106,43,0.05) 0px, rgba(201,106,43,0.05) 2px, transparent 2px, transparent 18px),
+                linear-gradient(180deg, #2b1a0e 0%, #3d2614 50%, #1a0f07 100%);
+        }
+        #app-container.jomon-era .sidebar-header h1 {
+            font-family: 'Shippori Mincho', serif;
+            color: #e8b787;
+            letter-spacing: 4px;
+        }
+        #app-container.jomon-era .sidebar-header::after {
+            content: '〰〰〰';
+            display: block; margin-top: 8px;
+            color: rgba(232,183,135,0.5); letter-spacing: 0.2em;
+        }
+        #app-container.jomon-era .nav-item { color: rgba(232,183,135,0.55); }
+        #app-container.jomon-era .nav-item:hover { color: #fff2e0; background: rgba(201,106,43,0.18); }
+        #app-container.jomon-era .nav-item.active {
+            color: #e8b787; background: rgba(201,106,43,0.25); border-left-color: #c96a2b;
+        }
+        #app-container.jomon-era .screen-header h2 {
+            font-family: 'Shippori Mincho', serif;
+            color: #8a4a1c; letter-spacing: 3px;
+        }
+        #app-container.jomon-era .screen-header::after {
+            content: '〜 縄文時代 〜';
+            display: block; margin-top: 8px; text-align: center;
+            font-size: 0.75rem; letter-spacing: 0.4em; color: rgba(107,68,35,0.6);
+        }
+        #app-container.jomon-era .clicker-col-left {
+            background:
+                radial-gradient(circle at 30% 20%, rgba(230,180,120,0.18), transparent 30%),
+                linear-gradient(180deg, #6b4423 0%, #4a2f18 55%, #2b1a0e 100%);
+        }
+        #app-container.jomon-era .clicker-col-center {
+            background: linear-gradient(180deg, #f5e9d6, #e5d4ba);
+        }
+        #app-container.jomon-era .kurofune-count {
+            background: linear-gradient(180deg, #ffe9c9, #e8b787 60%, #a85f22);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+        }
+        #app-container.jomon-era .btn-primary {
+            background: linear-gradient(160deg, #e8a05c, #c96a2b 50%, #8a4518 100%);
+            color: #fff6ea; border: 1px solid #6b3a14;
+        }
+        #app-container.jomon-era .shop-card { border-color: rgba(201,106,43,0.35) !important; }
 
         .clicker-top-reinc {
             display: none;
@@ -2777,7 +3022,7 @@ animation:facilitySweep 6s linear infinite;
             <div class="nav-item" onclick="openShipGachaScreen(this)"><span class="nav-icon">🎁</span><span class="nav-text">貢ぎ物の蔵（ガチャ）</span></div>
             <div class="nav-item" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
             <div class="nav-item" onclick="switchScreen('screen-ranking', this); refreshRanking();"><span class="nav-icon">🏆</span><span class="nav-text">世界ランキング</span></div>
-            <a class="nav-item" href="https://kurofunedanwashitsu.vercel.app/index.html" target="_blank" rel="noopener noreferrer" style="text-decoration: none;"><span class="nav-icon">⚓</span><span class="nav-text">黒船談話室</span></a>
+            <div class="nav-item" onclick="openGamblingHall(this)"><span class="nav-icon">🎲</span><span class="nav-text">浦賀賭博室</span></div>
             <div style="margin-top: auto; display: flex; flex-direction: column;">
                 <div class="nav-item" onclick="toggleSidebar()" style="border-top: 1px solid #3a2a18; color: #998877;"><span class="nav-icon" id="sidebar-toggle-icon">◀</span><span class="nav-text">メニューを畳む</span></div>
                 <div class="nav-item" onclick="toggleFullscreen()" style="border-top: 1px solid #3a2a18; color: var(--gold-color);"><span class="nav-icon">📺</span><span class="nav-text">全画面切り替え</span></div>
@@ -3041,7 +3286,7 @@ animation:facilitySweep 6s linear infinite;
                     <div class="skill-name" style="color:#f0cf8e;">明治維新</div><div class="skill-cost">コスト: 10 かけら</div><div class="skill-desc">明治時代に移行する。新施設「擬洋風建築」「東京駅」「鉄道」が追加される。</div>
                 </div>
                 <div class="circle-node is-far is-special" id="node-super-conscription" onclick="buySuperSkill('conscription')" style="left:24%; top:94%; border-color:#c9963f; background: radial-gradient(circle at 35% 30%, #5c3d1a, #2a1f0a 80%);">
-                    <div class="skill-name" style="color:#f0cf8e;">徴兵令</div><div class="skill-cost">コスト: 12 かけら</div><div class="skill-desc">新たな開国技術「徴兵」を追加。「幕府の帰順軍」のKpSが10%増加する。</div>
+                    <div class="skill-name" style="color:#f0cf8e;">徴兵令</div><div class="skill-cost">コスト: 12 かけら</div><div class="skill-desc">新たな開国技術「徴兵」を追加。1つ買うごとに「幕府の帰順軍」のKpSが2倍になる。</div>
                 </div>
                 <div class="circle-node is-far is-special" id="node-super-haihan" onclick="buySuperSkill('haihanChiken')" style="left:76%; top:94%; border-color:#c9963f; background: radial-gradient(circle at 35% 30%, #5c3d1a, #2a1f0a 80%);">
                     <div class="skill-name" style="color:#f0cf8e;">廃藩置県</div><div class="skill-cost">コスト: 30 かけら</div><div class="skill-desc">新たな開国技術「廃藩置県」を追加。1回限り、全体のKpSを2倍にする。</div>
@@ -3049,6 +3294,9 @@ animation:facilitySweep 6s linear infinite;
                 <div class="circle-node" id="node-super-carryover" onclick="buySuperSkill('carryOver')" style="left:8%; top:46%; border-color:#5cc9b3; background: radial-gradient(circle at 35% 30%, #1a5c4f, #0a2a22 80%);">
                     <div class="skill-name" style="color:#8ef0d9;">持ち越し</div><div class="skill-cost">コスト: 1 かけら</div><div class="skill-desc">超転生したとき、隻の数が変わらない（施設は消える）。</div>
                 </div>
+                </div>
+                <div class="circle-node is-far is-special" id="node-super-timecontrol" onclick="buySuperSkill('timeControl')" style="left:92%; top:46%; border-color:#e8e8e8; background: radial-gradient(circle at 35% 30%, #4a4a5c, #16161f 80%);">
+                    <div class="skill-name" style="color:#ffffff;">時間操作</div><div class="skill-cost">コスト: 35000 かけら</div><div class="skill-desc">施設に「タイムマシーン」を追加する。……何かが起こる予感。</div>
                 </div>
                 <button class="canvas-reset-btn" onclick="resetCanvasPan('super-ascension-circle-wrap', 'super-ascension-lines-svg', SUPER_ASCENSION_TREE_EDGES, (id) => !!superSkills[id])">⟲ 表示位置をリセット</button>
             </div>
@@ -3184,6 +3432,83 @@ animation:facilitySweep 6s linear infinite;
             </div>
         </div>
 
+        <!-- 浦賀賭博室 -->
+        <div id="screen-gambling" class="screen">
+            <div class="screen-header"><h2 class="serif-font">🎲 浦賀賭博室</h2><p style="color:#888; font-size:0.9rem; margin-top:6px;">黒船の隻数を賭けて遊べる、港町の裏の顔。ほどほどにな。</p></div>
+            <div class="gambling-layout">
+                <div class="gambling-balance">
+                    手持ちの黒船：<span id="gambling-balance-ships">0</span> 隻
+                </div>
+
+                <div class="gambling-bet-bar">
+                    <span class="gambling-bet-label">賭け金（隻）</span>
+                    <input type="number" id="gambling-bet-input" value="1000" min="1" step="1000">
+                    <button class="gambling-bet-quick" onclick="setGamblingBet(1000)">1千</button>
+                    <button class="gambling-bet-quick" onclick="setGamblingBet(1000000)">100万</button>
+                    <button class="gambling-bet-quick" onclick="setGamblingBet(1000000000)">10億</button>
+                    <button class="gambling-bet-quick" onclick="setGamblingBetAll()">全額</button>
+                </div>
+
+                <div class="gambling-section-title serif-font">🎰 ひとり遊び</div>
+                <div class="gambling-game-grid">
+
+                    <!-- スロットマシーン -->
+                    <div class="gambling-game-card">
+                        <div class="gg-title">🎰 黒船スロット</div>
+                        <div class="gg-desc">3つの絵柄を揃えろ。ゾロ目なら大配当、黒船が3つ揃えば大当たり！</div>
+                        <div class="slot-display" id="slot-display">
+                            <span class="slot-reel" id="slot-reel-0">🚢</span>
+                            <span class="slot-reel" id="slot-reel-1">⚓</span>
+                            <span class="slot-reel" id="slot-reel-2">🎩</span>
+                        </div>
+                        <button class="gg-btn" onclick="playSlot()">回す</button>
+                        <div class="gg-result" id="slot-result"></div>
+                    </div>
+
+                    <!-- 丁半博打 -->
+                    <div class="gambling-game-card">
+                        <div class="gg-title">🎲 丁半博打</div>
+                        <div class="gg-desc">サイコロ2つの合計が偶数（丁）か奇数（半）かを当てる。当たれば賭け金が倍。</div>
+                        <div class="dice-display" id="dice-display">
+                            <span class="dice-face" id="dice-0">⚀</span>
+                            <span class="dice-face" id="dice-1">⚀</span>
+                        </div>
+                        <div class="gg-btn-row">
+                            <button class="gg-btn" onclick="playChoHan('cho')">丁（偶数）</button>
+                            <button class="gg-btn" onclick="playChoHan('han')">半（奇数）</button>
+                        </div>
+                        <div class="gg-result" id="chohan-result"></div>
+                    </div>
+
+                    <!-- ハイ＆ロー -->
+                    <div class="gambling-game-card">
+                        <div class="gg-title">🃏 黒船ハイ＆ロー</div>
+                        <div class="gg-desc">次に引く札が今の札より高いか低いかを予想。連続で当てるほど倍率が上がる。</div>
+                        <div class="highlow-display">
+                            <div class="highlow-card" id="highlow-current">7</div>
+                            <div class="highlow-streak">連勝：<span id="highlow-streak">0</span>（<span id="highlow-mult">1.0</span>倍）</div>
+                        </div>
+                        <div class="gg-btn-row">
+                            <button class="gg-btn" onclick="playHighLow('high')">↑ 高い</button>
+                            <button class="gg-btn" onclick="playHighLow('low')">↓ 低い</button>
+                        </div>
+                        <button class="gg-btn gg-btn-cashout" onclick="cashOutHighLow()">配当を受け取る</button>
+                        <div class="gg-result" id="highlow-result"></div>
+                    </div>
+
+                </div>
+
+                <div class="gambling-section-title serif-font">🌐 みんなで遊ぶ（オンライン）</div>
+                <div class="gambling-online-note">
+                    オンライン対戦は現在準備中です。近日公開予定！
+                </div>
+
+                <div style="margin-top:32px; text-align:center;">
+                    <button class="btn-primary" onclick="switchScreen('screen-home',null)">← ホームに戻る</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -3196,6 +3521,21 @@ animation:facilitySweep 6s linear infinite;
         <div class="gacha-reveal-dup" id="gacha-reveal-dup"></div>
         <div class="gacha-reveal-close-hint">クリックして閉じる</div>
     </div>
+</div>
+
+<!-- 本当の転生：警告モーダル -->
+<div id="true-reinc-overlay">
+    <div id="true-reinc-box">
+        <h3>⚠ 警 告 ⚠</h3>
+        <p>これまでの隻数・転生数・超転生数・開国のかけら・鎖国のかけらその他がすべてリセットされ、時代「縄文時代」からやり直します。<br>続けますか？</p>
+        <button class="tr-btn tr-yes" onclick="confirmTrueReincarnation()">はい</button>
+        <button class="tr-btn" onclick="closeTrueReincarnationWarning()">いいえ</button>
+    </div>
+</div>
+
+<!-- 時間移動演出オーバーレイ -->
+<div id="time-travel-overlay">
+    <div id="time-travel-text"></div>
 </div>
 
 <!-- モーダル・オーバーレイ群（全画面対応のため app-container 内に配置） -->
@@ -3220,6 +3560,20 @@ animation:facilitySweep 6s linear infinite;
                     onchange="shortNumbers = this.checked; updateClickerUI(); saveSettings();">
                 <span id="short-numbers-track" style="position:absolute; inset:0; background:#ccc; border-radius:24px; transition:background 0.2s;"></span>
                 <span id="short-numbers-thumb" style="position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span>
+            </label>
+        </div>
+
+        <!-- 軽量化 -->
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:0.9rem;">⚡ 軽量化</div>
+                <div style="font-size:0.78rem; color:#777;">演出やアニメーションを減らして動作を軽くします</div>
+            </div>
+            <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+                <input type="checkbox" id="toggle-lite-mode" style="opacity:0; width:0; height:0;"
+                    onchange="liteMode = this.checked; applyLiteMode(); saveSettings();">
+                <span id="lite-mode-track" style="position:absolute; inset:0; background:#ccc; border-radius:24px; transition:background 0.2s;"></span>
+                <span id="lite-mode-thumb" style="position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span>
             </label>
         </div>
 
@@ -3272,7 +3626,7 @@ animation:facilitySweep 6s linear infinite;
     let upClickCost = 15, upClickLevel = 1, frenzyTimer = 0, frenzyClickMult = 1, frenzyKpsMult = 1;
     let reincarnationCount = 0, fragments = 0;
     let sakokuShards = 0, superReincarnationCount = 0, buyQuantity = 1;
-    let superSkills = { root: false, efficiency: false, kakera1: false, kakera2: false, kakera3: false, meijiRestoration: false, conscription: false, haihanChiken: false, carryOver: false };
+    let superSkills = { root: false, efficiency: false, kakera1: false, kakera2: false, kakera3: false, meijiRestoration: false, conscription: false, haihanChiken: false, carryOver: false, timeControl: false };
     let skills = { dawn: false, modShip: false, rebellion: false, modernization: false, addBase1: false, addBase2: false, kakera1: false, kakera2: false, kakera3: false, keiyaku: false, kaikoku: false, ifSkill: false, senpan: false, senpanKill: false, achievementBoost: false };
     let treaties = { nichibeiWashin: false, nichibeiShuko: false };
     const facilityUpgradeMilestones = [10, 50, 100, 150]; 
@@ -3304,10 +3658,10 @@ animation:facilitySweep 6s linear infinite;
         goldShip:   { id: 'goldShip',   name: '黄金船', rarity: '超珍品', icon: '🚢', filter: 'sepia(1) saturate(7) hue-rotate(5deg) brightness(1.15) contrast(1.15) drop-shadow(0 0 20px rgba(255,215,0,0.6))' },
         silverShip: { id: 'silverShip', name: '銀船',   rarity: '超珍品', icon: '🚢', filter: 'grayscale(1) brightness(1.4) contrast(1.1) drop-shadow(0 0 20px rgba(220,220,255,0.6))' },
         // 特殊（人物：実画像使用）
-        perrySkin:    { id: 'perrySkin',    name: 'ペリー',     rarity: '特殊', image: 'PerryJCDP.png',   filter: 'none' },
+        perrySkin:    { id: 'perrySkin',    name: 'ペリー',     rarity: '特殊', image: 'PerryJCDP.png',   filter: 'none', effect: '全施設の生産効率2倍' },
         iiNaosukeSkin:{ id: 'iiNaosukeSkin',name: '井伊直弼',   rarity: '特殊', image: '井伊直弼.png',     filter: 'none' },
         // 黒船級（究極レア：実画像使用）
-        realBlackShip: { id: 'realBlackShip', name: '本物の黒船', rarity: '黒船級', image: 'kurofune2.png', filter: 'drop-shadow(0 0 40px rgba(192,57,43,0.8)) drop-shadow(0 0 20px rgba(255,215,0,0.7))' },
+        realBlackShip: { id: 'realBlackShip', name: '本物の黒船', rarity: '黒船級', image: 'kurofune2.png', filter: 'drop-shadow(0 0 40px rgba(192,57,43,0.8)) drop-shadow(0 0 20px rgba(255,215,0,0.7))', effect: 'クリック効率9倍' },
         // Pチケット専用レア（Pチケットのみで排出される特別枠。B/Pチケット共通の6段階とは別枠）
         schoolLogoSkin:  { id: 'schoolLogoSkin',  name: '母校のロゴ',       rarity: 'P級レア',   image: 'gakkou.jpg',  filter: 'none' },
         mysteryLogoSkin: { id: 'mysteryLogoSkin', name: '???のロゴ',        rarity: 'ドP級レア', image: 'musashi.jpg', filter: 'none' },
@@ -3330,6 +3684,8 @@ animation:facilitySweep 6s linear infinite;
     let isDraggingSeekBar = false;
     let audio = null, audioContext = null, sourceNode = null, bassEQ = null, visualizerInterval = null;
     let shortNumbers = false; // 数字を短く表記するフラグ
+    let liteMode = false;     // 軽量化モード（演出を減らして動作を軽くする）
+    let currentEra = 'edo';   // 現在の時代（'edo' = 江戸時代、'jomon' = 縄文時代）
 
     // ==========================================
     // オンラインセーブ・ランキング関連
@@ -3367,6 +3723,7 @@ animation:facilitySweep 6s linear infinite;
         flagLover:    { title:"旗が大好き",         icon:"🏴",  desc:"合衆国の国旗を100万枚買う。",       flavor:"チート？？",               unlocked:false, isRare:true  },
         clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船なしで一回のクリックで100隻の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
         kaikokuFinal: { title:"開国",               icon:"🔴",  desc:"日米修好通商条約を締結し、ペリーを帰国させる。", flavor:"さようなら、ペリー", unlocked:false, isRare:false, isFinal:true },
+        timeTravel:   { title:"時間移動",           icon:"⌛",  desc:"「本当の転生」を実行し、縄文時代へと遡る。", flavor:"さようなら、黒船クリッカー。", unlocked:false, isRare:false, isFinal:true },
     };
     let achievements = JSON.parse(JSON.stringify(achievementsData));
 
@@ -3386,7 +3743,8 @@ animation:facilitySweep 6s linear infinite;
         iiNaosuke: { name: "井伊直弼", icon: "🎎", cost: 3800000, kps: 28000.0, baseCost: 3800000, multiplier: 1, upLevel: 0, count: 0, locked: true },
         meijiBuilding: { name: "擬洋風建築", icon: "🏛️", cost: 5000000, kps: 25000.0, baseCost: 5000000, multiplier: 1, upLevel: 0, count: 0, locked: true },
         tokyoStation: { name: "東京駅", icon: "🚉", cost: 50000000, kps: 220000.0, baseCost: 50000000, multiplier: 1, upLevel: 0, count: 0, locked: true },
-        railway: { name: "鉄道", icon: "🚆", cost: 500000000, kps: 2000000.0, baseCost: 500000000, multiplier: 1, upLevel: 0, count: 0, locked: true }
+        railway: { name: "鉄道", icon: "🚆", cost: 500000000, kps: 2000000.0, baseCost: 500000000, multiplier: 1, upLevel: 0, count: 0, locked: true },
+        timeMachine: { name: "タイムマシーン", icon: "⏳", cost: 100000000000000, kps: 500000000.0, baseCost: 100000000000000, multiplier: 1, upLevel: 0, count: 0, locked: true }
     };
     let facilities = JSON.parse(JSON.stringify(facilitiesData));
 
@@ -3559,6 +3917,388 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // カスタマイズ式黒船：ガチャシステム関数群
     // ==========================================
+    // ==========================================
+    // 浦賀賭博室
+    // ==========================================
+    let highLowCurrentCard = 7;
+    let highLowStreak = 0;
+    let highLowStake = 0;
+    let gamblingBusy = false;
+
+    // ==========================================
+    // 本当の転生 ／ 縄文時代
+    // ==========================================
+
+    // 縄文時代のワード置換テーブル（表示名のみを変更し、内部キーはそのまま）
+    const JOMON_FACILITY_NAMES = {
+        cannon:      { name: "石斧",             icon: "🪓" },
+        flag:        { name: "土偶",             icon: "🗿" },
+        boat:        { name: "丸木舟",           icon: "🛶" },
+        wship:       { name: "大丸木舟",         icon: "🚣" },
+        army:        { name: "狩人の一団",       icon: "🏹" },
+        flute:       { name: "骨笛",             icon: "🎋" },
+        cake:        { name: "どんぐりの粉",     icon: "🌰" },
+        gun:         { name: "投げ槍",           icon: "🗡️" },
+        binoculars:  { name: "物見の櫓",         icon: "🔭" },
+        liquor:      { name: "木の実の酒",       icon: "🍶" },
+        katana:      { name: "黒曜石の刃",       icon: "🪨" },
+        iiNaosuke:   { name: "村の長",           icon: "🧔" },
+        meijiBuilding: { name: "竪穴住居",       icon: "🛖" },
+        tokyoStation:  { name: "大集落",         icon: "🏘️" },
+        railway:       { name: "交易の道",       icon: "🛤️" },
+        timeMachine:   { name: "時の祠",         icon: "⏳" },
+    };
+
+    function getEraLabel() {
+        if (currentEra === 'jomon') return '縄文時代';
+        if (superSkills && superSkills.meijiRestoration) return '明治時代';
+        return '江戸時代（初期）';
+    }
+
+    // 「本当の転生」ボタンが押されたときの警告表示
+    function attemptTrueReincarnation() {
+        const overlay = document.getElementById('true-reinc-overlay');
+        if (overlay) overlay.classList.add('show');
+    }
+
+    function closeTrueReincarnationWarning() {
+        const overlay = document.getElementById('true-reinc-overlay');
+        if (overlay) overlay.classList.remove('show');
+    }
+
+    function confirmTrueReincarnation() {
+        closeTrueReincarnationWarning();
+        unlockAchievement('timeTravel');
+        playTimeTravelSequence();
+    }
+
+    // 白い光に包まれて時代が遡る演出
+    function playTimeTravelSequence() {
+        const overlay = document.getElementById('time-travel-overlay');
+        const textEl = document.getElementById('time-travel-text');
+        if (!overlay || !textEl) { executeTrueReincarnation(); return; }
+
+        overlay.classList.add('show');
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 1.2s';
+        requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+
+        const lines = ['……時が、巻き戻る。', '明治。江戸。戦国。平安。', '奈良。弥生。……そして。', '縄文時代'];
+        let i = 0;
+        textEl.style.transition = 'opacity 0.9s';
+        textEl.style.opacity = '0';
+
+        const showNext = () => {
+            if (i >= lines.length) {
+                setTimeout(() => {
+                    executeTrueReincarnation();
+                    textEl.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => { overlay.classList.remove('show'); }, 1300);
+                    }, 900);
+                }, 1400);
+                return;
+            }
+            textEl.textContent = lines[i];
+            textEl.style.opacity = '1';
+            setTimeout(() => {
+                textEl.style.opacity = '0';
+                i++;
+                setTimeout(showNext, 700);
+            }, 1500);
+        };
+        setTimeout(showNext, 1200);
+    }
+
+    // 全リセットを行い、縄文時代を開始する
+    function executeTrueReincarnation() {
+        // 進行状況をすべて初期化
+        clickerScore = 0; currentLifeScore = 0;
+        clickPower = 1; upClickCost = 15; upClickLevel = 1;
+        reincarnationCount = 0; fragments = 0;
+        sakokuShards = 0; superReincarnationCount = 0;
+        wrenchLevel = 0; upWrenchCost = 1000; combatTechPurchased = false;
+        conscriptionLevel = 0; upConscriptionCost = 10000000;
+        haihanPurchased = false; sakuradamonPurchased = false;
+        treaties = { nichibeiWashin: false, nichibeiShuko: false };
+        availableFacilityUpgrades = [];
+        for (let key in skills) skills[key] = false;
+        for (let key in superSkills) superSkills[key] = false;
+        for (let key in facilities) {
+            facilities[key].count = 0;
+            facilities[key].cost = facilities[key].baseCost;
+            facilities[key].multiplier = 1;
+            facilities[key].upLevel = 0;
+        }
+
+        // 縄文時代へ移行
+        currentEra = 'jomon';
+        enterJomonEra();
+
+        const btnAsc = document.getElementById('btn-to-ascension');
+        if (btnAsc) btnAsc.style.display = 'none';
+        const btnSuperAsc = document.getElementById('btn-to-super-ascension');
+        if (btnSuperAsc) btnSuperAsc.style.display = 'none';
+
+        initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); updateCenterView();
+        saveGame();
+    }
+
+    // 縄文時代のUI・表記を適用する
+    function enterJomonEra() {
+        const app = document.getElementById('app-container');
+        if (app) { app.classList.remove('meiji-era'); app.classList.add('jomon-era'); }
+
+        // 施設の表示名・アイコンを縄文仕様へ差し替え
+        for (let key in JOMON_FACILITY_NAMES) {
+            if (facilities[key]) {
+                facilities[key].name = JOMON_FACILITY_NAMES[key].name;
+                facilities[key].icon = JOMON_FACILITY_NAMES[key].icon;
+            }
+        }
+
+        // 縄文時代では基本施設のみ解放（それ以外は封印）
+        const jomonUnlocked = ['cannon', 'flag', 'boat', 'wship', 'army'];
+        for (let key in facilities) {
+            facilities[key].locked = !jomonUnlocked.includes(key);
+        }
+
+        applyEraText();
+    }
+
+    // 画面上の文言を、現在の時代に合わせて書き換える
+    function applyEraText() {
+        const isJomon = (currentEra === 'jomon');
+
+        const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+        const setHTML = (sel, html) => { const el = document.querySelector(sel); if (el) el.innerHTML = html; };
+
+        if (isJomon) {
+            setHTML('.ribbon-kicker', 'Ancient Jomon');
+            setHTML('.ribbon-title', '縄文クリッカー');
+            setHTML('.kurofune-count-title', '現在の土器保有量');
+            const hint = document.querySelector('.ship-hint');
+            if (hint) hint.textContent = '※ クリック・Spaceキーで土器を作る';
+            const nameInput = document.getElementById('ship-name');
+            if (nameInput) nameInput.placeholder = '土器に名前を付ける...';
+            const facTitle = document.querySelector('#clicker-base .col-heading');
+            if (facTitle) facTitle.textContent = '集落';
+        }
+    }
+
+    function openGamblingHall(navElement) {
+        switchScreen('screen-gambling', navElement || null);
+        renderGamblingHall();
+    }
+
+    function renderGamblingHall() {
+        const balEl = document.getElementById('gambling-balance-ships');
+        if (balEl) balEl.textContent = formatNumber(clickerScore);
+        const cardEl = document.getElementById('highlow-current');
+        if (cardEl) cardEl.textContent = highLowCurrentCard;
+        const streakEl = document.getElementById('highlow-streak');
+        if (streakEl) streakEl.textContent = highLowStreak;
+        const multEl = document.getElementById('highlow-mult');
+        if (multEl) multEl.textContent = getHighLowMultiplier().toFixed(1);
+    }
+
+    function getGamblingBet() {
+        const input = document.getElementById('gambling-bet-input');
+        if (!input) return 0;
+        let bet = Math.floor(parseFloat(input.value) || 0);
+        if (bet < 1) bet = 0;
+        return bet;
+    }
+
+    function setGamblingBet(amount) {
+        const input = document.getElementById('gambling-bet-input');
+        if (input) input.value = Math.min(amount, Math.floor(clickerScore));
+    }
+
+    function setGamblingBetAll() {
+        const input = document.getElementById('gambling-bet-input');
+        if (input) input.value = Math.floor(clickerScore);
+    }
+
+    // 賭け金が有効かを確認し、問題なければ差し引く。失敗時は false を返す。
+    function takeGamblingBet(resultElId) {
+        const bet = getGamblingBet();
+        const resEl = document.getElementById(resultElId);
+        if (bet <= 0) {
+            if (resEl) { resEl.className = 'gg-result lose'; resEl.textContent = '賭け金を入力してください。'; }
+            return 0;
+        }
+        if (clickerScore < bet) {
+            if (resEl) { resEl.className = 'gg-result lose'; resEl.textContent = '黒船が足りません。'; }
+            return 0;
+        }
+        clickerScore -= bet;
+        return bet;
+    }
+
+    function finishGambling() {
+        updateClickerUI();
+        renderGamblingHall();
+        saveGame();
+    }
+
+    // ---------- 黒船スロット ----------
+    const SLOT_SYMBOLS = ['🚢', '⚓', '🎩', '🌊', '💰', '⚔️'];
+
+    function playSlot() {
+        if (gamblingBusy) return;
+        const bet = takeGamblingBet('slot-result');
+        if (!bet) return;
+        gamblingBusy = true;
+
+        const reels = [0, 1, 2].map(i => document.getElementById('slot-reel-' + i));
+        const resEl = document.getElementById('slot-result');
+        resEl.className = 'gg-result';
+        resEl.textContent = '回転中…';
+        reels.forEach(r => { if (r) r.classList.add('spinning'); });
+
+        const spinDuration = liteMode ? 200 : 1100;
+        const spinInterval = setInterval(() => {
+            reels.forEach(r => { if (r) r.textContent = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]; });
+        }, liteMode ? 100 : 80);
+
+        setTimeout(() => {
+            clearInterval(spinInterval);
+            const result = [0, 1, 2].map(() => SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]);
+            reels.forEach((r, i) => { if (r) { r.textContent = result[i]; r.classList.remove('spinning'); } });
+
+            let payout = 0, msg = '';
+            if (result[0] === result[1] && result[1] === result[2]) {
+                if (result[0] === '🚢') { payout = bet * 100; msg = `🚢🚢🚢 黒船大当たり！ +${formatNumber(payout)} 隻`; }
+                else { payout = bet * 12; msg = `ゾロ目！ +${formatNumber(payout)} 隻`; }
+            } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
+                payout = Math.floor(bet * 1.5); msg = `2つ揃い！ +${formatNumber(payout)} 隻`;
+            } else {
+                msg = `はずれ… -${formatNumber(bet)} 隻`;
+            }
+
+            if (payout > 0) { clickerScore += payout; resEl.className = 'gg-result win'; playSE('buy'); }
+            else { resEl.className = 'gg-result lose'; }
+            resEl.textContent = msg;
+
+            gamblingBusy = false;
+            finishGambling();
+        }, spinDuration);
+    }
+
+    // ---------- 丁半博打 ----------
+    const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+    function playChoHan(choice) {
+        if (gamblingBusy) return;
+        const bet = takeGamblingBet('chohan-result');
+        if (!bet) return;
+        gamblingBusy = true;
+
+        const diceEls = [0, 1].map(i => document.getElementById('dice-' + i));
+        const resEl = document.getElementById('chohan-result');
+        resEl.className = 'gg-result';
+        resEl.textContent = '振っています…';
+        diceEls.forEach(d => { if (d) d.classList.add('rolling'); });
+
+        const rollDuration = liteMode ? 150 : 800;
+        const rollInterval = setInterval(() => {
+            diceEls.forEach(d => { if (d) d.textContent = DICE_FACES[Math.floor(Math.random() * 6)]; });
+        }, liteMode ? 100 : 70);
+
+        setTimeout(() => {
+            clearInterval(rollInterval);
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            diceEls[0].textContent = DICE_FACES[d1 - 1];
+            diceEls[1].textContent = DICE_FACES[d2 - 1];
+            diceEls.forEach(d => { if (d) d.classList.remove('rolling'); });
+
+            const total = d1 + d2;
+            const isCho = total % 2 === 0;
+            const won = (choice === 'cho' && isCho) || (choice === 'han' && !isCho);
+
+            if (won) {
+                const payout = bet * 2;
+                clickerScore += payout;
+                resEl.className = 'gg-result win';
+                resEl.textContent = `${d1} + ${d2} = ${total}（${isCho ? '丁' : '半'}）当たり！ +${formatNumber(payout)} 隻`;
+                playSE('buy');
+            } else {
+                resEl.className = 'gg-result lose';
+                resEl.textContent = `${d1} + ${d2} = ${total}（${isCho ? '丁' : '半'}）はずれ… -${formatNumber(bet)} 隻`;
+            }
+
+            gamblingBusy = false;
+            finishGambling();
+        }, rollDuration);
+    }
+
+    // ---------- 黒船ハイ＆ロー ----------
+    function getHighLowMultiplier() {
+        // 連勝数に応じて倍率が上がる（0連勝=1.0倍、以降1.5倍ずつ複利）
+        return highLowStreak === 0 ? 1.0 : Math.pow(1.5, highLowStreak);
+    }
+
+    function playHighLow(choice) {
+        if (gamblingBusy) return;
+        const resEl = document.getElementById('highlow-result');
+
+        // 初回のみ賭け金を徴収し、以降は連勝チャレンジとして継続する
+        if (highLowStreak === 0) {
+            const bet = takeGamblingBet('highlow-result');
+            if (!bet) return;
+            highLowStake = bet;
+        }
+
+        const next = Math.floor(Math.random() * 13) + 1;
+        const isHigher = next > highLowCurrentCard;
+        const isSame = next === highLowCurrentCard;
+
+        if (isSame) {
+            resEl.className = 'gg-result';
+            resEl.textContent = `${next} … 引き分け！もう一度どうぞ。`;
+            highLowCurrentCard = next;
+            renderGamblingHall();
+            return;
+        }
+
+        const won = (choice === 'high' && isHigher) || (choice === 'low' && !isHigher);
+        highLowCurrentCard = next;
+
+        if (won) {
+            highLowStreak++;
+            resEl.className = 'gg-result win';
+            resEl.textContent = `${next} で的中！ ${highLowStreak}連勝（配当 ${formatNumber(Math.floor(highLowStake * getHighLowMultiplier()))} 隻）`;
+            playSE('buy');
+        } else {
+            resEl.className = 'gg-result lose';
+            resEl.textContent = `${next} ではずれ… ${formatNumber(highLowStake)} 隻を失いました。`;
+            highLowStreak = 0;
+            highLowStake = 0;
+        }
+
+        finishGambling();
+    }
+
+    function cashOutHighLow() {
+        const resEl = document.getElementById('highlow-result');
+        if (highLowStreak === 0 || highLowStake === 0) {
+            resEl.className = 'gg-result';
+            resEl.textContent = 'まだ配当がありません。';
+            return;
+        }
+        const payout = Math.floor(highLowStake * getHighLowMultiplier());
+        clickerScore += payout;
+        resEl.className = 'gg-result win';
+        resEl.textContent = `${highLowStreak}連勝で配当 +${formatNumber(payout)} 隻を受け取りました！`;
+        playSE('buy');
+        highLowStreak = 0;
+        highLowStake = 0;
+        finishGambling();
+    }
+
     function openShipGachaScreen(navElement) {
         switchScreen('screen-gacha-shop', navElement || null);
         renderShipGachaScreen();
@@ -3732,6 +4472,7 @@ animation:facilitySweep 6s linear infinite;
                     <div class="skin-icon" style="filter:${iconFilter};">${iconHtml}</div>
                     <div class="skin-name">${owned ? skin.name : '？？？'}</div>
                     <div class="gacha-rarity-name rarity-${rarity}">${rarity}</div>
+                    ${owned && skin.effect ? `<div class="skin-effect-badge">✨ ${skin.effect}</div>` : ''}
                     ${currentSkin === skin.id ? '<div class="skin-equipped-badge">装備中</div>' : ''}
                 `;
                 grid.appendChild(card);
@@ -3756,6 +4497,7 @@ animation:facilitySweep 6s linear infinite;
                     <div class="skin-icon" style="filter:${iconFilter};">${iconHtml}</div>
                     <div class="skin-name">${owned ? skin.name : '？？？'}</div>
                     <div class="gacha-rarity-name rarity-${rarity}">${rarity}</div>
+                    ${owned && skin.effect ? `<div class="skin-effect-badge">✨ ${skin.effect}</div>` : ''}
                     ${currentSkin === skin.id ? '<div class="skin-equipped-badge">装備中</div>' : ''}
                 `;
                 grid.appendChild(card);
@@ -3830,6 +4572,7 @@ animation:facilitySweep 6s linear infinite;
             treaties,
             sakokuShards, superReincarnationCount, superSkills, buyQuantity,
             bTicket, pTicket, currentSkin, ownedSkins,
+            currentEra,
             playerName,
             lastSaveTime: Date.now()
         };
@@ -3843,14 +4586,16 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function saveSettings() {
-        localStorage.setItem('kurofuneSettings', JSON.stringify({ shortNumbers }));
+        localStorage.setItem('kurofuneSettings', JSON.stringify({ shortNumbers, liteMode }));
     }
 
     function loadSettings() {
         try {
             const s = JSON.parse(localStorage.getItem('kurofuneSettings') || 'null');
-            if (!s) return;
-            if (s.shortNumbers != null) shortNumbers = s.shortNumbers;
+            if (s) {
+                if (s.shortNumbers != null) shortNumbers = s.shortNumbers;
+                if (s.liteMode != null) liteMode = s.liteMode;
+            }
         } catch(e) {}
         // UIに反映
         const toggle = document.getElementById('toggle-short-numbers');
@@ -3859,6 +4604,24 @@ animation:facilitySweep 6s linear infinite;
         if (toggle) toggle.checked = shortNumbers;
         if (track) track.style.background = shortNumbers ? '#3498db' : '#ccc';
         if (thumb) thumb.style.transform = shortNumbers ? 'translateX(20px)' : 'translateX(0)';
+
+        const liteToggle = document.getElementById('toggle-lite-mode');
+        const liteTrack = document.getElementById('lite-mode-track');
+        const liteThumb = document.getElementById('lite-mode-thumb');
+        if (liteToggle) liteToggle.checked = liteMode;
+        if (liteTrack) liteTrack.style.background = liteMode ? '#3498db' : '#ccc';
+        if (liteThumb) liteThumb.style.transform = liteMode ? 'translateX(20px)' : 'translateX(0)';
+
+        applyLiteMode();
+    }
+
+    // 軽量化モードの適用：body にクラスを付け外しし、CSS側で演出を止める
+    function applyLiteMode() {
+        document.body.classList.toggle('lite-mode', !!liteMode);
+        const liteTrack = document.getElementById('lite-mode-track');
+        const liteThumb = document.getElementById('lite-mode-thumb');
+        if (liteTrack) liteTrack.style.background = liteMode ? '#3498db' : '#ccc';
+        if (liteThumb) liteThumb.style.transform = liteMode ? 'translateX(20px)' : 'translateX(0)';
     }
 
     // ==========================================
@@ -3896,7 +4659,8 @@ animation:facilitySweep 6s linear infinite;
                         playerName: saveData.playerName || '名無しの船長',
                         clickerScore: saveData.clickerScore || 0,
                         reincarnationCount: saveData.reincarnationCount || 0,
-                        fragments: saveData.fragments || 0
+                        fragments: saveData.fragments || 0,
+                        era: getEraLabel()
                     })
                 });
             }
@@ -3985,7 +4749,10 @@ animation:facilitySweep 6s linear infinite;
                             border:1px solid ${isMe ? 'var(--gold-color)' : 'rgba(0,0,0,0.08)'};">
                             <div style="display:flex; align-items:center; gap:14px;">
                                 <span style="font-size:1.3rem; font-weight:bold; min-width:48px; text-align:center;">${medal}</span>
-                                <span style="font-weight:bold;">${escapeHtml(playerData.playerName || '名無しの船長')}${isMe ? ' (自分)' : ''}</span>
+                                <div>
+                                    <div style="font-weight:bold;">${escapeHtml(playerData.playerName || '名無しの船長')}${isMe ? ' (自分)' : ''}</div>
+                                    <div style="font-size:0.72rem; color:#888; margin-top:2px;">🕰 ${escapeHtml(playerData.era || '江戸時代（初期）')}</div>
+                                </div>
                             </div>
                             <div style="text-align:right; font-size:0.9rem; color:#555;">
                                 <div style="font-weight:bold; color:var(--accent-color); font-size:1.1rem;">${Math.floor(playerData.clickerScore || 0).toLocaleString()} 隻</div>
@@ -4088,6 +4855,7 @@ animation:facilitySweep 6s linear infinite;
 
         bTicket = sanitizeNum(save.bTicket, 0); pTicket = sanitizeNum(save.pTicket, 0);
         currentSkin = save.currentSkin || 'normal';
+        currentEra = save.currentEra || 'edo';
         ownedSkins = { ...ownedSkins, ...(save.ownedSkins || {}) };
 
         skills = { ...skills, ...(save.skills || {}) };
@@ -4107,6 +4875,7 @@ animation:facilitySweep 6s linear infinite;
         if (skills.addBase2) { facilities.binoculars.locked = false; facilities.liquor.locked = false; facilities.katana.locked = false; }
         if (skills.senpan) { facilities.iiNaosuke.locked = false; }
         if (superSkills.meijiRestoration) { facilities.meijiBuilding.locked = false; facilities.tokyoStation.locked = false; facilities.railway.locked = false; }
+        if (superSkills.timeControl) { facilities.timeMachine.locked = false; }
 
         if (save.achievements) { for (let key in save.achievements) { if (achievements[key]) achievements[key].unlocked = save.achievements[key].unlocked; } }
 
@@ -4163,6 +4932,7 @@ animation:facilitySweep 6s linear infinite;
             const btnSuperAsc = document.getElementById('btn-to-super-ascension');
             if (skills.ifSkill && btnSuperAsc) btnSuperAsc.style.display = 'block';
             if (superSkills.meijiRestoration) { const app = document.getElementById('app-container'); if (app) app.classList.add('meiji-era'); }
+            if (currentEra === 'jomon') { enterJomonEra(); }
             updateBulkBuySelector();
             initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); updateAscensionUI(); updateSuperAscensionUI(); updateCenterView(); updateAchievementsModal();
             applyShipSkin();
@@ -4337,7 +5107,7 @@ animation:facilitySweep 6s linear infinite;
         if (superSkills.conscription) {
             let conscriptCard = document.createElement('div'); conscriptCard.className = 'shop-card special-card'; conscriptCard.id = 'up-conscription'; conscriptCard.onclick = () => buyConscription();
             conscriptCard.innerHTML = `
-                <div class="shop-info-left"><span class="shop-icon">🎌</span><div class="shop-details"><h4>徴兵</h4><p>「幕府の帰順軍」のKpSが <strong>+10%</strong> 増加する</p></div></div>
+                <div class="shop-info-left"><span class="shop-icon">🎌</span><div class="shop-details"><h4>徴兵</h4><p>「幕府の帰順軍」のKpSが <strong>2倍</strong> になる</p></div></div>
                 <div class="shop-info-right"><div class="shop-cost" id="up-conscription-cost">${formatNumber(upConscriptionCost)} 隻</div><div class="shop-count" id="up-conscription-level">Lv.${conscriptionLevel}</div></div>
             `;
             container.appendChild(conscriptCard);
@@ -4351,6 +5121,19 @@ animation:facilitySweep 6s linear infinite;
                 <div class="shop-info-right"><div class="shop-cost" id="up-haihan-cost">${formatNumber(100000000)} 隻</div></div>
             `;
             container.appendChild(haihanCard);
+        }
+
+        // 本当の転生（タイムマシーンを10個買うと出現する、異質な白いボタン）
+        if (superSkills.timeControl && facilities.timeMachine.count >= 10) {
+            let trueReincCard = document.createElement('div');
+            trueReincCard.className = 'shop-card true-reincarnation-card';
+            trueReincCard.id = 'up-true-reincarnation';
+            trueReincCard.onclick = () => attemptTrueReincarnation();
+            trueReincCard.innerHTML = `
+                <div class="shop-info-left"><span class="shop-icon">⌛</span><div class="shop-details"><h4>本当の転生</h4><p>時の流れを、遡る。</p></div></div>
+                <div class="shop-info-right"><div class="shop-cost">― ― ―</div></div>
+            `;
+            container.appendChild(trueReincCard);
         }
 
         // 日米和親条約（昇天スキル「契約」購入済みで追加）
@@ -4600,9 +5383,21 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function getKPS() {
-        let sum = 0; for (let key in facilities) { if(!facilities[key].locked) { sum += facilities[key].count * (facilities[key].kps * facilities[key].multiplier); } }
+        let sum = 0;
+        for (let key in facilities) {
+            if(!facilities[key].locked) {
+                let facKps = facilities[key].count * (facilities[key].kps * facilities[key].multiplier);
+                // 徴兵：1レベルごとに「幕府の帰順軍」のKpSが2倍になる
+                if (key === 'army' && conscriptionLevel > 0) {
+                    facKps *= Math.pow(2, conscriptionLevel);
+                }
+                sum += facKps;
+            }
+        }
         let achievementMult = skills.achievementBoost ? (1 + getUnlockedAchievementCount() * 0.1) : 1;
-        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1) * achievementMult; 
+        // スキン効果：「ペリー」装備中は全施設の生産効率が2倍
+        let skinKpsMult = (currentSkin === 'perrySkin') ? 2 : 1;
+        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1) * achievementMult * skinKpsMult; 
         return sanitizeNum(kps, 0);
     }
 
@@ -4903,9 +5698,9 @@ animation:facilitySweep 6s linear infinite;
 
         playSE('click'); 
         
-        // パーティクル生成処理の統合
+        // パーティクル生成処理の統合（軽量化モード時はスキップ）
         const base = document.getElementById('clicker-base');
-        if (base) {
+        if (base && !liteMode) {
             const emojis = ['✨','⭐','💥','💰','🌊'];
             for (let i = 0; i < 5; i++) {
                 let p = document.createElement('div'); 
@@ -4950,7 +5745,7 @@ animation:facilitySweep 6s linear infinite;
             }
         }
 
-        let currentClickPower = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1); let isCrit = false;
+        let currentClickPower = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1); let isCrit = false;
         if (skills.modShip && Math.random() < 0.15) { currentClickPower *= 5; isCrit = true; }
         currentClickPower = Math.floor(currentClickPower * (1 + reincarnationCount * 0.1) * frenzyClickMult);
 
@@ -5517,12 +6312,14 @@ animation:facilitySweep 6s linear infinite;
         else if (skillId === 'conscription') { cost = 12; req = superSkills.meijiRestoration; }
         else if (skillId === 'haihanChiken') { cost = 30; req = superSkills.meijiRestoration; }
         else if (skillId === 'carryOver') { cost = 1; req = true; }
+        else if (skillId === 'timeControl') { cost = 35000; req = superSkills.root; }
 
         if (req && !superSkills[skillId] && sakokuShards >= cost) {
             playSE('buy');
             sakokuShards -= cost; superSkills[skillId] = true;
             if (skillId === 'meijiRestoration') { enterMeijiEra(); }
             if (skillId === 'conscription' || skillId === 'haihanChiken') { initUpgradesDOM(); }
+            if (skillId === 'timeControl') { facilities.timeMachine.locked = false; initFacilitiesDOM(); initUpgradesDOM(); }
             updateSuperAscensionUI(); saveGame();
         }
     }
@@ -5547,7 +6344,7 @@ animation:facilitySweep 6s linear infinite;
     const SUPER_ASCENSION_TREE_EDGES = [
         ['root', 'efficiency'], ['root', 'kakera1'], ['root', 'kakera2'], ['root', 'kakera3'], ['root', 'meijiRestoration'],
         ['meijiRestoration', 'conscription'], ['meijiRestoration', 'haihanChiken'],
-        ['root', 'carryOver']
+        ['root', 'carryOver'], ['root', 'timeControl']
     ];
 
     function updateSuperAscensionUI() {
@@ -5565,7 +6362,8 @@ animation:facilitySweep 6s linear infinite;
             { id: 'super-meiji', skillKey: 'meijiRestoration', cost: 10, req: superSkills.root },
             { id: 'super-conscription', skillKey: 'conscription', cost: 12, req: superSkills.meijiRestoration },
             { id: 'super-haihan', skillKey: 'haihanChiken', cost: 30, req: superSkills.meijiRestoration },
-            { id: 'super-carryover', skillKey: 'carryOver', cost: 1, req: true }
+            { id: 'super-carryover', skillKey: 'carryOver', cost: 1, req: true },
+            { id: 'super-timecontrol', skillKey: 'timeControl', cost: 35000, req: superSkills.root }
         ];
         nodes.forEach(n => {
             const el = document.getElementById(`node-${n.id}`);
@@ -5769,15 +6567,29 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v3.0",
+            title: "浦賀賭博室の開設と、時を遡る「本当の転生」",
+            date: "2026-07-14",
+            content: [
+                "昇天アップグレード「徴兵」を大幅に強化しました。これまで効果が正しく反映されていなかった不具合もあわせて修正し、1つ購入するごとに「幕府の帰順軍」のKpSが2倍になるようになりました。",
+                "設定欄に「⚡ 軽量化」を追加しました。ONにすると、クリック時の絵文字エフェクトや黒船のアニメーション、背景の視差効果などを停止し、動作が軽くなります。",
+                "ガチャスキンに効果が付きました。「本物の黒船」を装備するとクリック効率が9倍に、「ペリー」を装備するとすべての施設の生産効率が2倍になります。",
+                "「黒船談話室」を閉鎖し、跡地に「🎲 浦賀賭博室」を開設しました。黒船の隻数を賭けて、黒船スロット・丁半博打・黒船ハイ＆ローの3種類で遊べます。オンライン対戦は近日公開予定です。",
+                "超昇天アップグレード「時間操作」を追加しました（コスト：35000かけら、前提：もしもの話）。施設に「タイムマシーン」が追加され、10個そろえたとき、何かが起こります。",
+                "世界ランキングに「時代」欄を追加しました。各プレイヤーが今どの時代を生きているのかが分かるようになります。"
+            ],
+            preview: "次回更新もお楽しみに"
+        },
+        {
             version: "v2.2",
             title: "モバイル対応とPチケット限定スキン",
-            date: "2026-09-8",
+            date: "2026-07-13",
             content: [
                 "毎秒増加量（KpS）の表示にも、「数字を短く表記」の設定が反映されるようになりました。設定をONにしていると、KpSもmillion・billionなどの単位で短縮表示されます。",
                 "スマートフォンなど画面の狭い端末向けに、UIを全面的に見直しました。画面下部にタブが表示され、「生産ライン」「黒船」「商会」をワンタップで切り替えながらプレイできるようになります。",
                 "貢ぎ物の蔵（ガチャ）に、Pチケットでのみ入手できる新しいスキン枠「Pチケット限定」を追加しました。P級レア（出現率94.7%）「母校のロゴ」、ドP級レア（出現率5%）「???のロゴ」、伝説P級レア（出現率0.3%）「見たことがある顔」の3種類です。Pチケットは今後、この専用の排出プールからスキンが手に入るようになります。"
             ],
-            preview: "次回v3.0今夜8:00更新！お楽しみに。"
+            preview: "次回更新もお楽しみに"
         },
         {
             version: "v2.1",
