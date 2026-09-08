@@ -6,11 +6,10 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
   try {
     const body = await parseBody(req);
-    const { playerId, playerName, clickerScore, reincarnationCount, fragments } = body;
+    const { playerId, playerName, clickerScore, reincarnationCount, fragments, era } = body;
     if (!playerId) return res.status(400).json({ error: 'Missing playerId' });
 
     // シャドウBANチェック：BAN対象には「成功したフリ」をして、実際はランキングを更新しない。
-    // こうすることで、相手はBANされたことに気づかず、ランキングだけが静かに反映されなくなる。
     const shadowCheck = await redisRequest(['sismember', 'shadow_banned_players', playerId]);
     if (shadowCheck.result === 1) {
       return res.status(200).json({ success: true });
@@ -22,6 +21,7 @@ module.exports = async (req, res) => {
       clickerScore: Math.floor(clickerScore || 0),
       reincarnationCount: reincarnationCount || 0,
       fragments: fragments || 0,
+      era: String(era || '江戸時代（初期）').substring(0, 20),
       updatedAt: Date.now(),
     });
     await redisRequest(['zadd', 'ranking', Math.floor(clickerScore || 0), playerId]);
