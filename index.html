@@ -1127,6 +1127,9 @@
         .rarity-超珍品 { color: #f39c12; }
         .rarity-特殊   { color: #b568e8; }
         .rarity-黒船級 { color: #c0392b; font-weight: 900; }
+        .rarity-P級レア     { color: #d9a6ec; }
+        .rarity-ドP級レア   { color: #e07ad0; font-weight: 700; }
+        .rarity-伝説P級レア { color: #ff3d7f; font-weight: 900; }
 
         .gacha-shop-layout { padding: 0 40px 60px; max-width: 1000px; margin: 0 auto; }
         .gacha-ticket-bar {
@@ -1184,6 +1187,12 @@
         .reveal-anim-特殊   .gacha-reveal-icon { animation: gachaFadeScale 0.9s ease-out; filter: drop-shadow(0 0 50px rgba(181,104,232,0.85)); }
         .reveal-anim-黒船級 { animation: gachaShake 0.9s ease-in-out, gachaFlashBg 1.4s ease-out; }
         .reveal-anim-黒船級 .gacha-reveal-icon { animation: gachaFadeScale 1.1s ease-out; filter: drop-shadow(0 0 70px rgba(192,57,43,0.95)) drop-shadow(0 0 30px rgba(255,215,0,0.8)); }
+
+        /* Pチケット専用レア（P級レア／ドP級レア／伝説P級レア）の演出 */
+        .reveal-anim-P級レア     .gacha-reveal-icon { animation: gachaFadeScale 0.6s ease-out; filter: drop-shadow(0 0 20px rgba(217,166,236,0.5)); }
+        .reveal-anim-ドP級レア   .gacha-reveal-icon { animation: gachaFadeScale 0.8s ease-out, gachaSparkleSpin 2.2s linear infinite; filter: drop-shadow(0 0 45px rgba(224,122,208,0.8)); }
+        .reveal-anim-伝説P級レア { animation: gachaShake 1s ease-in-out, gachaFlashBg 1.6s ease-out; }
+        .reveal-anim-伝説P級レア .gacha-reveal-icon { animation: gachaFadeScale 1.2s ease-out; filter: drop-shadow(0 0 80px rgba(255,61,127,0.95)) drop-shadow(0 0 35px rgba(255,215,0,0.85)); }
 
         .gacha-collection-title { text-align: center; font-family: 'Shippori Mincho', serif; font-size: 1.2rem; color: var(--primary-color); margin: 20px 0 16px; }
         .gacha-collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
@@ -2095,21 +2104,72 @@
             }
         }
 
+        /* ============================================
+           モバイル用：タブ切り替え式レイアウト
+           ============================================ */
+        #mobile-tab-bar {
+            display: none;
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            z-index: 500;
+            height: 64px;
+            background: linear-gradient(180deg, #2a1508, #180c05);
+            border-top: 2px solid var(--gold-color);
+            box-shadow: 0 -6px 18px rgba(0,0,0,0.35);
+        }
+        .mobile-tab-btn {
+            flex: 1;
+            height: 100%;
+            border: none;
+            background: transparent;
+            color: rgba(255, 224, 170, 0.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            font-size: 0.72rem;
+            font-family: 'Noto Sans JP', sans-serif;
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s;
+        }
+        .mobile-tab-btn .mobile-tab-icon { font-size: 1.4rem; }
+        .mobile-tab-btn.active {
+            color: var(--gold-color);
+            background: rgba(212, 175, 55, 0.12);
+            font-weight: bold;
+        }
+
         @media (max-width: 900px) {
+            #mobile-tab-bar { display: flex; }
+
+            #screen-clicker { padding-bottom: 64px; box-sizing: border-box; }
+
             .clicker-main-layout {
-                display: flex;
-                flex-direction: column;
-                overflow-y: auto;
-                overflow-x: hidden;
+                display: block;
+                position: relative;
+                overflow: hidden;
+                padding: 0;
+                height: 100%;
             }
 
             .clicker-col-left,
             .clicker-col-right,
             .clicker-col-center {
-                flex: none;
+                display: none;
+                position: absolute;
+                inset: 0;
                 width: 100%;
-                min-height: 420px;
+                height: 100%;
+                min-height: 0;
+                border-radius: 0;
+                margin: 0;
             }
+
+            /* JSが .clicker-main-layout に付与するクラスで表示タブを切り替える */
+            .clicker-main-layout.mobile-tab-left .clicker-col-left { display: flex; }
+            .clicker-main-layout.mobile-tab-center .clicker-col-center { display: flex; }
+            .clicker-main-layout.mobile-tab-right .clicker-col-right { display: flex; }
 
             .clicker-top-bar {
                 flex-wrap: wrap;
@@ -2825,7 +2885,7 @@ animation:facilitySweep 6s linear infinite;
                 </div>
             </div>
 
-            <div class="clicker-main-layout">
+            <div class="clicker-main-layout mobile-tab-left" id="clicker-main-layout">
                 <div class="clicker-col-left" id="clicker-base">
                     <div class="clicker-title-ribbon">
                         <span class="ribbon-kicker serif-font">Grand Black Ship</span>
@@ -2873,6 +2933,12 @@ animation:facilitySweep 6s linear infinite;
                     </div>
                     <div id="facilities-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
                 </div>
+            </div>
+
+            <div id="mobile-tab-bar">
+                <button class="mobile-tab-btn active" id="mobile-tab-btn-left" onclick="switchMobileTab('left')"><span class="mobile-tab-icon">⚓</span><span>生産ライン</span></button>
+                <button class="mobile-tab-btn" id="mobile-tab-btn-center" onclick="switchMobileTab('center')"><span class="mobile-tab-icon">🚢</span><span>黒船</span></button>
+                <button class="mobile-tab-btn" id="mobile-tab-btn-right" onclick="switchMobileTab('right')"><span class="mobile-tab-icon">🏯</span><span>商会</span></button>
             </div>
         </div>
 
@@ -3098,7 +3164,7 @@ animation:facilitySweep 6s linear infinite;
                     </div>
                     <div class="gacha-ticket-card">
                         <div class="ticket-icon">🎟️</div>
-                        <div>Pチケット <span style="font-size:0.65rem; color:#b568e8;">（超激レア10倍）</span></div>
+                        <div>Pチケット <span style="font-size:0.65rem; color:#b568e8;">（Pチケット限定スキンが手に入る）</span></div>
                         <div class="ticket-count" id="p-ticket-count">0</div>
                         <button class="ticket-exchange-btn" id="exchange-p-btn" onclick="exchangeForPTicket()">黒船 10兆 隻 → 1枚</button>
                     </div>
@@ -3242,13 +3308,20 @@ animation:facilitySweep 6s linear infinite;
         iiNaosukeSkin:{ id: 'iiNaosukeSkin',name: '井伊直弼',   rarity: '特殊', image: '井伊直弼.png',     filter: 'none' },
         // 黒船級（究極レア：実画像使用）
         realBlackShip: { id: 'realBlackShip', name: '本物の黒船', rarity: '黒船級', image: 'kurofune2.png', filter: 'drop-shadow(0 0 40px rgba(192,57,43,0.8)) drop-shadow(0 0 20px rgba(255,215,0,0.7))' },
+        // Pチケット専用レア（Pチケットのみで排出される特別枠。B/Pチケット共通の6段階とは別枠）
+        schoolLogoSkin:  { id: 'schoolLogoSkin',  name: '母校のロゴ',       rarity: 'P級レア',   image: 'gakkou.jpg',  filter: 'none' },
+        mysteryLogoSkin: { id: 'mysteryLogoSkin', name: '???のロゴ',        rarity: 'ドP級レア', image: 'musashi.jpg', filter: 'none' },
+        seenFaceSkin:    { id: 'seenFaceSkin',    name: '見たことがある顔', rarity: '伝説P級レア', image: 'yaju.jpg',  filter: 'none' },
     };
 
-    // B/Pチケットそれぞれのレア度抽選テーブル（%）。合計は必ず100になるようにする。
-    // Pチケットは「超珍品以降（超珍品・特殊・黒船級）」の合計出現率がBチケットの10倍になるよう設計。
+    // Pチケット専用ガチャの排出率（%）。合計は必ず100になる。B/Pチケット共通の6段階とは別枠の抽選。
+    const P_EXCLUSIVE_RARITY_ORDER = ['P級レア', 'ドP級レア', '伝説P級レア'];
+    const P_EXCLUSIVE_RATE_TABLE = { 'P級レア': 94.7, 'ドP級レア': 5, '伝説P級レア': 0.3 };
+
+    // Bチケットのレア度抽選テーブル（%）。合計は必ず100になるようにする。
+    // Pチケットは上記の「Pチケット専用ガチャ」を使用するため、ここには含まれない。
     const GACHA_RATE_TABLE = {
         b: { '劣悪': 50, '普通': 30, '珍品': 15, '超珍品': 3.5, '特殊': 1.2, '黒船級': 0.3 },
-        p: { '劣悪': 25, '普通': 15, '珍品': 10, '超珍品': 35,  '特殊': 12,  '黒船級': 3   },
     };
     let wrenchLevel = 0, upWrenchCost = 1000, combatTechPurchased = false;
     let conscriptionLevel = 0, upConscriptionCost = 10000000, haihanPurchased = false;
@@ -3378,6 +3451,21 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function toggleSidebar() { const sb = document.getElementById('sidebar'), icon = document.getElementById('sidebar-toggle-icon'); sb.classList.toggle('collapsed'); if(sb.classList.contains('collapsed')) { icon.textContent = '▶'; } else { icon.textContent = '◀'; } }
+
+    // ==========================================
+    // モバイル用：タブ切り替え
+    // ==========================================
+    function switchMobileTab(tab) {
+        const layout = document.getElementById('clicker-main-layout');
+        if (layout) {
+            layout.classList.remove('mobile-tab-left', 'mobile-tab-center', 'mobile-tab-right');
+            layout.classList.add('mobile-tab-' + tab);
+        }
+        ['left', 'center', 'right'].forEach(t => {
+            const btn = document.getElementById('mobile-tab-btn-' + t);
+            if (btn) btn.classList.toggle('active', t === tab);
+        });
+    }
     
     // グローバルスコープに関数を割り当て（HTMLのonclick用）
     function switchScreen(screenId, navElement) {
@@ -3510,16 +3598,28 @@ animation:facilitySweep 6s linear infinite;
         return SHIP_SKIN_RARITY_ORDER[0]; // フォールバック
     }
 
+    function rollPExclusiveRarity() {
+        const rand = Math.random() * 100;
+        let cumulative = 0;
+        for (const rarity of P_EXCLUSIVE_RARITY_ORDER) {
+            cumulative += P_EXCLUSIVE_RATE_TABLE[rarity];
+            if (rand < cumulative) return rarity;
+        }
+        return P_EXCLUSIVE_RARITY_ORDER[0]; // フォールバック
+    }
+
     function pullShipGacha(ticketType) {
+        let rarity;
         if (ticketType === 'b') {
             if (bTicket <= 0) return;
             bTicket--;
+            rarity = rollGachaRarity('b');
         } else {
             if (pTicket <= 0) return;
             pTicket--;
+            rarity = rollPExclusiveRarity();
         }
 
-        const rarity = rollGachaRarity(ticketType);
         const candidates = Object.values(shipSkinsData).filter(s => s.rarity === rarity);
         const skin = candidates[Math.floor(Math.random() * candidates.length)];
 
@@ -3621,6 +3721,30 @@ animation:facilitySweep 6s linear infinite;
         grid.appendChild(normalCard);
 
         SHIP_SKIN_RARITY_ORDER.forEach(rarity => {
+            Object.values(shipSkinsData).filter(s => s.rarity === rarity).forEach(skin => {
+                const owned = !!ownedSkins[skin.id];
+                const card = document.createElement('div');
+                card.className = 'skin-card' + (!owned ? ' locked' : '') + (currentSkin === skin.id ? ' equipped' : '');
+                if (owned) card.onclick = () => selectShipSkin(skin.id);
+                const iconFilter = owned && skin.filter !== 'none' ? skin.filter : 'none';
+                const iconHtml = !owned ? '❔' : (skin.image ? `<img src="${skin.image}" alt="${skin.name}" style="width:100%; height:100%; object-fit:contain;">` : skin.icon);
+                card.innerHTML = `
+                    <div class="skin-icon" style="filter:${iconFilter};">${iconHtml}</div>
+                    <div class="skin-name">${owned ? skin.name : '？？？'}</div>
+                    <div class="gacha-rarity-name rarity-${rarity}">${rarity}</div>
+                    ${currentSkin === skin.id ? '<div class="skin-equipped-badge">装備中</div>' : ''}
+                `;
+                grid.appendChild(card);
+            });
+        });
+
+        // Pチケット限定スキンの見出し
+        const pExclusiveHeader = document.createElement('div');
+        pExclusiveHeader.style.cssText = 'grid-column: 1/-1; text-align:center; font-family:\'Shippori Mincho\', serif; font-size:1.05rem; color:#b568e8; margin:18px 0 4px; letter-spacing:0.05em;';
+        pExclusiveHeader.textContent = '🎟️ Pチケット限定';
+        grid.appendChild(pExclusiveHeader);
+
+        P_EXCLUSIVE_RARITY_ORDER.forEach(rarity => {
             Object.values(shipSkinsData).filter(s => s.rarity === rarity).forEach(skin => {
                 const owned = !!ownedSkins[skin.id];
                 const card = document.createElement('div');
@@ -4393,7 +4517,11 @@ animation:facilitySweep 6s linear infinite;
         const totalScoreEl = document.getElementById('clicker-total-score');
         if (totalScoreEl) { totalScoreEl.textContent = `${formatNumber(clickerScore)} 隻`; fitScoreText(totalScoreEl); }
         const kpsEl = document.getElementById('clicker-kps');
-        if (kpsEl) kpsEl.textContent = `毎秒増加量(KpS): ${getKPS().toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} 隻`;
+        if (kpsEl) {
+            const kpsVal = getKPS();
+            const kpsDisplay = shortNumbers ? formatNumber(kpsVal) : kpsVal.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1});
+            kpsEl.textContent = `毎秒増加量(KpS): ${kpsDisplay} 隻`;
+        }
         
         const upClickCard = document.getElementById('up-click');
         if(upClickCard) {
@@ -5641,6 +5769,17 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v2.2",
+            title: "モバイル対応とPチケット限定スキン",
+            date: "2026-09-8",
+            content: [
+                "毎秒増加量（KpS）の表示にも、「数字を短く表記」の設定が反映されるようになりました。設定をONにしていると、KpSもmillion・billionなどの単位で短縮表示されます。",
+                "スマートフォンなど画面の狭い端末向けに、UIを全面的に見直しました。画面下部にタブが表示され、「生産ライン」「黒船」「商会」をワンタップで切り替えながらプレイできるようになります。",
+                "貢ぎ物の蔵（ガチャ）に、Pチケットでのみ入手できる新しいスキン枠「Pチケット限定」を追加しました。P級レア（出現率94.7%）「母校のロゴ」、ドP級レア（出現率5%）「???のロゴ」、伝説P級レア（出現率0.3%）「見たことがある顔」の3種類です。Pチケットは今後、この専用の排出プールからスキンが手に入るようになります。"
+            ],
+            preview: "次回v3.0今夜8:00更新！お楽しみに。"
+        },
+        {
             version: "v2.1",
             title: "表示の改善と明治維新の大改装",
             date: "2026-07-12",
@@ -5714,8 +5853,7 @@ animation:facilitySweep 6s linear infinite;
             content: [
                 "新しい昇天アップグレード「実績の有用性」を追加（コスト：1000かけら、前提：『開国の兆し』）。これを取得すると、解除した実績一つごとに全体のKpSが10%上昇するようになります。実績を集めることそのものが、生産力につながる新しい育成ルートです。",
                 "「契約」「開国」「If」の前提条件に「実績の有用性」を追加しました。これらの最終アップグレードを取得するには、新アップグレードも含めたすべての昇天アップグレードが必要になります。",
-                "今回のアップデートに伴い、セーブデータの仕様を変更しました。これまでのセーブデータは引き続きご利用いただけません。お手数をおかけしますが、再び黒船を増やしていただけますと幸いです。",
-                "本アップデートに関するお問い合わせ・ご要望は、下記の連絡先よりお気軽にどうぞ。連絡はこちら：https://line.me/ti/p/6SvoYZWNEm"
+                "今回のアップデートに伴い、セーブデータの仕様を変更しました。これまでのセーブデータは引き続きご利用いただけません。お手数をおかけしますが、再び黒船を増やしていただけますと幸いです。"
             ],
             preview: "次回更新もお楽しみに"
         },
