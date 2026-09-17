@@ -1317,6 +1317,23 @@
         .highlow-streak span { font-weight: bold; color: var(--gold-color); }
 
         /* 連打競い（オンライン対戦） */
+        .tap-table-label { font-size: 0.78rem; color: #777; margin-bottom: 8px; }
+        .tap-table-list { display: flex; flex-direction: column; gap: 6px; }
+        .tap-table-btn {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 10px 12px;
+            border: 1px solid rgba(184,134,47,0.4); border-radius: 8px;
+            background: #fffdf6; cursor: pointer;
+            font-family: inherit; text-align: left;
+            transition: all 0.18s;
+        }
+        .tap-table-btn:hover { background: #fff5dd; border-color: var(--gold-color); transform: translateX(3px); }
+        .tap-table-btn.disabled { opacity: 0.38; cursor: not-allowed; filter: grayscale(0.6); }
+        .tap-table-btn.disabled:hover { transform: none; background: #fffdf6; }
+        .ttb-icon { font-size: 1.3rem; flex-shrink: 0; }
+        .ttb-name { font-family: 'Shippori Mincho', serif; font-weight: bold; font-size: 0.88rem; color: var(--primary-color); flex: 1; }
+        .ttb-bet { font-size: 0.74rem; color: #b8862f; font-weight: bold; white-space: nowrap; }
+
         .tap-status-text { font-size: 0.9rem; font-weight: bold; color: var(--primary-color); margin-bottom: 6px; }
         .tap-sub-text { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
         .tap-dots { display: inline-block; animation: tapDots 1.4s steps(4, end) infinite; overflow: hidden; vertical-align: bottom; }
@@ -3800,7 +3817,8 @@ animation:facilitySweep 6s linear infinite;
                         <div class="gg-title">👊 連打競い</div>
                         <div class="gg-desc">10秒間ひたすら連打し、回数を競う一騎打ち。同じ賭け金の相手と自動で組み合わされ、勝った方が場の黒船をすべて持ち帰る。</div>
                         <div id="tap-match-idle">
-                            <button class="gg-btn" onclick="joinTapMatch()">⚔️ 相手を探す</button>
+                            <div class="tap-table-label">卓を選んでください</div>
+                            <div class="tap-table-list" id="tap-table-list"></div>
                         </div>
                         <div id="tap-match-waiting" style="display:none;">
                             <div class="tap-status-text">対戦相手を探しています<span class="tap-dots">…</span></div>
@@ -4609,6 +4627,7 @@ animation:facilitySweep 6s linear infinite;
         if (streakEl) streakEl.textContent = highLowStreak;
         const multEl = document.getElementById('highlow-mult');
         if (multEl) multEl.textContent = highLowMultiplier.toFixed(2);
+        renderTapTables();
         // 各選択肢の現在の配当倍率をボタンに表示する
         const hiBtn = document.getElementById('highlow-btn-high');
         const loBtn = document.getElementById('highlow-btn-low');
@@ -4869,12 +4888,41 @@ animation:facilitySweep 6s linear infinite;
     const MATCH_API = getNetlifyFunctionUrl('match');
     const TAP_DURATION = 10; // 秒
 
+    // 賭け金は「卓」として固定額を用意する。
+    // 自由入力だと額が1隻でも違うとマッチしないため、卓を揃えて待機列を集約する。
+    const MATCH_TABLES = [
+        { id: 'koban',   name: '小判の間',   bet: 10000,                   icon: '🪙' },
+        { id: 'senryo',  name: '千両の間',   bet: 1000000,                 icon: '💰' },
+        { id: 'oban',    name: '大判の間',   bet: 100000000,               icon: '🏆' },
+        { id: 'kurofune',name: '黒船の間',   bet: 1000000000000,           icon: '🚢' },
+        { id: 'perry',   name: 'ペリーの間', bet: 10000000000000000,       icon: '🎩' },
+    ];
+
     let tapMatchId = null;
     let tapMatchBet = 0;
     let tapPollTimer = null;
     let tapGameTimer = null;
     let tapCount = 0;
     let tapDeadline = 0;
+
+    function renderTapTables() {
+        const list = document.getElementById('tap-table-list');
+        if (!list) return;
+        list.innerHTML = '';
+        MATCH_TABLES.forEach(t => {
+            const affordable = clickerScore >= t.bet;
+            const btn = document.createElement('button');
+            btn.className = 'tap-table-btn' + (affordable ? '' : ' disabled');
+            btn.disabled = !affordable;
+            btn.onclick = () => joinTapMatch(t.bet);
+            btn.innerHTML = `
+                <span class="ttb-icon">${t.icon}</span>
+                <span class="ttb-name">${t.name}</span>
+                <span class="ttb-bet">${formatNumber(t.bet)} 隻</span>
+            `;
+            list.appendChild(btn);
+        });
+    }
 
     function callMatchApi(payload) {
         return fetch(MATCH_API, {
@@ -4898,10 +4946,16 @@ animation:facilitySweep 6s linear infinite;
         el.textContent = text || '';
     }
 
-    function joinTapMatch() {
-        const bet = takeGamblingBet('tap-match-message');
-        if (!bet) return;
+    function joinTapMatch(bet) {
+        bet = Math.floor(bet);
+        if (!bet || bet <= 0) return;
+        if (clickerScore < bet) {
+            setTapMessage('この卓に着くには黒船が足りません。', true);
+            return;
+        }
 
+        // 卓に着いた時点で賭け金を場に預ける
+        clickerScore -= bet;
         tapMatchBet = bet;
         tapCount = 0;
         setTapMessage('');
@@ -5098,6 +5152,7 @@ animation:facilitySweep 6s linear infinite;
         tapMatchId = null;
         tapCount = 0;
         setTapMessage('');
+        renderTapTables();
         showTapPhase('idle');
     }
 
