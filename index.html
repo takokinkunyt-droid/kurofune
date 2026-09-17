@@ -1316,6 +1316,36 @@
         .highlow-streak { font-size: 0.8rem; color: #666; }
         .highlow-streak span { font-weight: bold; color: var(--gold-color); }
 
+        /* 連打競い（オンライン対戦） */
+        .tap-status-text { font-size: 0.9rem; font-weight: bold; color: var(--primary-color); margin-bottom: 6px; }
+        .tap-sub-text { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
+        .tap-dots { display: inline-block; animation: tapDots 1.4s steps(4, end) infinite; overflow: hidden; vertical-align: bottom; }
+        @keyframes tapDots { 0% { width: 0; } 100% { width: 1.6em; } }
+        .tap-opponent-name { font-size: 0.85rem; color: #666; margin-bottom: 8px; }
+        .tap-countdown-num {
+            font-size: 4rem; font-weight: 900; color: var(--gold-color);
+            line-height: 1.1; animation: tapCountPop 1s ease-out;
+        }
+        @keyframes tapCountPop { 0% { transform: scale(1.8); opacity: 0; } 40% { transform: scale(1); opacity: 1; } }
+        .tap-timer { font-size: 1.8rem; font-weight: 900; color: #c0392b; font-family: 'Courier New', monospace; }
+        .tap-button {
+            width: 100%; padding: 30px 0; margin: 12px 0;
+            font-size: 1.4rem; font-weight: 900; letter-spacing: 0.2em;
+            border: none; border-radius: 12px; cursor: pointer; color: #fff;
+            background: linear-gradient(135deg, #e85c4a, #8b1a12);
+            box-shadow: 0 6px 0 #5e120c;
+            user-select: none; -webkit-user-select: none; touch-action: manipulation;
+        }
+        .tap-button:active { transform: translateY(4px); box-shadow: 0 2px 0 #5e120c; }
+        .tap-count { font-size: 2.2rem; font-weight: 900; color: var(--primary-color); }
+        .tap-score-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 14px 0; }
+        .tap-score-label { font-size: 0.72rem; color: #888; }
+        .tap-score-val { font-size: 1.8rem; font-weight: 900; color: var(--primary-color); }
+        .tap-vs { font-size: 0.8rem; color: #aaa; font-weight: bold; }
+        .tap-payout { font-size: 0.9rem; font-weight: bold; margin-bottom: 12px; }
+        body.lite-mode .tap-countdown-num,
+        body.lite-mode .tap-dots { animation: none !important; }
+
         .gambling-online-note {
             text-align: center; padding: 28px 20px; color: #888; font-size: 0.9rem;
             background: rgba(0,0,0,0.03); border: 1px dashed #ccc; border-radius: 10px;
@@ -3765,8 +3795,51 @@ animation:facilitySweep 6s linear infinite;
                 </div>
 
                 <div class="gambling-section-title serif-font">🌐 みんなで遊ぶ（オンライン）</div>
-                <div class="gambling-online-note">
-                    オンライン対戦は現在準備中です。近日公開予定！
+                <div class="gambling-game-grid">
+                    <div class="gambling-game-card">
+                        <div class="gg-title">👊 連打競い</div>
+                        <div class="gg-desc">10秒間ひたすら連打し、回数を競う一騎打ち。同じ賭け金の相手と自動で組み合わされ、勝った方が場の黒船をすべて持ち帰る。</div>
+                        <div id="tap-match-idle">
+                            <button class="gg-btn" onclick="joinTapMatch()">⚔️ 相手を探す</button>
+                        </div>
+                        <div id="tap-match-waiting" style="display:none;">
+                            <div class="tap-status-text">対戦相手を探しています<span class="tap-dots">…</span></div>
+                            <div class="tap-sub-text">賭け金：<span id="tap-waiting-bet">0</span> 隻</div>
+                            <button class="gg-btn gg-btn-cashout" onclick="cancelTapMatch()">取り消す</button>
+                        </div>
+                        <div id="tap-match-countdown" style="display:none;">
+                            <div class="tap-opponent-name" id="tap-opponent-name"></div>
+                            <div class="tap-countdown-num" id="tap-countdown-num">3</div>
+                        </div>
+                        <div id="tap-match-playing" style="display:none;">
+                            <div class="tap-timer" id="tap-timer">10.0</div>
+                            <button class="tap-button" id="tap-button" onclick="registerTap()">連打！</button>
+                            <div class="tap-count" id="tap-count">0</div>
+                        </div>
+                        <div id="tap-match-result" style="display:none;">
+                            <div class="tap-status-text" id="tap-result-headline"></div>
+                            <div class="tap-score-row">
+                                <div><div class="tap-score-label">あなた</div><div class="tap-score-val" id="tap-my-score">0</div></div>
+                                <div class="tap-vs">VS</div>
+                                <div><div class="tap-score-label" id="tap-opp-label">相手</div><div class="tap-score-val" id="tap-opp-score">-</div></div>
+                            </div>
+                            <div class="tap-payout" id="tap-payout"></div>
+                            <button class="gg-btn" onclick="resetTapMatch()">もう一度</button>
+                        </div>
+                        <div class="gg-result" id="tap-match-message"></div>
+                    </div>
+
+                    <div class="gambling-game-card" style="opacity:0.55;">
+                        <div class="gg-title">🃏 ババ抜き</div>
+                        <div class="gg-desc">おなじみのババ抜きで一騎打ち。最後にジョーカーを持っていた方が負け。</div>
+                        <div style="font-size:0.78rem; color:#888; padding:14px 0;">準備中</div>
+                    </div>
+
+                    <div class="gambling-game-card" style="opacity:0.55;">
+                        <div class="gg-title">🚢 黒船競い</div>
+                        <div class="gg-desc">3分間でどれだけ黒船を増やせるかを競うRTA勝負。全員が同じ条件から始める。</div>
+                        <div style="font-size:0.78rem; color:#888; padding:14px 0;">準備中</div>
+                    </div>
                 </div>
 
                 <div style="margin-top:32px; text-align:center;">
@@ -4279,6 +4352,7 @@ animation:facilitySweep 6s linear infinite;
     let highLowStreak = 0;
     let highLowStake = 0;
     let highLowMultiplier = 1;
+    let highLowRoundActive = false; // 勝負が進行中か（引き分けを挟んでも維持される）
     let gamblingBusy = false;
 
     // ==========================================
@@ -4711,12 +4785,15 @@ animation:facilitySweep 6s linear infinite;
             return;
         }
 
-        // 勝負の開始時のみ賭け金を徴収する（連勝中は賭け金を変更できない）
-        if (highLowStreak === 0) {
+        // 勝負の開始時のみ賭け金を徴収する。
+        // 引き分けを挟んでも連勝数は0のままなので、専用フラグで進行中かを判定する
+        // （連勝数で判定すると、引き分けの直後に賭け金が二重に徴収されてしまう）
+        if (!highLowRoundActive) {
             const bet = takeGamblingBet('highlow-result');
             if (!bet) return;
             highLowStake = bet;
             highLowMultiplier = 1;
+            highLowRoundActive = true;
             lockHighLowBet(true);
         }
 
@@ -4748,6 +4825,7 @@ animation:facilitySweep 6s linear infinite;
             highLowStreak = 0;
             highLowStake = 0;
             highLowMultiplier = 1;
+            highLowRoundActive = false;
             lockHighLowBet(false);
         }
 
@@ -4756,7 +4834,7 @@ animation:facilitySweep 6s linear infinite;
 
     function cashOutHighLow() {
         const resEl = document.getElementById('highlow-result');
-        if (highLowStreak === 0 || highLowStake === 0) {
+        if (!highLowRoundActive || highLowStake === 0) {
             resEl.className = 'gg-result';
             resEl.textContent = 'まだ配当がありません。';
             return;
@@ -4764,11 +4842,14 @@ animation:facilitySweep 6s linear infinite;
         const payout = getHighLowPayout();
         clickerScore += payout;
         resEl.className = 'gg-result win';
-        resEl.textContent = `${highLowStreak}連勝で配当 +${formatNumber(payout)} 隻を受け取りました！`;
+        resEl.textContent = highLowStreak > 0
+            ? `${highLowStreak}連勝で配当 +${formatNumber(payout)} 隻を受け取りました！`
+            : `勝負を降りました。賭け金 ${formatNumber(payout)} 隻が戻ります。`;
         playSE('buy');
         highLowStreak = 0;
         highLowStake = 0;
         highLowMultiplier = 1;
+        highLowRoundActive = false;
         lockHighLowBet(false);
         finishGambling();
     }
@@ -4780,6 +4861,244 @@ animation:facilitySweep 6s linear infinite;
         document.querySelectorAll('.gambling-bet-quick').forEach(b => { b.disabled = locked; });
         const note = document.getElementById('highlow-lock-note');
         if (note) note.style.display = locked ? 'block' : 'none';
+    }
+
+    // ==========================================
+    // オンライン対戦：連打競い
+    // ==========================================
+    const MATCH_API = getNetlifyFunctionUrl('match');
+    const TAP_DURATION = 10; // 秒
+
+    let tapMatchId = null;
+    let tapMatchBet = 0;
+    let tapPollTimer = null;
+    let tapGameTimer = null;
+    let tapCount = 0;
+    let tapDeadline = 0;
+
+    function callMatchApi(payload) {
+        return fetch(MATCH_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playerId, ...payload }),
+        }).then(r => r.json());
+    }
+
+    function showTapPhase(phase) {
+        ['idle', 'waiting', 'countdown', 'playing', 'result'].forEach(p => {
+            const el = document.getElementById('tap-match-' + p);
+            if (el) el.style.display = (p === phase) ? 'block' : 'none';
+        });
+    }
+
+    function setTapMessage(text, isError) {
+        const el = document.getElementById('tap-match-message');
+        if (!el) return;
+        el.className = 'gg-result' + (isError ? ' lose' : '');
+        el.textContent = text || '';
+    }
+
+    function joinTapMatch() {
+        const bet = takeGamblingBet('tap-match-message');
+        if (!bet) return;
+
+        tapMatchBet = bet;
+        tapCount = 0;
+        setTapMessage('');
+        const betEl = document.getElementById('tap-waiting-bet');
+        if (betEl) betEl.textContent = formatNumber(bet);
+        showTapPhase('waiting');
+        finishGambling();
+
+        callMatchApi({ action: 'join', playerName, game: 'tap', bet })
+            .then(data => {
+                if (data.error) {
+                    // 参加できなかったので賭け金を返す
+                    clickerScore += bet;
+                    finishGambling();
+                    showTapPhase('idle');
+                    setTapMessage(data.error, true);
+                    return;
+                }
+                tapMatchId = data.matchId;
+                if (data.status === 'matched') {
+                    beginTapCountdown(data);
+                } else {
+                    startTapPolling();
+                }
+            })
+            .catch(() => {
+                clickerScore += bet;
+                finishGambling();
+                showTapPhase('idle');
+                setTapMessage('接続に失敗しました。時間をおいてお試しください。', true);
+            });
+    }
+
+    function startTapPolling() {
+        stopTapPolling();
+        tapPollTimer = setInterval(() => {
+            if (!tapMatchId) return;
+            callMatchApi({ action: 'status', matchId: tapMatchId })
+                .then(data => {
+                    if (data.status === 'expired') {
+                        stopTapPolling();
+                        clickerScore += tapMatchBet; // 対戦が流れたので返金
+                        finishGambling();
+                        showTapPhase('idle');
+                        setTapMessage('相手が見つかりませんでした。賭け金は返却されました。');
+                        tapMatchId = null;
+                    } else if (data.status === 'playing' && data.opponent) {
+                        stopTapPolling();
+                        beginTapCountdown(data);
+                    }
+                })
+                .catch(() => { /* 一時的な通信断は次の巡回で拾う */ });
+        }, 2000);
+    }
+
+    function stopTapPolling() {
+        if (tapPollTimer) { clearInterval(tapPollTimer); tapPollTimer = null; }
+    }
+
+    function cancelTapMatch() {
+        if (!tapMatchId) { showTapPhase('idle'); return; }
+        stopTapPolling();
+        callMatchApi({ action: 'cancel', matchId: tapMatchId })
+            .then(data => {
+                if (data.refunded) {
+                    clickerScore += tapMatchBet;
+                    finishGambling();
+                    setTapMessage('待機を取り消しました。賭け金は返却されました。');
+                    showTapPhase('idle');
+                    tapMatchId = null;
+                } else {
+                    // 既に対戦が始まっていたので、そのまま勝負へ進む
+                    beginTapCountdown(data);
+                }
+            })
+            .catch(() => { setTapMessage('取り消しに失敗しました。', true); });
+    }
+
+    function beginTapCountdown(data) {
+        const nameEl = document.getElementById('tap-opponent-name');
+        if (nameEl && data.opponent) nameEl.textContent = `対戦相手：${data.opponent.name}`;
+        showTapPhase('countdown');
+
+        let n = 3;
+        const numEl = document.getElementById('tap-countdown-num');
+        if (numEl) numEl.textContent = n;
+        const cd = setInterval(() => {
+            n--;
+            if (n > 0) {
+                if (numEl) { numEl.textContent = n; numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = ''; }
+            } else {
+                clearInterval(cd);
+                startTapGame();
+            }
+        }, 1000);
+    }
+
+    function startTapGame() {
+        tapCount = 0;
+        const countEl = document.getElementById('tap-count');
+        if (countEl) countEl.textContent = '0';
+        showTapPhase('playing');
+        tapDeadline = Date.now() + TAP_DURATION * 1000;
+
+        if (tapGameTimer) clearInterval(tapGameTimer);
+        tapGameTimer = setInterval(() => {
+            const remain = Math.max(0, tapDeadline - Date.now());
+            const timerEl = document.getElementById('tap-timer');
+            if (timerEl) timerEl.textContent = (remain / 1000).toFixed(1);
+            if (remain <= 0) {
+                clearInterval(tapGameTimer);
+                tapGameTimer = null;
+                submitTapScore();
+            }
+        }, 50);
+    }
+
+    function registerTap() {
+        if (Date.now() > tapDeadline) return;
+        tapCount++;
+        const countEl = document.getElementById('tap-count');
+        if (countEl) countEl.textContent = tapCount;
+    }
+
+    function submitTapScore() {
+        showTapPhase('result');
+        const headline = document.getElementById('tap-result-headline');
+        if (headline) headline.textContent = '相手の結果を待っています…';
+        const myScoreEl = document.getElementById('tap-my-score');
+        if (myScoreEl) myScoreEl.textContent = tapCount;
+        const oppScoreEl = document.getElementById('tap-opp-score');
+        if (oppScoreEl) oppScoreEl.textContent = '-';
+        const payoutEl = document.getElementById('tap-payout');
+        if (payoutEl) payoutEl.textContent = '';
+
+        callMatchApi({ action: 'submit', matchId: tapMatchId, score: tapCount })
+            .then(data => {
+                if (data.status === 'done') { showTapResult(data); }
+                else { waitForTapOpponent(); }
+            })
+            .catch(() => { setTapMessage('スコアの送信に失敗しました。', true); });
+    }
+
+    function waitForTapOpponent() {
+        stopTapPolling();
+        tapPollTimer = setInterval(() => {
+            callMatchApi({ action: 'status', matchId: tapMatchId })
+                .then(data => {
+                    if (data.status === 'done') { stopTapPolling(); showTapResult(data); }
+                    else if (data.status === 'expired') {
+                        stopTapPolling();
+                        clickerScore += tapMatchBet;
+                        finishGambling();
+                        setTapMessage('対戦が成立しませんでした。賭け金は返却されました。');
+                        showTapPhase('idle');
+                    }
+                })
+                .catch(() => {});
+        }, 2000);
+    }
+
+    function showTapResult(data) {
+        const headline = document.getElementById('tap-result-headline');
+        const oppScoreEl = document.getElementById('tap-opp-score');
+        const oppLabel = document.getElementById('tap-opp-label');
+        const payoutEl = document.getElementById('tap-payout');
+
+        if (oppLabel && data.opponent) oppLabel.textContent = data.opponent.name;
+        if (oppScoreEl && data.opponent) oppScoreEl.textContent = data.opponent.score;
+
+        const r = data.result || {};
+        if (r.draw) {
+            // 引き分けは賭け金をそのまま返す
+            clickerScore += tapMatchBet;
+            if (headline) headline.textContent = '引き分け！';
+            if (payoutEl) { payoutEl.style.color = '#666'; payoutEl.textContent = `賭け金 ${formatNumber(tapMatchBet)} 隻が返却されました。`; }
+        } else if (data.payout > 0) {
+            clickerScore += data.payout;
+            if (headline) headline.textContent = r.timeout ? '相手が棄権しました。あなたの勝ちです！' : '🎉 勝利！';
+            if (payoutEl) { payoutEl.style.color = '#1f8a4c'; payoutEl.textContent = `+${formatNumber(data.payout)} 隻を獲得！`; }
+            playSE('buy');
+        } else {
+            if (headline) headline.textContent = '敗北…';
+            if (payoutEl) { payoutEl.style.color = '#c0392b'; payoutEl.textContent = `${formatNumber(tapMatchBet)} 隻を失いました。`; }
+        }
+
+        tapMatchId = null;
+        finishGambling();
+    }
+
+    function resetTapMatch() {
+        stopTapPolling();
+        if (tapGameTimer) { clearInterval(tapGameTimer); tapGameTimer = null; }
+        tapMatchId = null;
+        tapCount = 0;
+        setTapMessage('');
+        showTapPhase('idle');
     }
 
     function openShipGachaScreen(navElement) {
@@ -6505,25 +6824,30 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function doReincarnation() {
-        reincarnationCount++;
+        // かけらの計算は reincarnationCount を増やす「前」に行う。
+        // 先にカウントを増やすと必要隻数の基準が1.4倍に上がってしまい、
+        // 本来もらえるはずのかけらが0個になってしまうため。
+        let pendingFragments = 0;
+        let shardsGained = 0;
+        const isSuperReincarnation = !!skills.ifSkill;
 
-        // 「If」昇天アップグレード所持時は、すべての転生が「超転生」となる
-        let isSuperReincarnation = false;
-        if (skills.ifSkill) {
+        if (isSuperReincarnation) {
             // 開国のかけらは、達成した隻数を通常の転生ペースに換算して計算する
             // （超転生の成長曲線のまま計算すると、かけらがほとんど増えなくなってしまうため）
-            let equivalentFragments = calcEquivalentNormalFragments(currentLifeScore);
-            if (equivalentFragments > 0) fragments += equivalentFragments;
+            pendingFragments = calcEquivalentNormalFragments(currentLifeScore);
+            shardsGained = getSuperShardGainPreview();
+        } else {
+            pendingFragments = calcPendingFragments();
+        }
 
-            let shardsGained = getSuperShardGainPreview();
+        reincarnationCount++;
+        if (pendingFragments > 0) fragments += pendingFragments;
+
+        if (isSuperReincarnation) {
             sakokuShards += shardsGained;
             superReincarnationCount++;
-            isSuperReincarnation = true;
             const btnSuperAsc = document.getElementById('btn-to-super-ascension');
             if (btnSuperAsc) btnSuperAsc.style.display = 'block';
-        } else {
-            let pending = calcPendingFragments();
-            if (pending > 0) fragments += pending;
         }
 
         // 「持ち越し」超昇天アップグレード所持時、超転生では隻の数を維持する（施設はリセット）
@@ -7054,7 +7378,7 @@ animation:facilitySweep 6s linear infinite;
         {
             version: "v.SP",
             title: "懐かしいものを、そっと置いておきます",
-            date: "2026-07-16",
+            date: "2026-09-16",
             content: [
                 "懐かしい気持ちになるものを追加しました。有名な文言をとあるところに入力すると起動します。",
                 "あわせて、新しい特殊実績をひとつ追加しています。"
@@ -7064,7 +7388,7 @@ animation:facilitySweep 6s linear infinite;
         {
             version: "v3.0.1",
             title: "スマートフォン表示の修正と、ハイ＆ローの調整",
-            date: "2026-07-15",
+            date: "2026-09-16",
             content: [
                 "スマートフォンで画面下部のタブ（生産ライン／黒船／商会）が表示されず、施設を購入できなくなることがある不具合を修正しました。",
                 "スマートフォンでメニューが常に画面を占有し、文字が縦に潰れて表示が大きく崩れていた問題を修正しました。今後メニューは画面左上の「☰」ボタンから開く形式になり、本文が画面いっぱいに表示されます。",
@@ -7080,7 +7404,7 @@ animation:facilitySweep 6s linear infinite;
         {
             version: "v3.0",
             title: "浦賀賭博室の開設と、時を遡る「本当の転生」",
-            date: "2026-07-14",
+            date: "2026-09-14",
             content: [
                 "昇天アップグレード「徴兵」を大幅に強化しました。これまで効果が正しく反映されていなかった不具合もあわせて修正し、1つ購入するごとに「幕府の帰順軍」のKpSが2倍になるようになりました。",
                 "設定欄に「⚡ 軽量化」を追加しました。ONにすると、クリック時の絵文字エフェクトや黒船のアニメーション、背景の視差効果などを停止し、動作が軽くなります。",
