@@ -19,6 +19,16 @@ const WAIT_TTL       = 120;   // 待機列に並んでいられる時間（秒�
 const SUBMIT_TIMEOUT = 45000; // 相手のスコア提出を待つ上限（ミリ秒）
 const GAMES = ['tap'];        // 現在対応しているゲーム種別
 
+// 賭け金は決められた「卓」の額のみを受け付ける。
+// 自由な額を許すと待機列が分散してマッチしなくなるため。
+const ALLOWED_BETS = [
+  10000,              // 小判の間
+  1000000,            // 千両の間
+  100000000,          // 大判の間
+  1000000000000,      // 黒船の間
+  10000000000000000,  // ペリーの間
+];
+
 // 連打競いで人間が出しうる上限。これを超える申告は不正とみなす。
 const TAP_DURATION_SEC = 10;
 const TAP_MAX_PER_SEC  = 25;
@@ -139,7 +149,9 @@ module.exports = async (req, res) => {
       if (!GAMES.includes(game)) return res.status(400).json({ error: '対応していないゲームです' });
 
       const betAmount = Math.floor(Number(bet) || 0);
-      if (betAmount <= 0) return res.status(400).json({ error: '賭け金が不正です' });
+      if (!ALLOWED_BETS.includes(betAmount)) {
+        return res.status(400).json({ error: '用意されていない卓です' });
+      }
 
       // 申告された賭け金が、記録されている保有数を超えていないか確認する
       const rec = await redis(['get', `player:${playerId}`]);
