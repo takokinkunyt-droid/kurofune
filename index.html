@@ -1363,6 +1363,110 @@
         body.lite-mode .tap-countdown-num,
         body.lite-mode .tap-dots { animation: none !important; }
 
+        /* ============================================
+           ババ抜き（全画面）
+           ============================================ */
+        #oldmaid-overlay {
+            position: fixed; inset: 0; z-index: 99992;
+            display: none; align-items: stretch; justify-content: center;
+            background:
+                radial-gradient(circle at 50% 30%, rgba(40,90,60,0.55), transparent 65%),
+                linear-gradient(180deg, #123024, #071410);
+        }
+        #oldmaid-overlay.show { display: flex; }
+        #om-table {
+            width: 100%; max-width: 980px;
+            display: flex; flex-direction: column;
+            padding: 16px 18px 22px; box-sizing: border-box;
+            position: relative;
+        }
+        #om-header {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px; flex-shrink: 0;
+        }
+        #om-bet-info { font-size: 0.8rem; color: #a9d8bd; letter-spacing: 0.05em; }
+        #om-bet-info span { color: #ffe9a8; font-weight: bold; }
+        #om-turn-banner {
+            font-family: 'Shippori Mincho', serif; font-weight: bold;
+            font-size: 1rem; letter-spacing: 0.1em;
+            padding: 7px 18px; border-radius: 999px;
+            background: rgba(0,0,0,0.35); color: #e8f5ec;
+            border: 1px solid rgba(255,255,255,0.18);
+            transition: all 0.3s;
+        }
+        #om-turn-banner.my-turn {
+            background: linear-gradient(135deg, #f0dca0, #d9b872);
+            color: #16301f; border-color: #fff3d0;
+            box-shadow: 0 0 22px rgba(217,184,114,0.5);
+        }
+
+        #om-opponent-area, #om-my-area { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+        .om-player-label {
+            font-size: 0.78rem; color: #9fc9b0; letter-spacing: 0.1em;
+            text-align: center; margin-bottom: 8px;
+        }
+        #om-opponent-hand, #om-my-hand {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 5px; padding: 0 4px;
+        }
+
+        .om-card {
+            width: 50px; height: 72px; flex-shrink: 0;
+            border-radius: 6px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 1.15rem; font-weight: 900;
+            box-shadow: 0 3px 9px rgba(0,0,0,0.4);
+            transition: transform 0.18s, box-shadow 0.18s;
+            user-select: none;
+        }
+        .om-card.face-down {
+            background: repeating-linear-gradient(45deg, #7a2b22 0px, #7a2b22 5px, #98392e 5px, #98392e 10px);
+            border: 2px solid #d9b872; color: transparent;
+            cursor: default;
+        }
+        .om-card.face-down.selectable { cursor: pointer; }
+        .om-card.face-down.selectable:hover {
+            transform: translateY(-14px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 16px rgba(255,233,168,0.7);
+        }
+        .om-card.face-up {
+            background: #fffdf6; border: 2px solid #d8d0bc; color: #1a1a1a;
+        }
+        .om-card.face-up.red { color: #c0392b; }
+        .om-card.face-up.joker {
+            background: linear-gradient(145deg, #3a1a5c, #190a2e);
+            color: #ffd94a; border-color: #b388ff; font-size: 1.5rem;
+        }
+        .om-card.dealt-in { animation: omDealIn 0.34s ease-out; }
+        @keyframes omDealIn { from { opacity: 0; transform: translateY(-22px) scale(0.85); } to { opacity: 1; transform: none; } }
+
+        #om-center-msg {
+            text-align: center; min-height: 2.2em; padding: 6px 10px;
+            font-size: 0.88rem; color: #ffe9a8; font-weight: bold;
+            letter-spacing: 0.05em; flex-shrink: 0;
+        }
+
+        #om-result-panel {
+            display: none;
+            position: absolute; inset: 0; z-index: 5;
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 14px; text-align: center;
+            background: rgba(4, 14, 10, 0.93);
+        }
+        #om-result-panel.show { display: flex; }
+        #om-result-title { font-family: 'Shippori Mincho', serif; font-size: 2rem; font-weight: 900; }
+        #om-result-title.win { color: #ffe08a; text-shadow: 0 0 26px rgba(255,224,138,0.6); }
+        #om-result-title.lose { color: #ff8a7a; }
+        #om-result-payout { font-size: 0.95rem; color: #d8eade; }
+
+        @media (max-width: 900px) {
+            .om-card { width: 38px; height: 55px; font-size: 0.95rem; }
+            #om-turn-banner { font-size: 0.85rem; padding: 6px 14px; }
+            #om-result-title { font-size: 1.5rem; }
+        }
+        body.lite-mode .om-card.dealt-in { animation: none !important; }
+        body.lite-mode .om-card.face-down.selectable:hover { transform: translateY(-6px); }
+
         .gambling-online-note {
             text-align: center; padding: 28px 20px; color: #888; font-size: 0.9rem;
             background: rgba(0,0,0,0.03); border: 1px dashed #ccc; border-radius: 10px;
@@ -3847,10 +3951,19 @@ animation:facilitySweep 6s linear infinite;
                         <div class="gg-result" id="tap-match-message"></div>
                     </div>
 
-                    <div class="gambling-game-card" style="opacity:0.55;">
+                    <div class="gambling-game-card">
                         <div class="gg-title">🃏 ババ抜き</div>
-                        <div class="gg-desc">おなじみのババ抜きで一騎打ち。最後にジョーカーを持っていた方が負け。</div>
-                        <div style="font-size:0.78rem; color:#888; padding:14px 0;">準備中</div>
+                        <div class="gg-desc">おなじみのババ抜きで一騎打ち。相手の手札から1枚引き、同じ数字が揃えば捨てられる。先に手札を無くした方の勝ち。</div>
+                        <div id="om-match-idle">
+                            <div class="tap-table-label">卓を選んでください</div>
+                            <div class="tap-table-list" id="om-table-list"></div>
+                        </div>
+                        <div id="om-match-waiting" style="display:none;">
+                            <div class="tap-status-text">対戦相手を探しています<span class="tap-dots">…</span></div>
+                            <div class="tap-sub-text">賭け金：<span id="om-waiting-bet">0</span> 隻</div>
+                            <button class="gg-btn gg-btn-cashout" onclick="cancelOldMaid()">取り消す</button>
+                        </div>
+                        <div class="gg-result" id="om-match-message"></div>
                     </div>
 
                     <div class="gambling-game-card" style="opacity:0.55;">
@@ -3922,6 +4035,34 @@ animation:facilitySweep 6s linear infinite;
 </div>
 
 <!-- Classic 実行用オーバーレイ -->
+<!-- ババ抜き：全画面対戦画面 -->
+<div id="oldmaid-overlay">
+    <div id="om-table">
+        <div id="om-header">
+            <div id="om-bet-info">賭け金 <span id="om-bet-display">0</span> 隻</div>
+            <div id="om-turn-banner">対戦開始</div>
+        </div>
+
+        <div id="om-opponent-area">
+            <div class="om-player-label" id="om-opponent-label">相手</div>
+            <div id="om-opponent-hand"></div>
+        </div>
+
+        <div id="om-center-msg"></div>
+
+        <div id="om-my-area">
+            <div class="om-player-label">あなたの手札 <span id="om-my-count"></span></div>
+            <div id="om-my-hand"></div>
+        </div>
+
+        <div id="om-result-panel">
+            <div id="om-result-title"></div>
+            <div id="om-result-payout"></div>
+            <button class="gg-btn" onclick="exitOldMaid()">賭博室に戻る</button>
+        </div>
+    </div>
+</div>
+
 <div id="classic-play-overlay">
     <div id="classic-play-bar">
         <span id="classic-play-title">黒船クリッカー Classic</span>
@@ -4628,6 +4769,7 @@ animation:facilitySweep 6s linear infinite;
         const multEl = document.getElementById('highlow-mult');
         if (multEl) multEl.textContent = highLowMultiplier.toFixed(2);
         renderTapTables();
+        renderOmTables();
         // 各選択肢の現在の配当倍率をボタンに表示する
         const hiBtn = document.getElementById('highlow-btn-high');
         const loBtn = document.getElementById('highlow-btn-low');
@@ -5154,6 +5296,262 @@ animation:facilitySweep 6s linear infinite;
         setTapMessage('');
         renderTapTables();
         showTapPhase('idle');
+    }
+
+    // ==========================================
+    // オンライン対戦：ババ抜き
+    // ==========================================
+    let omMatchId = null;
+    let omMatchBet = 0;
+    let omPollTimer = null;
+    let omLastSeenDraw = null;
+    let omDealt = false;
+
+    function renderOmTables() {
+        const list = document.getElementById('om-table-list');
+        if (!list) return;
+        list.innerHTML = '';
+        MATCH_TABLES.forEach(t => {
+            const affordable = clickerScore >= t.bet;
+            const btn = document.createElement('button');
+            btn.className = 'tap-table-btn' + (affordable ? '' : ' disabled');
+            btn.disabled = !affordable;
+            btn.onclick = () => joinOldMaid(t.bet);
+            btn.innerHTML = `
+                <span class="ttb-icon">${t.icon}</span>
+                <span class="ttb-name">${t.name}</span>
+                <span class="ttb-bet">${formatNumber(t.bet)} 隻</span>
+            `;
+            list.appendChild(btn);
+        });
+    }
+
+    function showOmPhase(phase) {
+        ['idle', 'waiting'].forEach(p => {
+            const el = document.getElementById('om-match-' + p);
+            if (el) el.style.display = (p === phase) ? 'block' : 'none';
+        });
+    }
+
+    function setOmMessage(text, isError) {
+        const el = document.getElementById('om-match-message');
+        if (!el) return;
+        el.className = 'gg-result' + (isError ? ' lose' : '');
+        el.textContent = text || '';
+    }
+
+    function joinOldMaid(bet) {
+        bet = Math.floor(bet);
+        if (!bet || clickerScore < bet) { setOmMessage('この卓に着くには黒船が足りません。', true); return; }
+
+        clickerScore -= bet;
+        omMatchBet = bet;
+        omLastSeenDraw = null;
+        omDealt = false;
+        setOmMessage('');
+        const betEl = document.getElementById('om-waiting-bet');
+        if (betEl) betEl.textContent = formatNumber(bet);
+        showOmPhase('waiting');
+        finishGambling();
+
+        callMatchApi({ action: 'join', playerName, game: 'oldmaid', bet })
+            .then(data => {
+                if (data.error) {
+                    clickerScore += bet; finishGambling();
+                    showOmPhase('idle'); setOmMessage(data.error, true);
+                    return;
+                }
+                omMatchId = data.matchId;
+                if (data.status === 'matched') { enterOldMaidTable(data); }
+                else { startOmPolling(); }
+            })
+            .catch(() => {
+                clickerScore += bet; finishGambling();
+                showOmPhase('idle'); setOmMessage('接続に失敗しました。', true);
+            });
+    }
+
+    function startOmPolling() {
+        stopOmPolling();
+        omPollTimer = setInterval(() => {
+            if (!omMatchId) return;
+            callMatchApi({ action: 'status', matchId: omMatchId })
+                .then(data => {
+                    if (data.status === 'expired') {
+                        stopOmPolling();
+                        clickerScore += omMatchBet; finishGambling();
+                        showOmPhase('idle');
+                        setOmMessage('相手が見つかりませんでした。賭け金は返却されました。');
+                        omMatchId = null;
+                    } else if (data.status === 'playing' && data.opponentName) {
+                        stopOmPolling();
+                        enterOldMaidTable(data);
+                    }
+                })
+                .catch(() => {});
+        }, 2000);
+    }
+
+    function stopOmPolling() {
+        if (omPollTimer) { clearInterval(omPollTimer); omPollTimer = null; }
+    }
+
+    function cancelOldMaid() {
+        if (!omMatchId) { showOmPhase('idle'); return; }
+        stopOmPolling();
+        callMatchApi({ action: 'cancel', matchId: omMatchId })
+            .then(data => {
+                if (data.refunded) {
+                    clickerScore += omMatchBet; finishGambling();
+                    setOmMessage('待機を取り消しました。賭け金は返却されました。');
+                    showOmPhase('idle');
+                    omMatchId = null;
+                } else { enterOldMaidTable(data); }
+            })
+            .catch(() => setOmMessage('取り消しに失敗しました。', true));
+    }
+
+    // 全画面の対戦卓へ移動する
+    function enterOldMaidTable(data) {
+        const overlay = document.getElementById('oldmaid-overlay');
+        if (overlay) overlay.classList.add('show');
+        const panel = document.getElementById('om-result-panel');
+        if (panel) panel.classList.remove('show');
+        const betEl = document.getElementById('om-bet-display');
+        if (betEl) betEl.textContent = formatNumber(omMatchBet);
+        renderOldMaid(data);
+        startOmGamePolling();
+    }
+
+    function startOmGamePolling() {
+        stopOmPolling();
+        omPollTimer = setInterval(() => {
+            if (!omMatchId) return;
+            callMatchApi({ action: 'status', matchId: omMatchId })
+                .then(data => {
+                    if (data.status === 'expired') {
+                        stopOmPolling();
+                        clickerScore += omMatchBet; finishGambling();
+                        showOldMaidResult({ expired: true });
+                        return;
+                    }
+                    renderOldMaid(data);
+                })
+                .catch(() => {});
+        }, 1800);
+    }
+
+    function cardLabel(card) {
+        if (card.r === 0) return '🃏';
+        const names = { 1: 'A', 11: 'J', 12: 'Q', 13: 'K' };
+        const suits = { s: '♠', h: '♥', d: '♦', c: '♣' };
+        return (names[card.r] || card.r) + (suits[card.s] || '');
+    }
+
+    function renderOldMaid(data) {
+        if (!data) return;
+
+        // 手番の表示
+        const banner = document.getElementById('om-turn-banner');
+        if (banner) {
+            if (data.state === 'done') { banner.textContent = '勝負あり'; banner.classList.remove('my-turn'); }
+            else if (data.isMyTurn) { banner.textContent = '▶ あなたの番です'; banner.classList.add('my-turn'); }
+            else { banner.textContent = '相手が考えています…'; banner.classList.remove('my-turn'); }
+        }
+
+        const oppLabel = document.getElementById('om-opponent-label');
+        if (oppLabel) oppLabel.textContent = `${data.opponentName || '相手'}（残り ${data.opponentCount} 枚）`;
+
+        // 相手の手札（裏向き）。自分の番のときだけ引ける
+        const oppHand = document.getElementById('om-opponent-hand');
+        if (oppHand) {
+            oppHand.innerHTML = '';
+            for (let i = 0; i < data.opponentCount; i++) {
+                const c = document.createElement('div');
+                c.className = 'om-card face-down' + (data.isMyTurn && data.state === 'playing' ? ' selectable' : '');
+                if (!omDealt) c.classList.add('dealt-in');
+                if (data.isMyTurn && data.state === 'playing') c.onclick = () => drawOldMaidCard(i);
+                oppHand.appendChild(c);
+            }
+        }
+
+        // 自分の手札（表向き）
+        const myHand = document.getElementById('om-my-hand');
+        if (myHand) {
+            myHand.innerHTML = '';
+            (data.myHand || []).forEach(card => {
+                const c = document.createElement('div');
+                const isRed = (card.s === 'h' || card.s === 'd');
+                c.className = 'om-card face-up' + (card.r === 0 ? ' joker' : (isRed ? ' red' : ''));
+                if (!omDealt) c.classList.add('dealt-in');
+                c.textContent = cardLabel(card);
+                myHand.appendChild(c);
+            });
+        }
+        const myCount = document.getElementById('om-my-count');
+        if (myCount) myCount.textContent = `（${(data.myHand || []).length} 枚）`;
+        omDealt = true;
+
+        // 直前に誰が何を引いたかを知らせる
+        const msg = document.getElementById('om-center-msg');
+        if (msg && data.lastDraw && data.lastDraw.at !== omLastSeenDraw) {
+            omLastSeenDraw = data.lastDraw.at;
+            const who = data.lastDraw.by === playerId ? 'あなた' : (data.opponentName || '相手');
+            const what = data.lastDraw.by === playerId ? cardLabel(data.lastDraw.card) : '1枚';
+            msg.textContent = `${who}が ${what} を引きました${data.lastDraw.paired ? '／ペアが揃って捨てました！' : ''}`;
+        }
+
+        if (data.state === 'done') { showOldMaidResult(data); }
+    }
+
+    function drawOldMaidCard(index) {
+        if (!omMatchId) return;
+        const msg = document.getElementById('om-center-msg');
+        if (msg) msg.textContent = '引いています…';
+        callMatchApi({ action: 'draw', matchId: omMatchId, index })
+            .then(data => {
+                if (data.error && msg) { msg.textContent = data.error; return; }
+                renderOldMaid(data);
+            })
+            .catch(() => { if (msg) msg.textContent = '通信に失敗しました。'; });
+    }
+
+    function showOldMaidResult(data) {
+        stopOmPolling();
+        const panel = document.getElementById('om-result-panel');
+        const title = document.getElementById('om-result-title');
+        const payoutEl = document.getElementById('om-result-payout');
+        if (!panel) return;
+
+        if (data.expired) {
+            if (title) { title.className = ''; title.textContent = '対戦が終了しました'; }
+            if (payoutEl) payoutEl.textContent = `賭け金 ${formatNumber(omMatchBet)} 隻が返却されました。`;
+        } else if (data.payout > 0) {
+            clickerScore += data.payout;
+            if (title) { title.className = 'win'; title.textContent = '🎉 勝利！'; }
+            if (payoutEl) payoutEl.textContent = `+${formatNumber(data.payout)} 隻を獲得！`;
+            playSE('buy');
+            finishGambling();
+        } else {
+            if (title) { title.className = 'lose'; title.textContent = 'ババを掴んだ…'; }
+            if (payoutEl) payoutEl.textContent = `${formatNumber(omMatchBet)} 隻を失いました。`;
+        }
+        panel.classList.add('show');
+        omMatchId = null;
+    }
+
+    function exitOldMaid() {
+        stopOmPolling();
+        const overlay = document.getElementById('oldmaid-overlay');
+        if (overlay) overlay.classList.remove('show');
+        const panel = document.getElementById('om-result-panel');
+        if (panel) panel.classList.remove('show');
+        omMatchId = null;
+        omDealt = false;
+        setOmMessage('');
+        showOmPhase('idle');
+        renderOmTables();
+        finishGambling();
     }
 
     function openShipGachaScreen(navElement) {
