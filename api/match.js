@@ -440,7 +440,7 @@ module.exports = async (req, res) => {
       await saveMatch(match);
       await redis(['rpush', queueKey, matchId]);
       await redis(['expire', queueKey, WAIT_TTL]);
-      return res.status(200).json({ status: 'waiting', matchId });
+      return res.status(200).json({ status: 'waiting', matchId, joined: 1, need });
     }
 
     // ── 対戦の状態を確認する ────────────────────────
@@ -448,6 +448,16 @@ module.exports = async (req, res) => {
       const { matchId } = body;
       const match = await loadMatch(matchId);
       if (!match) return res.status(200).json({ status: 'expired' });
+
+      // まだ人数が揃っていないときは、何人集まったかを返す
+      if (match.state === 'waiting') {
+        return res.status(200).json({
+          status: 'waiting',
+          matchId,
+          joined: match.players.length,
+          need: requiredPlayers(match.game),
+        });
+      }
 
       // 相手がスコアを出さないまま時間切れになったら、提出済みの側の不戦勝にする
       if (match.state === 'playing' && match.players.length === 2) {
