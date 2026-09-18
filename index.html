@@ -5693,6 +5693,538 @@ animation:facilitySweep 6s linear infinite;
         el.textContent = text || '';
     }
 
+    // ==========================================
+    // オンライン対戦：黒船競い（5分RTA）
+    // ==========================================
+    const RTA_SECONDS = 300;
+    const RTA_SAKURADA_SEC = 45; // 桜田門外の変の効果時間
+
+    // 本番専用の施設。通常のゲームとは別に、この場だけの数値で動く。
+    const RTA_FACILITY_DEFS = [
+        { key: 'cannon', name: '圧迫大砲',     icon: '💣', base: 15,   kps: 0.1 },
+        { key: 'flag',   name: '合衆国旗',     icon: '🎌', base: 100,  kps: 1 },
+        { key: 'boat',   name: '浦賀の監視艇', icon: '🛶', base: 1200, kps: 8 },
+        { key: 'wship',  name: '新型蒸気白船', icon: '🛳️', base: 8000, kps: 45 },
+        { key: 'army',   name: '幕府の帰順軍', icon: '⚔️', base: 5000, kps: 12 },
+    ];
+
+    let rtaMatchId = null, rtaMatchBet = 0, rtaPollTimer = null;
+    let rtaLoopTimer = null, rtaEndAt = 0;
+    let rtaState = null;
+    let rtaPracticeMode = false;
+    // 買い物欄は最初に一度だけ組み立て、以降は中身だけ書き換える。
+    // 毎フレーム作り直すとボタンが消えてクリックが通らなくなるため。
+    let rtaShopBuilt = false;
+    let rtaCenterSignature = '';
+
+    function renderRtaTables() {
+        const list = document.getElementById('rta-table-list');
+        if (!list) return;
+        list.innerHTML = '';
+        MATCH_TABLES.forEach(t => {
+            const ok = clickerScore >= t.bet;
+            const btn = document.createElement('button');
+            btn.className = 'tap-table-btn' + (ok ? '' : ' disabled');
+            btn.disabled = !ok;
+            btn.onclick = () => joinRta(t.bet);
+            btn.innerHTML = `<span class="ttb-icon">${t.icon}</span><span class="ttb-name">${t.name}</span><span class="ttb-bet">${formatNumber(t.bet)} 隻</span>`;
+            list.appendChild(btn);
+        });
+    }
+
+    function showRtaPhase(phase) {
+        ['idle', 'waiting'].forEach(p => {
+            const el = document.getElementById('rta-match-' + p);
+            if (el) el.style.display = (p === phase) ? 'block' : 'none';
+        });
+    }
+
+    function setRtaMessage(text, isError) {
+        const el = document.getElementById('rta-match-message');
+        if (!el) return;
+        el.className = 'gg-result' + (isError ? ' lose' : '');
+        el.textContent = text || '';
+    }
+
+    function joinRta(bet) {
+        bet = Math.floor(bet);
+        if (!bet || clickerScore < bet) { setRtaMessage('この卓に着くには黒船が足りません。', true); return; }
+        rtaPracticeMode = false;
+        clickerScore -= bet;
+        rtaMatchBet = bet;
+        setRtaMessage('');
+        const betEl = document.getElementById('rta-waiting-bet');
+        if (betEl) betEl.textContent = formatNumber(bet);
+        showRtaPhase('waiting');
+        finishGambling();
+
+        callMatchApi({ action: 'join', playerName, game: 'rta', bet })
+            .then(data => {
+                if (data.error) {
+                    clickerScore += bet; finishGambling();
+                    showRtaPhase('idle'); setRtaMessage(data.error, true); return;
+                }
+                rtaMatchId = data.matchId;
+                if (data.status === 'matched') { enterRtaBriefing(data); }
+                else { startRtaPolling(); }
+            })
+            .catch(() => {
+                clickerScore += bet; finishGambling();
+                showRtaPhase('idle'); setRtaMessage('接続に失敗しました。', true);
+            });
+    }
+
+    function startRtaPolling() {
+        stopRtaPolling();
+        rtaPollTimer = setInterval(() => {
+            if (!rtaMatchId) return;
+            callMatchApi({ action: 'status', matchId: rtaMatchId })
+                .then(data => {
+                    if (data.status === 'expired') {
+                        stopRtaPolling();
+                        clickerScore += rtaMatchBet; finishGambling();
+                        showRtaPhase('idle');
+                        setRtaMessage('相手が見つかりませんでした。賭け金は返却されました。');
+                        rtaMatchId = null;
+                    } else if ((data.status === 'ready' || data.status === 'playing') && data.opponent) {
+                        stopRtaPolling();
+                        enterRtaBriefing(data);
+                    }
+                }).catch(() => {});
+        }, 2000);
+    }
+
+    function stopRtaPolling() { if (rtaPollTimer) { clearInterval(rtaPollTimer); rtaPollTimer = null; } }
+
+    function cancelRta() {
+        if (!rtaMatchId) { showRtaPhase('idle'); return; }
+        stopRtaPolling();
+        callMatchApi({ action: 'cancel', matchId: rtaMatchId })
+            .then(data => {
+                if (data.refunded) {
+                    clickerScore += rtaMatchBet; finishGambling();
+                    setRtaMessage('待機を取り消しました。賭け金は返却されました。');
+                    showRtaPhase('idle'); rtaMatchId = null;
+                } else { enterRtaBriefing(data); }
+            }).catch(() => setRtaMessage('取り消しに失敗しました。', true));
+    }
+
+    // 説明書き＋準備完了の待ち合わせ
+    function enterRtaBriefing(data) {
+        const overlay = document.getElementById('rta-overlay');
+        if (!overlay) return;
+        overlay.classList.add('show');
+        overlay.className = 'show phase-brief';
+        const btn = document.getElementById('rta-ready-btn');
+        if (btn) { btn.disabled = false; btn.textContent = '準備完了'; btn.onclick = sendRtaReady; }
+        updateRtaReadyView(data);
+
+        stopRtaPolling();
+        rtaPollTimer = setInterval(() => {
+            if (!rtaMatchId) return;
+            callMatchApi({ action: 'status', matchId: rtaMatchId })
+                .then(d => {
+                    if (d.status === 'playing') { stopRtaPolling(); startRtaGame(); }
+                    else if (d.status === 'expired') {
+                        stopRtaPolling();
+                        clickerScore += rtaMatchBet; finishGambling();
+                        exitRta();
+                    } else { updateRtaReadyView(d); }
+                }).catch(() => {});
+        }, 1500);
+    }
+
+    function updateRtaReadyView(data) {
+        const oppEl = document.getElementById('rta-opp-ready');
+        if (oppEl && data.opponent) {
+            oppEl.textContent = data.opponent.ready ? '✓ 準備完了' : '準備中…';
+            oppEl.style.color = data.opponent.ready ? '#7ed99a' : '#b8a890';
+        }
+        const timerEl = document.getElementById('rta-ready-timer');
+        if (timerEl && data.readyDeadline) {
+            const left = Math.max(0, Math.ceil((data.readyDeadline - Date.now()) / 1000));
+            timerEl.textContent = `${left}秒後に自動で開始します`;
+        }
+    }
+
+    function sendRtaReady() {
+        const btn = document.getElementById('rta-ready-btn');
+        if (btn) { btn.disabled = true; btn.textContent = '相手を待っています…'; }
+        callMatchApi({ action: 'ready', matchId: rtaMatchId })
+            .then(data => { if (data.status === 'playing') { stopRtaPolling(); startRtaGame(); } })
+            .catch(() => { if (btn) { btn.disabled = false; btn.textContent = '準備完了'; } });
+    }
+
+    // ひとり練習モード（賭けなし・対戦相手なし）
+    function startRtaPractice() {
+        rtaPracticeMode = true;
+        rtaMatchId = null;
+        rtaMatchBet = 0;
+        const overlay = document.getElementById('rta-overlay');
+        if (overlay) { overlay.classList.add('show'); overlay.className = 'show phase-brief'; }
+        const btn = document.getElementById('rta-ready-btn');
+        if (btn) { btn.disabled = false; btn.textContent = '開始する'; btn.onclick = () => startRtaGame(); }
+        const oppEl = document.getElementById('rta-opp-ready');
+        if (oppEl) { oppEl.textContent = '（練習モード）'; oppEl.style.color = '#b8a890'; }
+        const timerEl = document.getElementById('rta-ready-timer');
+        if (timerEl) timerEl.textContent = '好きなタイミングで開始できます';
+    }
+
+    // ---------- 本番 ----------
+    function startRtaGame() {
+        rtaState = {
+            score: 0,
+            clickPower: 1,
+            dockLevel: 1, dockCost: 15,
+            facilities: {},
+            wrenchLevel: 0, wrenchCost: 200,
+            conscriptionLevel: 0, conscriptionCost: 600,
+            combatBought: false,
+            haihanBought: false,
+            sakuradaUsed: false,
+            sakuradaUntil: 0,
+        };
+        RTA_FACILITY_DEFS.forEach(f => { rtaState.facilities[f.key] = { count: 0, cost: f.base }; });
+
+        const overlay = document.getElementById('rta-overlay');
+        if (overlay) overlay.className = 'show phase-play';
+        rtaEndAt = Date.now() + RTA_SECONDS * 1000;
+
+        rtaShopBuilt = false;
+        rtaCenterSignature = '';
+        buildRtaShop();
+        updateRtaHud();
+        updateRtaShop();
+
+        if (rtaLoopTimer) clearInterval(rtaLoopTimer);
+        rtaLoopTimer = setInterval(rtaTick, 100);
+        window.addEventListener('keydown', rtaSpaceHandler);
+    }
+
+    function rtaSpaceHandler(e) {
+        if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); rtaClick(); }
+    }
+
+    function getRtaKps() {
+        if (!rtaState) return 0;
+        let sum = 0;
+        RTA_FACILITY_DEFS.forEach(f => {
+            let k = rtaState.facilities[f.key].count * f.kps;
+            // 徴兵は帰順軍だけを強化する
+            if (f.key === 'army' && rtaState.conscriptionLevel > 0) {
+                k *= (1 + 0.2 * rtaState.conscriptionLevel);
+            }
+            sum += k;
+        });
+        sum *= (1 + rtaState.wrenchLevel * 0.01);
+        if (rtaState.haihanBought) sum *= 2;
+        if (Date.now() < rtaState.sakuradaUntil) sum *= 2;
+        return sum;
+    }
+
+    function rtaClick(e) {
+        if (!rtaState || Date.now() > rtaEndAt) return;
+        const power = rtaState.clickPower * (rtaState.combatBought ? 2 : 1);
+        rtaState.score += power;
+        updateRtaHud();
+        updateRtaShop();
+    }
+
+    function rtaTick() {
+        if (!rtaState) return;
+        const remain = rtaEndAt - Date.now();
+        if (remain <= 0) { finishRtaGame(); return; }
+        rtaState.score += getRtaKps() / 10;
+        updateRtaHud();
+        updateRtaShop();
+    }
+
+    function updateRtaHud() {
+        if (!rtaState) return;
+        const remain = Math.max(0, rtaEndAt - Date.now());
+        const timerEl = document.getElementById('rta-timer');
+        if (timerEl) {
+            const s = Math.ceil(remain / 1000);
+            timerEl.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+            timerEl.classList.toggle('urgent', s <= 15);
+        }
+        const scoreEl = document.getElementById('rta-score');
+        if (scoreEl) { scoreEl.textContent = `${formatNumber(Math.floor(rtaState.score))} 隻`; fitScoreText(scoreEl); }
+        const kpsEl = document.getElementById('rta-kps');
+        if (kpsEl) kpsEl.textContent = `毎秒増加量(KpS): ${formatNumber(getRtaKps())} 隻`;
+        const left = rtaState.sakuradaUntil - Date.now();
+        const buffEl = document.getElementById('rta-buff');
+        if (buffEl) buffEl.textContent = left > 0 ? `⚔️ 桜田門外の変 残り${Math.ceil(left / 1000)}秒` : '';
+        const buffStatus = document.getElementById('rta-buff-status');
+        if (buffStatus) buffStatus.textContent = left > 0 ? `✨ 特別効果発動中！ 残り ${Math.ceil(left / 1000)}秒 ✨` : '';
+    }
+
+    function buildRtaShop() {
+        const facEl = document.getElementById('rta-facilities');
+        const upEl = document.getElementById('rta-upgrades');
+        if (!facEl || !upEl) return;
+        facEl.innerHTML = '';
+        upEl.innerHTML = '';
+
+        upEl.appendChild(mkRtaCard('up-dock', '🛠️', '近代ドック拡張', '1クリックの基本生産を +1', buyRtaDock));
+        upEl.appendChild(mkRtaCard('up-wrench', '🔧', 'レンチ', '全体の生産効率を +1% する', buyRtaWrench, 'special-card'));
+        upEl.appendChild(mkRtaCard('up-combat', '⚔️', '戦闘用技術', 'クリック力が 2倍 になる(1回限り)', buyRtaCombat, 'special-card'));
+        upEl.appendChild(mkRtaCard('up-conscription', '🎌', '徴兵', '「幕府の帰順軍」のKpSが +20%', buyRtaConscription, 'special-card'));
+        upEl.appendChild(mkRtaCard('up-haihan', '🏯', '廃藩置県', '全体のKpSが 2倍 になる(1回限り)', buyRtaHaihan, 'special-card'));
+        upEl.appendChild(mkRtaCard('up-sakurada', '🗾', '桜田門外の変', '45秒間だけ全体のKpSが2倍', useRtaSakurada, 'special-card'));
+
+        RTA_FACILITY_DEFS.forEach(f => {
+            facEl.appendChild(mkRtaCard('inst-' + f.key, f.icon, f.name, '自動生産', () => buyRtaFacility(f.key)));
+        });
+        rtaShopBuilt = true;
+    }
+
+    function mkRtaCard(id, icon, name, desc, onClick, extraClass) {
+        const card = document.createElement('div');
+        card.className = 'shop-card' + (extraClass ? ' ' + extraClass : '');
+        card.id = 'rta-' + id;
+        card.onclick = onClick;
+        card.innerHTML = `
+            <div class="shop-info-left"><span class="shop-icon">${icon}</span><div class="shop-details"><h4>${name}</h4><p class="rta-desc">${desc}</p></div></div>
+            <div class="shop-info-right"><div class="shop-cost"></div><div class="shop-count"></div></div>
+        `;
+        return card;
+    }
+
+    // 表示の更新だけを行う（要素の作り直しはしない）
+    function updateRtaShop() {
+        if (!rtaState) return;
+        if (!rtaShopBuilt) buildRtaShop();
+
+        const setCard = (id, cost, count, affordable, visible, desc) => {
+            const card = document.getElementById('rta-' + id);
+            if (!card) return;
+            card.style.display = (visible === false) ? 'none' : '';
+            const costEl = card.querySelector('.shop-cost');
+            const cntEl = card.querySelector('.shop-count');
+            if (costEl && costEl.textContent !== cost) costEl.textContent = cost;
+            if (cntEl && cntEl.textContent !== count) cntEl.textContent = count;
+            if (desc !== undefined) {
+                const d = card.querySelector('.rta-desc');
+                if (d && d.innerHTML !== desc) d.innerHTML = desc;
+            }
+            card.classList.toggle('disabled', !affordable);
+        };
+
+        setCard('up-dock', formatNumber(rtaState.dockCost) + ' 隻', 'Lv.' + rtaState.dockLevel, rtaState.score >= rtaState.dockCost);
+        setCard('up-wrench', formatNumber(rtaState.wrenchCost) + ' 隻', 'Lv.' + rtaState.wrenchLevel, rtaState.score >= rtaState.wrenchCost);
+        setCard('up-combat', '500 隻', '', rtaState.score >= 500, !rtaState.combatBought);
+        setCard('up-conscription', formatNumber(rtaState.conscriptionCost) + ' 隻', 'Lv.' + rtaState.conscriptionLevel, rtaState.score >= rtaState.conscriptionCost);
+        setCard('up-haihan', '800 隻', '', rtaState.score >= 800, !rtaState.haihanBought);
+        setCard('up-sakurada', '無料', '', true, !rtaState.sakuradaUsed);
+
+        RTA_FACILITY_DEFS.forEach(f => {
+            const st = rtaState.facilities[f.key];
+            let k = f.kps;
+            if (f.key === 'army' && rtaState.conscriptionLevel > 0) k = f.kps * (1 + 0.2 * rtaState.conscriptionLevel);
+            setCard('inst-' + f.key, formatNumber(st.cost) + ' 隻', st.count,
+                rtaState.score >= st.cost, true,
+                `自動生産（+${k.toFixed(1)} KpS）`);
+        });
+
+        updateRtaCenterView();
+    }
+
+    // 中央の生産ライン。本編の updateCenterView と同じ見た目にする。
+    function updateRtaCenterView() {
+        const centerArea = document.getElementById('rta-center-area');
+        if (!centerArea || !rtaState) return;
+
+        // 施設の個数が変わったときだけ組み直す（毎フレーム作り直すとチラつくため）
+        const sig = RTA_FACILITY_DEFS.map(f => rtaState.facilities[f.key].count).join(',');
+        if (sig === rtaCenterSignature) return;
+        rtaCenterSignature = sig;
+
+        centerArea.innerHTML = '';
+        RTA_FACILITY_DEFS.forEach(f => {
+            const st = rtaState.facilities[f.key];
+            if (st.count <= 0) return;
+
+            const tier = getFacilityTier(st.count);
+            const nextTarget = facilityUpgradeMilestones.find(m => m > st.count) || null;
+            const progress = nextTarget ? Math.min(100, (st.count / nextTarget) * 100) : 100;
+            const displayCount = Math.min(st.count, 100);
+
+            const row = document.createElement('div');
+            row.className = `facility-row scene-${f.key} tier-${tier} level-0`;
+            row.style.setProperty('--scene-opacity', `${0.24 + Math.min(0.7, st.count / 150)}`);
+
+            const title = document.createElement('div');
+            title.className = 'facility-row-title serif-font';
+            title.innerHTML = f.name;
+
+            const progressBar = document.createElement('div');
+            progressBar.className = 'facility-progress';
+            progressBar.innerHTML = `<span style="--progress:${progress}%"></span>`;
+
+            const titleAndProgress = document.createElement('div');
+            titleAndProgress.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;';
+            titleAndProgress.appendChild(title);
+            titleAndProgress.appendChild(progressBar);
+
+            const icons = document.createElement('div');
+            icons.className = `facility-row-icons facility-anim-${f.key}`;
+            let iconStr = '';
+            for (let i = 0; i < displayCount; i++) iconStr += `<span>${f.icon}</span>`;
+            if (st.count > 100) iconStr += ` <span style="font-size:0.8rem; color:#fff; align-self:center; margin-left:10px; text-shadow: 1px 1px 2px #000;">...他 ${st.count - 100}個</span>`;
+            icons.innerHTML = iconStr;
+
+            const sceneWrap = document.createElement('div');
+            sceneWrap.innerHTML = getFacilitySceneHTML(f.key, { count: st.count, icon: f.icon, name: f.name }, tier);
+            if (sceneWrap.firstElementChild) row.appendChild(sceneWrap.firstElementChild);
+            row.appendChild(titleAndProgress);
+            row.appendChild(icons);
+            centerArea.appendChild(row);
+        });
+    }
+
+    function buyRtaFacility(key) {
+        const def = RTA_FACILITY_DEFS.find(f => f.key === key);
+        const st = rtaState.facilities[key];
+        if (rtaState.score < st.cost) return;
+        rtaState.score -= st.cost;
+        st.count++;
+        st.cost = Math.floor(def.base * Math.pow(1.15, st.count));
+        updateRtaHud(); updateRtaShop();
+    }
+    function buyRtaDock() {
+        if (!rtaState || rtaState.score < rtaState.dockCost) return;
+        rtaState.score -= rtaState.dockCost;
+        rtaState.clickPower += 1;
+        rtaState.dockLevel++;
+        rtaState.dockCost = Math.floor(rtaState.dockCost * 1.8);
+        updateRtaHud(); updateRtaShop();
+    }
+    function buyRtaWrench() {
+        if (rtaState.score < rtaState.wrenchCost) return;
+        rtaState.score -= rtaState.wrenchCost;
+        rtaState.wrenchLevel++;
+        rtaState.wrenchCost = Math.floor(rtaState.wrenchCost * 1.6);
+        updateRtaHud(); updateRtaShop();
+    }
+    function buyRtaConscription() {
+        if (rtaState.score < rtaState.conscriptionCost) return;
+        rtaState.score -= rtaState.conscriptionCost;
+        rtaState.conscriptionLevel++;
+        rtaState.conscriptionCost = Math.floor(rtaState.conscriptionCost * 1.4);
+        updateRtaHud(); updateRtaShop();
+    }
+    function buyRtaCombat() {
+        if (rtaState.score < 500 || rtaState.combatBought) return;
+        rtaState.score -= 500; rtaState.combatBought = true;
+        updateRtaHud(); updateRtaShop();
+    }
+    function buyRtaHaihan() {
+        if (rtaState.score < 800 || rtaState.haihanBought) return;
+        rtaState.score -= 800; rtaState.haihanBought = true;
+        updateRtaHud(); updateRtaShop();
+    }
+    function useRtaSakurada() {
+        if (!rtaState || rtaState.sakuradaUsed) return;
+        rtaState.sakuradaUsed = true;
+        rtaState.sakuradaUntil = Date.now() + RTA_SAKURADA_SEC * 1000;
+        updateRtaHud(); updateRtaShop();
+    }
+
+    function finishRtaGame() {
+        if (rtaLoopTimer) { clearInterval(rtaLoopTimer); rtaLoopTimer = null; }
+        window.removeEventListener('keydown', rtaSpaceHandler);
+
+        const finalScore = Math.floor(rtaState.score);
+        const overlay = document.getElementById('rta-overlay');
+        if (overlay) overlay.className = 'show phase-result';
+        const titleEl = document.getElementById('rta-result-title');
+        if (titleEl) { titleEl.className = ''; titleEl.textContent = '相手の結果を待っています…'; }
+        const myEl = document.getElementById('rta-my-final');
+        if (myEl) myEl.textContent = formatNumber(finalScore);
+
+        if (rtaPracticeMode) {
+            if (titleEl) { titleEl.className = ''; titleEl.textContent = '練習終了'; }
+            const oppLabel = document.getElementById('rta-opp-label');
+            if (oppLabel) oppLabel.textContent = '―';
+            const oppEl = document.getElementById('rta-opp-final');
+            if (oppEl) oppEl.textContent = '―';
+            const payoutEl = document.getElementById('rta-result-payout');
+            if (payoutEl) { payoutEl.style.color = '#d8c4a8'; payoutEl.textContent = `最終スコア ${formatNumber(finalScore)} 隻`; }
+            return;
+        }
+
+        callMatchApi({ action: 'submit', matchId: rtaMatchId, score: finalScore })
+            .then(data => {
+                if (data.status === 'done') showRtaResult(data);
+                else waitForRtaOpponent();
+            })
+            .catch(() => waitForRtaOpponent());
+    }
+
+    function waitForRtaOpponent() {
+        stopRtaPolling();
+        rtaPollTimer = setInterval(() => {
+            callMatchApi({ action: 'status', matchId: rtaMatchId })
+                .then(data => {
+                    if (data.status === 'done') { stopRtaPolling(); showRtaResult(data); }
+                    else if (data.status === 'expired') {
+                        stopRtaPolling();
+                        clickerScore += rtaMatchBet; finishGambling();
+                        showRtaResult({ expired: true });
+                    }
+                }).catch(() => {});
+        }, 2000);
+    }
+
+    function showRtaResult(data) {
+        const titleEl = document.getElementById('rta-result-title');
+        const oppLabel = document.getElementById('rta-opp-label');
+        const oppEl = document.getElementById('rta-opp-final');
+        const payoutEl = document.getElementById('rta-result-payout');
+
+        if (data.opponent) {
+            if (oppLabel) oppLabel.textContent = data.opponent.name;
+            if (oppEl) oppEl.textContent = formatNumber(data.opponent.score || 0);
+        }
+
+        const r = data.result || {};
+        if (data.expired) {
+            if (titleEl) { titleEl.className = ''; titleEl.textContent = '対戦が終了しました'; }
+            if (payoutEl) payoutEl.textContent = `賭け金 ${formatNumber(rtaMatchBet)} 隻が返却されました。`;
+        } else if (r.draw) {
+            clickerScore += rtaMatchBet;
+            if (titleEl) { titleEl.className = ''; titleEl.textContent = '引き分け！'; }
+            if (payoutEl) payoutEl.textContent = `賭け金 ${formatNumber(rtaMatchBet)} 隻が返却されました。`;
+            finishGambling();
+        } else if (data.payout > 0) {
+            clickerScore += data.payout;
+            if (titleEl) { titleEl.className = 'win'; titleEl.textContent = '🎉 勝利！'; }
+            if (payoutEl) { payoutEl.style.color = '#7ed99a'; payoutEl.textContent = `+${formatNumber(data.payout)} 隻を獲得！`; }
+            playSE('buy');
+            finishGambling();
+        } else {
+            if (titleEl) { titleEl.className = 'lose'; titleEl.textContent = '敗北…'; }
+            if (payoutEl) { payoutEl.style.color = '#ff8a7a'; payoutEl.textContent = `${formatNumber(rtaMatchBet)} 隻を失いました。`; }
+        }
+        rtaMatchId = null;
+    }
+
+    function exitRta() {
+        stopRtaPolling();
+        if (rtaLoopTimer) { clearInterval(rtaLoopTimer); rtaLoopTimer = null; }
+        window.removeEventListener('keydown', rtaSpaceHandler);
+        const overlay = document.getElementById('rta-overlay');
+        if (overlay) { overlay.classList.remove('show'); overlay.className = ''; }
+        rtaMatchId = null; rtaState = null; rtaPracticeMode = false;
+        const rb = document.getElementById('rta-ready-btn');
+        if (rb) { rb.onclick = sendRtaReady; rb.textContent = '準備完了'; rb.disabled = false; }
+        setRtaMessage('');
+        showRtaPhase('idle');
+        renderRtaTables();
+        finishGambling();
+    }
+
     let omGame = 'oldmaid';
     let omSpectating = false;
     let omPrevCounts = {};
