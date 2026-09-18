@@ -3521,14 +3521,15 @@
         @media (max-width: 900px) {
             .album-art-wrap { width: 190px; height: 190px; }
         }
+        /* 曲数が増減しても崩れないよう、幅は固定値にせず1ページ＝ビューポート幅とする */
         .music-pages-strip {
-            display: flex; height: 100%; width: 300%;
+            display: flex; height: 100%; width: 100%;
             transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
         }
         .music-page {
-            width: 33.3333%; flex-shrink: 0;
+            width: 100%; flex: 0 0 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 10px; padding: 0 20px;
+            gap: 10px; padding: 0 20px; box-sizing: border-box;
         }
         .music-nav-arrow {
             position: absolute; top: 50%; transform: translateY(-50%);
@@ -4806,6 +4807,16 @@ animation:facilitySweep 6s linear infinite;
         if(screenId === 'screen-game') { initGameCanvas(); document.getElementById('game-start-overlay').style.display = 'flex'; document.getElementById('game-over-overlay').style.display = 'none'; document.getElementById('game-clear-overlay').style.display = 'none'; updateBuffStatusUI(); } else { stopGame(); }
         if(screenId === 'screen-clicker') { initClickerLoop(); } else { stopClickerLoop(); }
         if(screenId === 'screen-study') { document.getElementById('screen-study').scrollTop = 0; checkScroll(); }
+        // 音楽室を開いたとき、現在の曲の位置にスライドを合わせ直す
+        if(screenId === 'screen-music') {
+            const strip = document.getElementById('music-pages-strip');
+            if (strip) {
+                const prev = strip.style.transition;
+                strip.style.transition = 'none';
+                strip.style.transform = `translateX(-${currentTrackIndex * 100}%)`;
+                requestAnimationFrame(() => { strip.style.transition = prev || ''; });
+            }
+        }
         if(screenId === 'screen-ascension') { requestAnimationFrame(() => requestAnimationFrame(() => { updateAscensionUI(); initCanvasPan('ascension-circle-wrap', 'ascension-lines-svg', ASCENSION_TREE_EDGES, (id) => !!skills[id]); })); }
         if(screenId === 'screen-super-ascension') { requestAnimationFrame(() => requestAnimationFrame(() => { updateSuperAscensionUI(); initCanvasPan('super-ascension-circle-wrap', 'super-ascension-lines-svg', SUPER_ASCENSION_TREE_EDGES, (id) => !!superSkills[id]); })); }
     }
@@ -8797,7 +8808,7 @@ animation:facilitySweep 6s linear infinite;
 
         // 画面全体（レコード+曲情報）をスライドさせる
         const strip = document.getElementById('music-pages-strip');
-        if (strip) strip.style.transform = `translateX(-${newIndex * (100 / musicTracks.length)}%)`;
+        if (strip) strip.style.transform = `translateX(-${newIndex * 100}%)`;
 
         // ドット更新
         document.querySelectorAll('.music-dot').forEach((d, i) => d.classList.toggle('active', i === newIndex));
