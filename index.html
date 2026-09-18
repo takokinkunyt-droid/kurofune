@@ -1368,17 +1368,17 @@
            ============================================ */
         #oldmaid-overlay {
             position: fixed; inset: 0; z-index: 99992;
-            display: none; align-items: stretch; justify-content: center;
+            display: none;
             background:
                 radial-gradient(circle at 50% 30%, rgba(40,90,60,0.55), transparent 65%),
                 linear-gradient(180deg, #123024, #071410);
         }
         #oldmaid-overlay.show { display: flex; }
         #om-table {
-            width: 100%; max-width: 980px;
+            flex: 1; min-width: 0;
             display: flex; flex-direction: column;
-            padding: 16px 18px 22px; box-sizing: border-box;
-            position: relative;
+            padding: 14px 18px 20px; box-sizing: border-box;
+            position: relative; overflow-y: auto;
         }
         #om-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -1398,74 +1398,299 @@
             background: linear-gradient(135deg, #f0dca0, #d9b872);
             color: #16301f; border-color: #fff3d0;
             box-shadow: 0 0 22px rgba(217,184,114,0.5);
+            animation: omTurnGlow 1.6s ease-in-out infinite;
         }
+        @keyframes omTurnGlow {
+            0%,100% { box-shadow: 0 0 18px rgba(217,184,114,0.45); }
+            50% { box-shadow: 0 0 34px rgba(255,233,168,0.85); }
+        }
+        #om-chat-toggle {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.25); background: rgba(0,0,0,0.35);
+            color: #d8eade; font-size: 1.05rem; cursor: pointer;
+        }
+        #om-chat-toggle:hover { background: rgba(255,255,255,0.15); }
 
-        #om-opponent-area, #om-my-area { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+        #om-opponents { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 10px; min-height: 0; }
+        .om-opponent-block {
+            padding: 8px; border-radius: 10px;
+            border: 1px solid transparent; transition: all 0.3s;
+        }
+        .om-opponent-block.is-turn { border-color: rgba(255,233,168,0.55); background: rgba(255,233,168,0.07); }
+        .om-opponent-block.is-target { border-color: #ffe9a8; background: rgba(255,233,168,0.13); }
+        .om-opponent-block.is-finished { opacity: 0.5; }
         .om-player-label {
-            font-size: 0.78rem; color: #9fc9b0; letter-spacing: 0.1em;
-            text-align: center; margin-bottom: 8px;
+            font-size: 0.78rem; color: #9fc9b0; letter-spacing: 0.08em;
+            text-align: center; margin-bottom: 6px;
         }
-        #om-opponent-hand, #om-my-hand {
-            display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 5px; padding: 0 4px;
-        }
+        .om-player-label .om-rank { color: #ffe08a; font-weight: bold; }
+        #om-my-area { flex-shrink: 0; }
+        .om-hand-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+        #om-my-hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; overflow-y: auto; max-height: 30vh; }
 
         .om-card {
-            width: 50px; height: 72px; flex-shrink: 0;
+            width: 46px; height: 66px; flex-shrink: 0;
             border-radius: 6px; display: flex;
             align-items: center; justify-content: center;
-            font-size: 1.15rem; font-weight: 900;
+            font-size: 1.05rem; font-weight: 900;
             box-shadow: 0 3px 9px rgba(0,0,0,0.4);
             transition: transform 0.18s, box-shadow 0.18s;
-            user-select: none;
+            user-select: none; position: relative;
         }
         .om-card.face-down {
             background: repeating-linear-gradient(45deg, #7a2b22 0px, #7a2b22 5px, #98392e 5px, #98392e 10px);
-            border: 2px solid #d9b872; color: transparent;
-            cursor: default;
+            border: 2px solid #d9b872; color: transparent; cursor: default;
         }
         .om-card.face-down.selectable { cursor: pointer; }
         .om-card.face-down.selectable:hover {
             transform: translateY(-14px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 16px rgba(255,233,168,0.7);
         }
-        .om-card.face-up {
-            background: #fffdf6; border: 2px solid #d8d0bc; color: #1a1a1a;
-        }
+        .om-card.face-up { background: #fffdf6; border: 2px solid #d8d0bc; color: #1a1a1a; }
         .om-card.face-up.red { color: #c0392b; }
         .om-card.face-up.joker {
             background: linear-gradient(145deg, #3a1a5c, #190a2e);
-            color: #ffd94a; border-color: #b388ff; font-size: 1.5rem;
+            color: #ffd94a; border-color: #b388ff; font-size: 1.4rem;
         }
         .om-card.dealt-in { animation: omDealIn 0.34s ease-out; }
         @keyframes omDealIn { from { opacity: 0; transform: translateY(-22px) scale(0.85); } to { opacity: 1; transform: none; } }
 
-        #om-center-msg {
-            text-align: center; min-height: 2.2em; padding: 6px 10px;
-            font-size: 0.88rem; color: #ffe9a8; font-weight: bold;
-            letter-spacing: 0.05em; flex-shrink: 0;
+        /* 引いたカードが飛んでくる演出 */
+        #om-fly-card {
+            position: fixed; z-index: 100005; pointer-events: none;
+            width: 46px; height: 66px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; font-weight: 900;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            transition: left 0.55s cubic-bezier(0.4,0,0.2,1), top 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s ease, opacity 0.2s;
+        }
+        /* ペアが揃って消えるときの演出 */
+        .om-card.pair-off { animation: omPairOff 0.55s ease-out forwards; }
+        @keyframes omPairOff {
+            0% { transform: translateY(0) scale(1); box-shadow: 0 0 0 rgba(255,233,168,0); }
+            35% { transform: translateY(-16px) scale(1.12); box-shadow: 0 0 26px rgba(255,233,168,0.95); }
+            100% { transform: translateY(-36px) scale(0.5); opacity: 0; }
+        }
+        /* ジョーカーを掴んだときのフラッシュ（自分の画面にだけ出る） */
+        #om-joker-flash {
+            position: fixed; inset: 0; z-index: 100004; pointer-events: none;
+            background: radial-gradient(circle, rgba(192,57,43,0.55), transparent 70%);
+            opacity: 0;
+        }
+        #om-joker-flash.flash { animation: omJokerFlash 0.7s ease-out; }
+        @keyframes omJokerFlash { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+        /* 上がった瞬間 */
+        .om-opponent-block.just-finished, #om-my-area.just-finished { animation: omWinGlow 1.1s ease-out; }
+        @keyframes omWinGlow {
+            0% { box-shadow: 0 0 0 rgba(255,224,138,0); }
+            40% { box-shadow: 0 0 40px rgba(255,224,138,0.9); }
+            100% { box-shadow: 0 0 0 rgba(255,224,138,0); }
         }
 
-        #om-result-panel {
-            display: none;
-            position: absolute; inset: 0; z-index: 5;
+        #om-center-msg {
+            text-align: center; min-height: 2.2em; padding: 6px 10px;
+            font-size: 0.86rem; color: #ffe9a8; font-weight: bold;
+            letter-spacing: 0.04em; flex-shrink: 0;
+        }
+
+        /* 上がったときの選択パネル */
+        #om-finish-panel {
+            display: none; position: absolute; inset: 0; z-index: 6;
             flex-direction: column; align-items: center; justify-content: center;
-            gap: 14px; text-align: center;
-            background: rgba(4, 14, 10, 0.93);
+            gap: 16px; text-align: center; background: rgba(4,14,10,0.9);
+        }
+        #om-finish-panel.show { display: flex; }
+        #om-finish-text { font-family: 'Shippori Mincho', serif; font-size: 1.6rem; font-weight: 900; color: #ffe08a; }
+        .om-finish-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+        #om-result-panel {
+            display: none; position: absolute; inset: 0; z-index: 7;
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 14px; text-align: center; background: rgba(4,14,10,0.94);
         }
         #om-result-panel.show { display: flex; }
         #om-result-title { font-family: 'Shippori Mincho', serif; font-size: 2rem; font-weight: 900; }
         #om-result-title.win { color: #ffe08a; text-shadow: 0 0 26px rgba(255,224,138,0.6); }
         #om-result-title.lose { color: #ff8a7a; }
+        #om-result-ranking { font-size: 0.85rem; color: #d8eade; line-height: 2; }
+        #om-result-ranking .rk { color: #ffe08a; font-weight: bold; }
         #om-result-payout { font-size: 0.95rem; color: #d8eade; }
 
-        @media (max-width: 900px) {
-            .om-card { width: 38px; height: 55px; font-size: 0.95rem; }
-            #om-turn-banner { font-size: 0.85rem; padding: 6px 14px; }
-            #om-result-title { font-size: 1.5rem; }
+        /* 右に貼り付くチャット */
+        #om-chat {
+            width: 280px; flex-shrink: 0;
+            display: none; flex-direction: column;
+            background: rgba(6, 22, 16, 0.72);
+            backdrop-filter: blur(6px);
+            border-left: 1px solid rgba(255,255,255,0.14);
         }
-        body.lite-mode .om-card.dealt-in { animation: none !important; }
+        #om-chat.show { display: flex; }
+        #om-chat-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; font-size: 0.8rem; color: #d8eade;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+        #om-chat-head button { background: none; border: none; color: #9fc9b0; cursor: pointer; font-size: 0.9rem; }
+        #om-chat-log { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .om-chat-msg { display: flex; gap: 8px; align-items: flex-start; }
+        .om-chat-avatar {
+            width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; font-weight: 900; color: #0d1f16;
+        }
+        .om-chat-body { min-width: 0; }
+        .om-chat-name { font-size: 0.64rem; color: #8fb8a0; }
+        .om-chat-text { font-size: 0.78rem; color: #eaf5ee; word-break: break-word; line-height: 1.5; }
+        #om-chat-presets { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 10px 0; }
+        .om-preset-btn {
+            padding: 4px 9px; font-size: 0.7rem; border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.07);
+            color: #d8eade; cursor: pointer;
+        }
+        .om-preset-btn:hover { background: rgba(255,255,255,0.18); }
+        #om-chat-input-row { display: flex; gap: 6px; padding: 8px 10px; }
+        #om-chat-input {
+            flex: 1; min-width: 0; padding: 7px 10px; border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3);
+            color: #eaf5ee; font-family: inherit; font-size: 0.78rem; outline: none;
+        }
+        #om-chat-input:disabled { opacity: 0.45; }
+        #om-chat-input-row button {
+            padding: 7px 12px; border-radius: 6px; border: none; cursor: pointer;
+            background: #3f6b52; color: #fff; font-size: 0.75rem; font-weight: bold;
+        }
+        #om-chat-note { font-size: 0.66rem; color: #8fb8a0; padding: 0 10px 10px; text-align: center; }
+
+        @media (max-width: 900px) {
+            .om-card { width: 34px; height: 50px; font-size: 0.85rem; }
+            #om-turn-banner { font-size: 0.82rem; padding: 6px 12px; }
+            #om-result-title { font-size: 1.5rem; }
+            #om-chat { position: absolute; right: 0; top: 0; bottom: 0; width: 84%; max-width: 300px; z-index: 20; }
+        }
+        body.lite-mode .om-card.dealt-in,
+        body.lite-mode .om-card.pair-off,
+        body.lite-mode #om-turn-banner.my-turn { animation: none !important; }
         body.lite-mode .om-card.face-down.selectable:hover { transform: translateY(-6px); }
+        body.lite-mode #om-chat { backdrop-filter: none; background: rgba(6,22,16,0.92); }
+
+        /* ============================================
+           黒船競い（全画面RTA）
+           ============================================ */
+        #rta-overlay {
+            position: fixed; inset: 0; z-index: 99993;
+            display: none; flex-direction: column;
+            background: linear-gradient(180deg, #2a1508, #120a04);
+            color: #fff3e0;
+        }
+        #rta-overlay.show { display: flex; }
+        #rta-briefing, #rta-play, #rta-result { display: none; flex: 1; min-height: 0; }
+        #rta-overlay.phase-brief  #rta-briefing { display: flex; }
+        #rta-overlay.phase-play   #rta-play { display: flex; flex-direction: column; }
+        #rta-overlay.phase-result #rta-result { display: flex; }
+
+        #rta-briefing { align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        #rta-briefing-box {
+            max-width: 620px; width: 100%;
+            background: rgba(0,0,0,0.42); border: 1px solid var(--gold-color);
+            border-radius: 14px; padding: 28px 26px; text-align: center;
+        }
+        #rta-briefing-box h2 { color: var(--gold-color); font-size: 1.5rem; margin-bottom: 10px; }
+        .rta-lead { font-size: 0.86rem; color: #d8c4a8; line-height: 1.8; margin-bottom: 16px; }
+        #rta-rules { text-align: left; font-size: 0.8rem; line-height: 1.9; color: #e8dcc8; margin: 0 0 18px; padding-left: 20px; }
+        #rta-rules b { color: var(--gold-color); }
+        #rta-ready-status { font-size: 0.8rem; color: #b8a890; margin-bottom: 4px; }
+        #rta-ready-timer { font-size: 0.75rem; color: #9a8a74; margin-bottom: 14px; }
+        #rta-ready-btn:disabled { opacity: 0.5; cursor: default; }
+
+        #rta-topbar {
+            flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 8px 18px; border-bottom: 1px solid rgba(255,224,170,0.25);
+            background: rgba(0,0,0,0.3);
+        }
+        #rta-timer { font-family: 'Courier New', monospace; font-size: 1.7rem; font-weight: 900; color: #ff8a6a; }
+        #rta-timer.urgent { color: #ff3d3d; animation: rtaPulse 0.5s ease-in-out infinite; }
+        @keyframes rtaPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+        #rta-buff { font-size: 0.82rem; font-weight: bold; color: #ffd94a; min-width: 120px; text-align: right; }
+
+        /* 本編と同じレイアウトをそのまま使うため、独自の装飾は持たせない */
+        #rta-main { flex: 1; min-height: 0; }
+        #rta-shop-area .shop-card.disabled,
+        #rta-facilities .shop-card.disabled { opacity: 0.42; filter: grayscale(0.5); cursor: not-allowed; }
+
+        /* スクロール設定は本編の #clicker-center-area / #shop-area と同じものを当てる */
+        #rta-center-area {
+            position: relative;
+            z-index: 2;
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 8px 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(123, 74, 25, 0.45) transparent;
+        }
+        #rta-shop-area {
+            overflow: hidden !important;
+            overflow-y: auto !important;
+            max-height: 100%;
+        }
+        #rta-base {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 224, 170, 0.45) transparent;
+        }
+        #rta-center-area::-webkit-scrollbar,
+        #rta-shop-area::-webkit-scrollbar,
+        #rta-base::-webkit-scrollbar { width: 8px; }
+        #rta-center-area::-webkit-scrollbar-thumb,
+        #rta-shop-area::-webkit-scrollbar-thumb,
+        #rta-base::-webkit-scrollbar-thumb { background: rgba(200,150,80,0.5); border-radius: 4px; }
+        #rta-center-area::-webkit-scrollbar-track,
+        #rta-shop-area::-webkit-scrollbar-track,
+        #rta-base::-webkit-scrollbar-track { background: rgba(0,0,0,0.15); }
+
+        /* 説明画面・結果画面も内容が多いときはスクロールできるようにする */
+        #rta-briefing { overflow-y: auto; }
+        #rta-result { overflow-y: auto; }
+
+        #rta-result { flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 20px; }
+        #rta-result-title { font-family: 'Shippori Mincho', serif; font-size: 2.1rem; font-weight: 900; }
+        #rta-result-title.win { color: #ffe08a; text-shadow: 0 0 26px rgba(255,224,138,0.55); }
+        #rta-result-title.lose { color: #ff8a7a; }
+        #rta-result-scores { display: flex; align-items: center; gap: 20px; }
+        .rta-rs-label { font-size: 0.72rem; color: #b8a890; }
+        .rta-rs-val { font-size: 1.5rem; font-weight: 900; color: #fff6e0; }
+        .rta-rs-vs { font-size: 0.8rem; color: #8a7a64; }
+        #rta-result-payout { font-size: 0.95rem; font-weight: bold; }
+
+        @media (max-width: 900px) {
+            /* モバイルでは3カラムを縦に積み、全体を1本のスクロールにする */
+            #rta-main {
+                display: flex !important;
+                flex-direction: column;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding: 10px;
+                gap: 10px;
+            }
+            #rta-main .clicker-col-left,
+            #rta-main .clicker-col-center,
+            #rta-main .clicker-col-right {
+                position: static !important;
+                display: flex !important;
+                width: 100%;
+                height: auto;
+                min-height: 280px;
+                inset: auto;
+            }
+            #rta-center-area, #rta-shop-area, #rta-base {
+                overflow: visible !important;
+                max-height: none !important;
+            }
+            #rta-ship { font-size: 5rem; }
+            #rta-timer { font-size: 1.4rem; }
+            #rta-briefing-box { padding: 20px 16px; }
+            #rta-rules { font-size: 0.74rem; }
+        }
+        body.lite-mode #rta-timer.urgent { animation: none !important; }
 
         .gambling-online-note {
             text-align: center; padding: 28px 20px; color: #888; font-size: 0.9rem;
@@ -3966,10 +4191,20 @@ animation:facilitySweep 6s linear infinite;
                         <div class="gg-result" id="om-match-message"></div>
                     </div>
 
-                    <div class="gambling-game-card" style="opacity:0.55;">
+                    <div class="gambling-game-card">
                         <div class="gg-title">🚢 黒船競い</div>
-                        <div class="gg-desc">3分間でどれだけ黒船を増やせるかを競うRTA勝負。全員が同じ条件から始める。</div>
-                        <div style="font-size:0.78rem; color:#888; padding:14px 0;">準備中</div>
+                        <div class="gg-desc">5分間でどれだけ黒船を増やせるかを競うRTA勝負。全員が同じ条件から始まり、腕前と戦略だけがものを言う。</div>
+                        <div id="rta-match-idle">
+                            <div class="tap-table-label">卓を選んでください</div>
+                            <div class="tap-table-list" id="rta-table-list"></div>
+                            <button class="gg-btn gg-btn-cashout" style="margin-top:8px;" onclick="startRtaPractice()">🎯 ひとりで試す（賭けなし）</button>
+                        </div>
+                        <div id="rta-match-waiting" style="display:none;">
+                            <div class="tap-status-text">対戦相手を探しています<span class="tap-dots">…</span></div>
+                            <div class="tap-sub-text">賭け金：<span id="rta-waiting-bet">0</span> 隻</div>
+                            <button class="gg-btn gg-btn-cashout" onclick="cancelRta()">取り消す</button>
+                        </div>
+                        <div class="gg-result" id="rta-match-message"></div>
                     </div>
                 </div>
 
@@ -4041,12 +4276,10 @@ animation:facilitySweep 6s linear infinite;
         <div id="om-header">
             <div id="om-bet-info">賭け金 <span id="om-bet-display">0</span> 隻</div>
             <div id="om-turn-banner">対戦開始</div>
+            <button id="om-chat-toggle" onclick="toggleOmChat()">💬</button>
         </div>
 
-        <div id="om-opponent-area">
-            <div class="om-player-label" id="om-opponent-label">相手</div>
-            <div id="om-opponent-hand"></div>
-        </div>
+        <div id="om-opponents"></div>
 
         <div id="om-center-msg"></div>
 
@@ -4055,11 +4288,119 @@ animation:facilitySweep 6s linear infinite;
             <div id="om-my-hand"></div>
         </div>
 
+        <div id="om-finish-panel">
+            <div id="om-finish-text"></div>
+            <div class="om-finish-btns">
+                <button class="gg-btn" onclick="spectateOldMaid()">👀 観戦する</button>
+                <button class="gg-btn gg-btn-cashout" onclick="exitOldMaid()">やめる</button>
+            </div>
+        </div>
+
         <div id="om-result-panel">
             <div id="om-result-title"></div>
+            <div id="om-result-ranking"></div>
             <div id="om-result-payout"></div>
             <button class="gg-btn" onclick="exitOldMaid()">賭博室に戻る</button>
         </div>
+    </div>
+
+    <!-- 対戦中チャット -->
+    <div id="om-chat">
+        <div id="om-chat-head">
+            <span>💬 チャット</span>
+            <button onclick="toggleOmChat()">✕</button>
+        </div>
+        <div id="om-chat-log"></div>
+        <div id="om-chat-presets"></div>
+        <div id="om-chat-input-row">
+            <input id="om-chat-input" type="text" maxlength="100" placeholder="メッセージ…" onkeydown="if(event.key==='Enter'){event.preventDefault();sendOmChat();}">
+            <button onclick="sendOmChat()">送信</button>
+        </div>
+        <div id="om-chat-note"></div>
+    </div>
+</div>
+
+<!-- 黒船競い：全画面対戦画面 -->
+<div id="rta-overlay">
+    <!-- 説明・準備完了フェーズ -->
+    <div id="rta-briefing">
+        <div id="rta-briefing-box">
+            <h2 class="serif-font">🚢 黒船競い</h2>
+            <p class="rta-lead">5分間で、どれだけ黒船を増やせるかを競います。<br>通常のゲームとは、以下の点が異なります。</p>
+            <ul id="rta-rules">
+                <li><b>全員が0隻・施設なしから</b>始まります。普段の進行度は持ち込めません。</li>
+                <li><b>幕府の帰順軍が安く</b>なっています（5,000隻）。ただし性能は控えめです。</li>
+                <li><b>徴兵</b>（600隻〜）を重ねると、帰順軍が化けます。並べてから重ねるのが鍵。</li>
+                <li><b>戦闘用技術</b>（500隻）でクリックが2倍になります。</li>
+                <li><b>廃藩置県</b>（800隻）で全体の生産が2倍に。1回限り。</li>
+                <li><b>桜田門外の変</b>は無料。ただし<b>押してから45秒だけ</b>生産が2倍になります。いつ切るかが勝負。</li>
+                <li><b>レンチ</b>（200隻〜）は買うほど全体が少しずつ伸びます。</li>
+            </ul>
+            <div id="rta-ready-status">相手：<span id="rta-opp-ready">準備中…</span></div>
+            <div id="rta-ready-timer"></div>
+            <button class="gg-btn" id="rta-ready-btn" onclick="sendRtaReady()">準備完了</button>
+        </div>
+    </div>
+
+    <!-- 本番フェーズ -->
+    <div id="rta-play">
+        <div id="rta-topbar">
+            <div id="rta-timer">5:00</div>
+            <div id="rta-buff"></div>
+        </div>
+
+        <div class="clicker-main-layout" id="rta-main">
+            <div class="clicker-col-left" id="rta-base">
+                <div class="clicker-title-ribbon">
+                    <span class="ribbon-kicker serif-font">Grand Black Ship</span>
+                    <span class="ribbon-title serif-font">黒船競い</span>
+                </div>
+                <div class="top-ui-wrapper">
+                    <div class="clicker-score-board">
+                        <p class="kurofune-count-title serif-font">現在の黒船保有量</p>
+                        <div class="kurofune-count-wrap"><div class="kurofune-count" id="rta-score">0 隻</div></div>
+                        <div class="kps-display" id="rta-kps">毎秒増加量(KpS): 0 隻</div>
+                    </div>
+                    <div id="rta-buff-status"></div>
+                </div>
+                <div class="ship-wrapper">
+                    <div id="rta-sunburst" class="sunburst-bg"></div>
+                    <div class="kurofune-click-target" id="rta-ship" onclick="rtaClick(event)">🚢</div>
+                    <p class="ship-hint">※クリック・Spaceキーで増殖</p>
+                </div>
+            </div>
+
+            <div class="clicker-col-center" id="rta-center-wrap">
+                <div class="clicker-column-header">
+                    <h3 class="serif-font">生産ライン</h3>
+                    <p>施設が増えるほど、黒船の物流と熱気が雪だるま式に増えていきます。</p>
+                </div>
+                <div id="rta-center-area"></div>
+            </div>
+
+            <div class="clicker-col-right" id="rta-shop-area">
+                <div class="clicker-shop-header">
+                    <h3 class="serif-font">商会の棚</h3>
+                    <p>アップグレードと施設購入を、豪奢なカタログから選んでください。</p>
+                </div>
+                <div class="shop-section-title serif-font">開国技術（アップグレード）</div>
+                <div id="rta-upgrades" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;"></div>
+                <div class="shop-section-title serif-font">植民補給拠点（施設購入）</div>
+                <div id="rta-facilities" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結果フェーズ -->
+    <div id="rta-result">
+        <div id="rta-result-title"></div>
+        <div id="rta-result-scores">
+            <div><div class="rta-rs-label">あなた</div><div class="rta-rs-val" id="rta-my-final">0</div></div>
+            <div class="rta-rs-vs">VS</div>
+            <div><div class="rta-rs-label" id="rta-opp-label">相手</div><div class="rta-rs-val" id="rta-opp-final">-</div></div>
+        </div>
+        <div id="rta-result-payout"></div>
+        <button class="gg-btn" onclick="exitRta()">賭博室に戻る</button>
     </div>
 </div>
 
@@ -4770,6 +5111,7 @@ animation:facilitySweep 6s linear infinite;
         if (multEl) multEl.textContent = highLowMultiplier.toFixed(2);
         renderTapTables();
         renderOmTables();
+        renderRtaTables();
         // 各選択肢の現在の配当倍率をボタンに表示する
         const hiBtn = document.getElementById('highlow-btn-high');
         const loBtn = document.getElementById('highlow-btn-low');
@@ -5311,6 +5653,14 @@ animation:facilitySweep 6s linear infinite;
         const list = document.getElementById('om-table-list');
         if (!list) return;
         list.innerHTML = '';
+
+        // 3人プレイのテスト用卓（賭け金なし）
+        const beta = document.createElement('button');
+        beta.className = 'tap-table-btn om-beta-btn';
+        beta.onclick = () => joinOldMaid(0, 'oldmaid3');
+        beta.innerHTML = `<span class="ttb-icon">🧪</span><span class="ttb-name">ベータの間<br><span style="font-size:0.66rem; color:#888; font-weight:normal;">三人プレイ</span></span><span class="ttb-bet">賭け金なし</span>`;
+        list.appendChild(beta);
+
         MATCH_TABLES.forEach(t => {
             const affordable = clickerScore >= t.bet;
             const btn = document.createElement('button');
@@ -5340,33 +5690,49 @@ animation:facilitySweep 6s linear infinite;
         el.textContent = text || '';
     }
 
-    function joinOldMaid(bet) {
-        bet = Math.floor(bet);
-        if (!bet || clickerScore < bet) { setOmMessage('この卓に着くには黒船が足りません。', true); return; }
+    let omGame = 'oldmaid';
+    let omSpectating = false;
+    let omPrevCounts = {};
+    let omFinishShown = false;
+    let omChatOpen = false;
+    let omLastChatAt = 0;
 
-        clickerScore -= bet;
+    const OM_CHAT_PRESETS = ['よろしく', 'ナイス', '惜しい', 'ありがとう', 'やられた', 'こっちかな'];
+
+    function joinOldMaid(bet, game) {
+        bet = Math.floor(bet || 0);
+        omGame = game || 'oldmaid';
+        if (bet > 0 && clickerScore < bet) { setOmMessage('この卓に着くには黒船が足りません。', true); return; }
+
+        if (bet > 0) clickerScore -= bet;
         omMatchBet = bet;
         omLastSeenDraw = null;
         omDealt = false;
+        omSpectating = false;
+        omPrevCounts = {};
+        omFinishShown = false;
         setOmMessage('');
         const betEl = document.getElementById('om-waiting-bet');
-        if (betEl) betEl.textContent = formatNumber(bet);
+        if (betEl) betEl.textContent = bet > 0 ? formatNumber(bet) : 'なし';
         showOmPhase('waiting');
         finishGambling();
 
-        callMatchApi({ action: 'join', playerName, game: 'oldmaid', bet })
+        callMatchApi({ action: 'join', playerName, game: omGame, bet })
             .then(data => {
                 if (data.error) {
-                    clickerScore += bet; finishGambling();
+                    if (bet > 0) { clickerScore += bet; finishGambling(); }
                     showOmPhase('idle'); setOmMessage(data.error, true);
                     return;
                 }
                 omMatchId = data.matchId;
                 if (data.status === 'matched') { enterOldMaidTable(data); }
-                else { startOmPolling(); }
+                else {
+                    if (data.need) setOmMessage(`${data.joined || 1} / ${data.need} 人`);
+                    startOmPolling();
+                }
             })
             .catch(() => {
-                clickerScore += bet; finishGambling();
+                if (bet > 0) { clickerScore += bet; finishGambling(); }
                 showOmPhase('idle'); setOmMessage('接続に失敗しました。', true);
             });
     }
@@ -5379,22 +5745,21 @@ animation:facilitySweep 6s linear infinite;
                 .then(data => {
                     if (data.status === 'expired') {
                         stopOmPolling();
-                        clickerScore += omMatchBet; finishGambling();
+                        if (omMatchBet > 0) { clickerScore += omMatchBet; finishGambling(); }
                         showOmPhase('idle');
-                        setOmMessage('相手が見つかりませんでした。賭け金は返却されました。');
+                        setOmMessage('相手が見つかりませんでした。' + (omMatchBet > 0 ? '賭け金は返却されました。' : ''));
                         omMatchId = null;
-                    } else if (data.status === 'playing' && data.opponentName) {
+                    } else if (data.status === 'playing') {
                         stopOmPolling();
                         enterOldMaidTable(data);
+                    } else if (data.joined) {
+                        setOmMessage(`${data.joined} / ${data.need} 人`);
                     }
-                })
-                .catch(() => {});
+                }).catch(() => {});
         }, 2000);
     }
 
-    function stopOmPolling() {
-        if (omPollTimer) { clearInterval(omPollTimer); omPollTimer = null; }
-    }
+    function stopOmPolling() { if (omPollTimer) { clearInterval(omPollTimer); omPollTimer = null; } }
 
     function cancelOldMaid() {
         if (!omMatchId) { showOmPhase('idle'); return; }
@@ -5402,23 +5767,22 @@ animation:facilitySweep 6s linear infinite;
         callMatchApi({ action: 'cancel', matchId: omMatchId })
             .then(data => {
                 if (data.refunded) {
-                    clickerScore += omMatchBet; finishGambling();
-                    setOmMessage('待機を取り消しました。賭け金は返却されました。');
-                    showOmPhase('idle');
-                    omMatchId = null;
+                    if (omMatchBet > 0) { clickerScore += omMatchBet; finishGambling(); }
+                    setOmMessage('待機を取り消しました。');
+                    showOmPhase('idle'); omMatchId = null;
                 } else { enterOldMaidTable(data); }
-            })
-            .catch(() => setOmMessage('取り消しに失敗しました。', true));
+            }).catch(() => setOmMessage('取り消しに失敗しました。', true));
     }
 
-    // 全画面の対戦卓へ移動する
     function enterOldMaidTable(data) {
         const overlay = document.getElementById('oldmaid-overlay');
         if (overlay) overlay.classList.add('show');
-        const panel = document.getElementById('om-result-panel');
-        if (panel) panel.classList.remove('show');
+        ['om-result-panel', 'om-finish-panel'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.classList.remove('show');
+        });
         const betEl = document.getElementById('om-bet-display');
-        if (betEl) betEl.textContent = formatNumber(omMatchBet);
+        if (betEl) betEl.textContent = omMatchBet > 0 ? formatNumber(omMatchBet) : 'なし（ベータの間）';
+        buildOmChatPresets();
         renderOldMaid(data);
         startOmGamePolling();
     }
@@ -5431,13 +5795,12 @@ animation:facilitySweep 6s linear infinite;
                 .then(data => {
                     if (data.status === 'expired') {
                         stopOmPolling();
-                        clickerScore += omMatchBet; finishGambling();
+                        if (omMatchBet > 0) { clickerScore += omMatchBet; finishGambling(); }
                         showOldMaidResult({ expired: true });
                         return;
                     }
                     renderOldMaid(data);
-                })
-                .catch(() => {});
+                }).catch(() => {});
         }, 1800);
     }
 
@@ -5448,67 +5811,137 @@ animation:facilitySweep 6s linear infinite;
         return (names[card.r] || card.r) + (suits[card.s] || '');
     }
 
+    function makeOmCard(card, faceUp, extraClass) {
+        const c = document.createElement('div');
+        if (faceUp) {
+            const isRed = (card.s === 'h' || card.s === 'd');
+            c.className = 'om-card face-up' + (card.r === 0 ? ' joker' : (isRed ? ' red' : ''));
+            c.textContent = cardLabel(card);
+        } else {
+            c.className = 'om-card face-down';
+        }
+        if (extraClass) c.className += ' ' + extraClass;
+        return c;
+    }
+
     function renderOldMaid(data) {
         if (!data) return;
 
-        // 手番の表示
         const banner = document.getElementById('om-turn-banner');
         if (banner) {
             if (data.state === 'done') { banner.textContent = '勝負あり'; banner.classList.remove('my-turn'); }
+            else if (data.isSpectator) { banner.textContent = `観戦中 — ${data.turnName || ''}の番`; banner.classList.remove('my-turn'); }
             else if (data.isMyTurn) { banner.textContent = '▶ あなたの番です'; banner.classList.add('my-turn'); }
-            else { banner.textContent = '相手が考えています…'; banner.classList.remove('my-turn'); }
+            else { banner.textContent = `${data.turnName || '相手'}が考えています…`; banner.classList.remove('my-turn'); }
         }
 
-        const oppLabel = document.getElementById('om-opponent-label');
-        if (oppLabel) oppLabel.textContent = `${data.opponentName || '相手'}（残り ${data.opponentCount} 枚）`;
+        // 相手（1人または2人）
+        const oppWrap = document.getElementById('om-opponents');
+        if (oppWrap) {
+            oppWrap.innerHTML = '';
+            (data.others || []).forEach(o => {
+                const block = document.createElement('div');
+                block.className = 'om-opponent-block'
+                    + (o.isTurn ? ' is-turn' : '')
+                    + (o.isDrawTarget ? ' is-target' : '')
+                    + (o.finished ? ' is-finished' : '');
+                block.id = 'om-opp-' + o.playerId;
 
-        // 相手の手札（裏向き）。自分の番のときだけ引ける
-        const oppHand = document.getElementById('om-opponent-hand');
-        if (oppHand) {
-            oppHand.innerHTML = '';
-            for (let i = 0; i < data.opponentCount; i++) {
-                const c = document.createElement('div');
-                c.className = 'om-card face-down' + (data.isMyTurn && data.state === 'playing' ? ' selectable' : '');
-                if (!omDealt) c.classList.add('dealt-in');
-                if (data.isMyTurn && data.state === 'playing') c.onclick = () => drawOldMaidCard(i);
-                oppHand.appendChild(c);
-            }
+                const label = document.createElement('div');
+                label.className = 'om-player-label';
+                let txt = `${o.name}（残り ${o.count} 枚）`;
+                if (o.finished) txt += ` <span class="om-rank">${o.rank}位で上がり</span>`;
+                else if (o.isDrawTarget) txt += ' ← ここから引く';
+                label.innerHTML = txt;
+
+                const hand = document.createElement('div');
+                hand.className = 'om-hand-row';
+                hand.id = 'om-hand-' + o.playerId;
+
+                if (o.cards) {
+                    // 観戦中・決着後は中身が見える
+                    o.cards.forEach(card => hand.appendChild(makeOmCard(card, true)));
+                } else {
+                    const canDraw = data.isMyTurn && data.state === 'playing' && o.isDrawTarget;
+                    for (let i = 0; i < o.count; i++) {
+                        const c = makeOmCard(null, false, (canDraw ? 'selectable' : '') + (!omDealt ? ' dealt-in' : ''));
+                        if (canDraw) c.onclick = () => drawOldMaidCard(i, o.playerId);
+                        hand.appendChild(c);
+                    }
+                }
+                block.appendChild(label);
+                block.appendChild(hand);
+                oppWrap.appendChild(block);
+
+                // 上がった瞬間を光らせる
+                if (o.finished && omPrevCounts[o.playerId] > 0) {
+                    block.classList.add('just-finished');
+                }
+                omPrevCounts[o.playerId] = o.count;
+            });
         }
 
-        // 自分の手札（表向き）
+        // 自分の手札
         const myHand = document.getElementById('om-my-hand');
         if (myHand) {
             myHand.innerHTML = '';
             (data.myHand || []).forEach(card => {
-                const c = document.createElement('div');
-                const isRed = (card.s === 'h' || card.s === 'd');
-                c.className = 'om-card face-up' + (card.r === 0 ? ' joker' : (isRed ? ' red' : ''));
-                if (!omDealt) c.classList.add('dealt-in');
-                c.textContent = cardLabel(card);
-                myHand.appendChild(c);
+                myHand.appendChild(makeOmCard(card, true, !omDealt ? 'dealt-in' : ''));
             });
         }
         const myCount = document.getElementById('om-my-count');
         if (myCount) myCount.textContent = `（${(data.myHand || []).length} 枚）`;
         omDealt = true;
 
-        // 直前に誰が何を引いたかを知らせる
+        // 直前の動きを知らせる
         const msg = document.getElementById('om-center-msg');
         if (msg && data.lastDraw && data.lastDraw.at !== omLastSeenDraw) {
             omLastSeenDraw = data.lastDraw.at;
-            const who = data.lastDraw.by === playerId ? 'あなた' : (data.opponentName || '相手');
-            const what = data.lastDraw.by === playerId ? cardLabel(data.lastDraw.card) : '1枚';
-            msg.textContent = `${who}が ${what} を引きました${data.lastDraw.paired ? '／ペアが揃って捨てました！' : ''}`;
+            const byName = data.lastDraw.by === playerId ? 'あなた'
+                : ((data.others.find(o => o.playerId === data.lastDraw.by) || {}).name || '相手');
+            const fromName = data.lastDraw.from === playerId ? 'あなた'
+                : ((data.others.find(o => o.playerId === data.lastDraw.from) || {}).name || '相手');
+            const what = (data.lastDraw.by === playerId || data.isSpectator) ? cardLabel(data.lastDraw.card) : '1枚';
+            msg.textContent = `${byName} が ${fromName} から ${what} を引きました${data.lastDraw.paired ? '／ペアが揃って捨てました！' : ''}`;
+
+            // 自分がジョーカーを引いたときだけ赤く光らせる
+            if (data.lastDraw.by === playerId && data.lastDraw.card && data.lastDraw.card.r === 0) {
+                flashOmJoker();
+            }
+        }
+
+        renderOmChat(data);
+
+        // 上がったときの選択（1回だけ出す）
+        if (data.myFinished && data.state === 'playing' && !omSpectating && !omFinishShown) {
+            omFinishShown = true;
+            const panel = document.getElementById('om-finish-panel');
+            const txt = document.getElementById('om-finish-text');
+            if (txt) txt.textContent = `🎉 ${data.myRank}位で上がり！`;
+            if (panel) panel.classList.add('show');
         }
 
         if (data.state === 'done') { showOldMaidResult(data); }
     }
 
-    function drawOldMaidCard(index) {
+    function flashOmJoker() {
+        if (liteMode) return;
+        let el = document.getElementById('om-joker-flash');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'om-joker-flash';
+            document.body.appendChild(el);
+        }
+        el.classList.remove('flash');
+        void el.offsetWidth;
+        el.classList.add('flash');
+    }
+
+    function drawOldMaidCard(index, targetId) {
         if (!omMatchId) return;
         const msg = document.getElementById('om-center-msg');
         if (msg) msg.textContent = '引いています…';
-        callMatchApi({ action: 'draw', matchId: omMatchId, index })
+        callMatchApi({ action: 'draw', matchId: omMatchId, index, targetId })
             .then(data => {
                 if (data.error && msg) { msg.textContent = data.error; return; }
                 renderOldMaid(data);
@@ -5516,25 +5949,55 @@ animation:facilitySweep 6s linear infinite;
             .catch(() => { if (msg) msg.textContent = '通信に失敗しました。'; });
     }
 
+    function spectateOldMaid() {
+        omSpectating = true;
+        const panel = document.getElementById('om-finish-panel');
+        if (panel) panel.classList.remove('show');
+        const note = document.getElementById('om-chat-note');
+        if (note) note.textContent = '観戦中は発言できません';
+        const input = document.getElementById('om-chat-input');
+        if (input) input.disabled = true;
+    }
+
     function showOldMaidResult(data) {
         stopOmPolling();
         const panel = document.getElementById('om-result-panel');
         const title = document.getElementById('om-result-title');
+        const rankEl = document.getElementById('om-result-ranking');
         const payoutEl = document.getElementById('om-result-payout');
         if (!panel) return;
 
+        const finishPanel = document.getElementById('om-finish-panel');
+        if (finishPanel) finishPanel.classList.remove('show');
+
         if (data.expired) {
             if (title) { title.className = ''; title.textContent = '対戦が終了しました'; }
-            if (payoutEl) payoutEl.textContent = `賭け金 ${formatNumber(omMatchBet)} 隻が返却されました。`;
-        } else if (data.payout > 0) {
-            clickerScore += data.payout;
-            if (title) { title.className = 'win'; title.textContent = '🎉 勝利！'; }
-            if (payoutEl) payoutEl.textContent = `+${formatNumber(data.payout)} 隻を獲得！`;
-            playSE('buy');
-            finishGambling();
+            if (rankEl) rankEl.innerHTML = '';
+            if (payoutEl) payoutEl.textContent = omMatchBet > 0 ? `賭け金 ${formatNumber(omMatchBet)} 隻が返却されました。` : '';
         } else {
-            if (title) { title.className = 'lose'; title.textContent = 'ババを掴んだ…'; }
-            if (payoutEl) payoutEl.textContent = `${formatNumber(omMatchBet)} 隻を失いました。`;
+            const myRank = data.myRank || (data.others.length + 1);
+            const isTop = myRank === 1;
+            if (title) {
+                title.className = isTop ? 'win' : (myRank === (data.playerCount || 2) ? 'lose' : '');
+                title.textContent = isTop ? '🎉 1位！' : (myRank === (data.playerCount || 2) ? 'ババを掴んだ…' : `${myRank}位`);
+            }
+            // 順位表
+            if (rankEl && data.result && data.result.ranking) {
+                const nameOf = id => id === playerId ? data.myName + '（あなた）'
+                    : ((data.others.find(o => o.playerId === id) || {}).name || '?');
+                rankEl.innerHTML = data.result.ranking.map((id, i) =>
+                    `<div><span class="rk">${i + 1}位</span> ${escapeHtml(nameOf(id))}</div>`).join('');
+            }
+            if (data.payout > 0) {
+                clickerScore += data.payout;
+                if (payoutEl) { payoutEl.style.color = '#7ed99a'; payoutEl.textContent = `+${formatNumber(data.payout)} 隻を獲得！`; }
+                playSE('buy');
+                finishGambling();
+            } else if (omMatchBet > 0) {
+                if (payoutEl) { payoutEl.style.color = '#ff8a7a'; payoutEl.textContent = `${formatNumber(omMatchBet)} 隻を失いました。`; }
+            } else {
+                if (payoutEl) payoutEl.textContent = '（ベータの間：賭け金なし）';
+            }
         }
         panel.classList.add('show');
         omMatchId = null;
@@ -5544,14 +6007,80 @@ animation:facilitySweep 6s linear infinite;
         stopOmPolling();
         const overlay = document.getElementById('oldmaid-overlay');
         if (overlay) overlay.classList.remove('show');
-        const panel = document.getElementById('om-result-panel');
-        if (panel) panel.classList.remove('show');
-        omMatchId = null;
-        omDealt = false;
+        ['om-result-panel', 'om-finish-panel'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.classList.remove('show');
+        });
+        omMatchId = null; omDealt = false; omSpectating = false; omFinishShown = false;
         setOmMessage('');
         showOmPhase('idle');
         renderOmTables();
         finishGambling();
+    }
+
+    // ---------- 対戦中チャット ----------
+    function toggleOmChat() {
+        omChatOpen = !omChatOpen;
+        const el = document.getElementById('om-chat');
+        if (el) el.classList.toggle('show', omChatOpen);
+    }
+
+    function buildOmChatPresets() {
+        const wrap = document.getElementById('om-chat-presets');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        OM_CHAT_PRESETS.forEach(t => {
+            const b = document.createElement('button');
+            b.className = 'om-preset-btn';
+            b.textContent = t;
+            b.onclick = () => sendOmChat(t);
+            wrap.appendChild(b);
+        });
+    }
+
+    // 名前の頭文字をアイコンにする。色は名前から決めるので、同じ人は常に同じ色になる。
+    function omAvatarFor(name) {
+        const ch = (name || '?').trim().charAt(0) || '?';
+        let hash = 0;
+        for (let i = 0; i < (name || '').length; i++) hash = (hash * 31 + name.charCodeAt(i)) % 360;
+        return { ch, color: `hsl(${hash}, 62%, 68%)` };
+    }
+
+    function renderOmChat(data) {
+        const log = document.getElementById('om-chat-log');
+        if (!log || !data.chat) return;
+        const latest = data.chat.length ? data.chat[data.chat.length - 1].at : 0;
+        if (latest === omLastChatAt) return;
+        omLastChatAt = latest;
+
+        log.innerHTML = '';
+        data.chat.forEach(m => {
+            const av = omAvatarFor(m.name);
+            const row = document.createElement('div');
+            row.className = 'om-chat-msg';
+            row.innerHTML = `
+                <div class="om-chat-avatar" style="background:${av.color};">${escapeHtml(av.ch)}</div>
+                <div class="om-chat-body">
+                    <div class="om-chat-name">${escapeHtml(m.name)}</div>
+                    <div class="om-chat-text">${escapeHtml(m.text)}</div>
+                </div>`;
+            log.appendChild(row);
+        });
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function sendOmChat(preset) {
+        const input = document.getElementById('om-chat-input');
+        const text = preset || (input ? input.value.trim() : '');
+        if (!text || !omMatchId) return;
+        if (omSpectating) return;
+        if (input && !preset) input.value = '';
+        callMatchApi({ action: 'chat', matchId: omMatchId, text })
+            .then(data => {
+                const note = document.getElementById('om-chat-note');
+                if (data.error && note) { note.textContent = data.error; setTimeout(() => { note.textContent = ''; }, 2500); }
+                renderOmChat(data);
+            })
+            .catch(() => {});
     }
 
     function openShipGachaScreen(navElement) {
