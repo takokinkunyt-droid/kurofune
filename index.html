@@ -3500,6 +3500,27 @@
 
         /* ── 画面ごとスライド切替 ── */
         .music-pages-viewport { position: relative; flex: 1; overflow: hidden; }
+        /* ジャケット画像で見せるページ（レコードは置かない） */
+        .album-art-wrap {
+            display: flex; align-items: center; justify-content: center;
+            width: 300px; height: 300px; flex-shrink: 0;
+        }
+        .album-art {
+            width: 100%; height: 100%; object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        /* 再生中はジャケットがゆっくり呼吸する */
+        .album-art.playing { animation: albumBreath 3.2s ease-in-out infinite; }
+        @keyframes albumBreath {
+            0%,100% { transform: scale(1); box-shadow: 0 18px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12); }
+            50% { transform: scale(1.03); box-shadow: 0 22px 52px rgba(0,0,0,0.5), 0 0 28px rgba(255,220,150,0.35); }
+        }
+        body.lite-mode .album-art.playing { animation: none; }
+        @media (max-width: 900px) {
+            .album-art-wrap { width: 190px; height: 190px; }
+        }
         .music-pages-strip {
             display: flex; height: 100%; width: 300%;
             transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
@@ -3961,8 +3982,12 @@ animation:facilitySweep 6s linear infinite;
                             <div class="music-info-static"><h3 class="track-title serif-font">明治維新顛末記</h3><p class="track-artist serif-font">歌唱・演奏：レツゴーペリー</p></div>
                         </div>
                         <div class="music-page" id="music-page-2">
-                            <div class="vinyl-container"><div class="vinyl vinyl3" id="vinyl-disc-2"><div class="vinyl-label vinyl3-label" id="vinyl-label-2"></div><div class="vinyl-center-hole"></div></div><div class="tonearm" id="vinyl-arm-2"></div></div>
+                            <div class="album-art-wrap"><img class="album-art" src="BLACK_SHIP_FUNK.png" alt="BLACK SHIP FUNK"></div>
                             <div class="music-info-static"><h3 class="track-title serif-font">BLACK SHIP FUNK</h3><p class="track-artist serif-font">REMIX：ILOVEPERRY</p></div>
+                        </div>
+                        <div class="music-page" id="music-page-3">
+                            <div class="album-art-wrap"><img class="album-art" src="OPPEKEPE_FUNK.png" alt="OPPEKEPE FUNK"></div>
+                            <div class="music-info-static"><h3 class="track-title serif-font">OPPEKEPE FUNK</h3><p class="track-artist serif-font">RIMIX：川上音三郎</p></div>
                         </div>
                     </div>
                     <div class="music-nav-arrow next" onclick="switchTrack(1)">▶</div>
@@ -3971,6 +3996,7 @@ animation:facilitySweep 6s linear infinite;
                     <div class="music-dot active" id="music-dot-0" onclick="goToTrack(0)"></div>
                     <div class="music-dot" id="music-dot-1" onclick="goToTrack(1)"></div>
                     <div class="music-dot" id="music-dot-2" onclick="goToTrack(2)"></div>
+                    <div class="music-dot" id="music-dot-3" onclick="goToTrack(3)"></div>
                 </div>
                 <div class="music-controls-fixed">
                     <div class="audio-error-msg" id="audio-error-box">⚠️ 再生に失敗しました。<br>同じフォルダに音源ファイルが置かれているか確認してね！</div>
@@ -8734,8 +8760,18 @@ animation:facilitySweep 6s linear infinite;
         { src: 'れつごーぺりー.mp3', title: '浦賀黒船顛末記', artist: '歌唱・演奏：レッツゴーペリー' },
         { src: '明治維新顛末記.mp3', title: '明治維新顛末記', artist: '歌唱・演奏：レツゴーペリー' },
         { src: 'BLACK_SHIP_FUNK.mp3', title: 'BLACK SHIP FUNK', artist: 'REMIX：ILOVEPERRY' },
+        { src: 'OPPEKEPE_FUNK.mp3', title: 'OPPEKEPE FUNK', artist: 'RIMIX：川上音三郎' },
     ];
     let currentTrackIndex = 0;
+
+    function getCurrentAlbumArt() {
+        const page = document.getElementById(`music-page-${currentTrackIndex}`);
+        return page ? page.querySelector('.album-art') : null;
+    }
+    function setAlbumArtPlaying(on) {
+        const art = getCurrentAlbumArt();
+        if (art) art.classList.toggle('playing', !!on);
+    }
 
     function getCurrentVinylDisc() { return document.getElementById(`vinyl-disc-${currentTrackIndex}`); }
     function getCurrentVinylArm()  { return document.getElementById(`vinyl-arm-${currentTrackIndex}`); }
@@ -8752,6 +8788,7 @@ animation:facilitySweep 6s linear infinite;
         // 現在再生中の音を止める
         if (audio) {
             audio.pause();
+            setAlbumArtPlaying(false);
             const oldDisc = getCurrentVinylDisc(); const oldArm = getCurrentVinylArm();
             if (oldDisc) oldDisc.style.animationPlayState = 'paused';
             if (oldArm) oldArm.style.transform = 'rotate(-30deg)';
@@ -8812,6 +8849,7 @@ animation:facilitySweep 6s linear infinite;
         if (playPauseBtn) playPauseBtn.textContent = '▶'; 
         if (vinylDisc) vinylDisc.style.animationPlayState = 'paused'; 
         if (vinylArm) vinylArm.style.transform = 'rotate(-30deg)'; 
+        setAlbumArtPlaying(false);
         stopVisualizer(); 
     }
 
@@ -8842,6 +8880,7 @@ animation:facilitySweep 6s linear infinite;
                 playPromise.then(() => {
                     if (audioErrorBox) audioErrorBox.style.display = 'none';
                     if (playPauseBtn) playPauseBtn.textContent = '⏸';
+                    setAlbumArtPlaying(true);
                     if (playbackStatus) playbackStatus.textContent = '演奏中';
                     if (vinylDisc) vinylDisc.style.animationPlayState = 'running';
                     if (vinylArm) vinylArm.style.transform = 'rotate(0deg)';
@@ -8854,6 +8893,7 @@ animation:facilitySweep 6s linear infinite;
             if (playbackStatus) playbackStatus.textContent = '停止中'; 
             if (vinylDisc) vinylDisc.style.animationPlayState = 'paused'; 
             if (vinylArm) vinylArm.style.transform = 'rotate(-30deg)'; 
+            setAlbumArtPlaying(false);
             stopVisualizer();
         }
         } catch(e) {
@@ -8900,6 +8940,24 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v3.1",
+            title: "浦賀賭博室にオンライン対戦が上陸",
+            date: "2026-09-18",
+            content: [
+                "浦賀賭博室に、他の船長と直接勝負できるオンライン対戦を追加しました。賭け金は「小判の間」から「ペリーの間」までの卓から選ぶ方式で、同じ卓に着いた相手と自動で組み合わされます。賭け金は対戦成立の時点で場に預けられ、勝った方が総取りします。",
+                "オンライン対戦その一「👊 連打競い」。10秒間ひたすら連打し、回数を競う一騎打ちです。",
+                "オンライン対戦その二「🃏 ババ抜き」。全画面の専用卓で対戦します。相手の手札から1枚引き、同じ数字が揃えば捨てられる、おなじみのルールです。先に手札を無くした方の勝ち。",
+                "ババ抜きに「🧪 ベータの間」を追加しました。賭け金なしの三人プレイで、時計回りに札を引き合います。先に上がった人は「観戦する」を選ぶと、残った二人の手札を見ながら決着を見届けられます。",
+                "ババ抜きに対戦中チャットを追加しました。画面右側に半透明で表示され、💬ボタンで開閉できます。アイコンはお名前の頭文字です。定型文のボタンも用意したので、スマートフォンでも片手でやり取りできます。なお、観戦中の方は手札が見えているため発言できません。",
+                "ババ抜きに演出を追加しました。配られた札が降ってくる、ペアが揃うと光って消える、手番が回ると札が脈打つ、上がった瞬間に金色に輝く、といった動きで、何が起きたか一目で分かるようになります。",
+                "オンライン対戦その三「🚢 黒船競い」。5分間でどれだけ黒船を増やせるかを競うRTA勝負です。全員が0隻から始まり、普段の進行度は持ち込めません。近代ドック拡張・レンチ・戦闘用技術・徴兵・廃藩置県が使えるほか、「桜田門外の変」は無料ですが押してから45秒間だけ効果が続くため、いつ切るかが勝負の分かれ目になります。相手を待たずに試せる練習モードも用意しました。",
+                "勝敗の判定はすべて黒船奉行所（サーバー）が行います。手札の中身や相手の得点は、見えてはいけない場面では一切お渡ししていません。",
+                "浦賀音楽堂に新曲「OPPEKEPE FUNK」を追加しました。明治の壮士・川上音二郎が世に放った「オッペケペー節」を、現代の音で組み直した一曲です（RIMIX：川上音三郎）。",
+                "「BLACK SHIP FUNK」「OPPEKEPE FUNK」の二曲は、レコード盤に代えてジャケット画像で並べるようにしました。再生中はジャケットがゆっくりと脈を打ちます。"
+            ],
+            preview: "次回更新もお楽しみに"
+        },
         {
             version: "v.SP",
             title: "懐かしいものを、そっと置いておきます",
