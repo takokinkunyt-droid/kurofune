@@ -186,6 +186,12 @@
         .serif-font { font-family: 'Shippori Mincho', serif; }
 
         /* PC横画面用コンテナ */
+        /* 全画面表示のとき、中身が画面いっぱいに広がるようにする */
+        html:fullscreen, html:-webkit-full-screen { width: 100%; height: 100%; }
+        html:fullscreen body, html:-webkit-full-screen body { width: 100%; height: 100%; }
+        /* 全画面中に表示される各種オーバーレイが背面に隠れないようにする */
+        html:fullscreen #app-container, html:-webkit-full-screen #app-container { z-index: 0; }
+
         #app-container {
             width: 100vw; height: 100vh; max-width: none; min-height: 0;
             background-color: var(--bg-color); box-shadow: none;
@@ -4830,17 +4836,23 @@ animation:facilitySweep 6s linear infinite;
         let warn = document.createElement('div'); warn.style.position = 'absolute'; warn.style.bottom = '20px'; warn.style.right = '20px';
         warn.style.background = '#c0392b'; warn.style.color = '#fff'; warn.style.padding = '15px 20px'; warn.style.borderRadius = '8px'; warn.style.zIndex = '99999';
         warn.innerHTML = '📺 フルスクリーンは現在の環境で制限されています。<br>ブラウザのF11キーを使用するか別タブでお試しください。';
-        const appContainer = document.getElementById('app-container');
-        (appContainer || document.body).appendChild(warn); setTimeout(() => { warn.animate([{opacity: 1}, {opacity: 0}], {duration: 500, fill: 'forwards'}).onfinish = () => warn.remove(); }, 4000);
+        warn.style.position = 'fixed';
+        document.body.appendChild(warn); setTimeout(() => { warn.animate([{opacity: 1}, {opacity: 0}], {duration: 500, fill: 'forwards'}).onfinish = () => warn.remove(); }, 4000);
     }
     
     function toggleFullscreen() {
-        const container = document.getElementById('app-container');
+        // 全画面の対象は body にする。
+        // #app-container を対象にすると、その外側に置かれている
+        // 設定モーダル・実績通知・ガチャ演出・賭博室の全画面などが
+        // すべて描画されなくなってしまうため。
+        const target = document.documentElement;
         try {
-            if (!document.fullscreenElement) { 
-                let p; if (container.requestFullscreen) p = container.requestFullscreen(); else if (container.webkitRequestFullscreen) p = container.webkitRequestFullscreen(); 
-                if (p && p.catch) p.catch(err => showFullscreenWarning()); 
-            } 
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                let p;
+                if (target.requestFullscreen) p = target.requestFullscreen();
+                else if (target.webkitRequestFullscreen) p = target.webkitRequestFullscreen();
+                if (p && p.catch) p.catch(err => showFullscreenWarning());
+            }
             else { if (document.exitFullscreen) document.exitFullscreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); }
         } catch (err) { showFullscreenWarning(); }
     }
