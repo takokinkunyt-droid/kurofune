@@ -1336,6 +1336,8 @@
 
         .tap-status-text { font-size: 0.9rem; font-weight: bold; color: var(--primary-color); margin-bottom: 6px; }
         .tap-sub-text { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
+        .om-waiting-count { font-size: 0.9rem; color: #555; margin-bottom: 8px; font-weight: bold; }
+        .om-waiting-count .omw-num { font-size: 1.5rem; color: var(--gold-color); }
         .tap-dots { display: inline-block; animation: tapDots 1.4s steps(4, end) infinite; overflow: hidden; vertical-align: bottom; }
         @keyframes tapDots { 0% { width: 0; } 100% { width: 1.6em; } }
         .tap-opponent-name { font-size: 0.85rem; color: #666; margin-bottom: 8px; }
@@ -4185,6 +4187,7 @@ animation:facilitySweep 6s linear infinite;
                         </div>
                         <div id="om-match-waiting" style="display:none;">
                             <div class="tap-status-text">対戦相手を探しています<span class="tap-dots">…</span></div>
+                            <div id="om-waiting-count" class="om-waiting-count"></div>
                             <div class="tap-sub-text">賭け金：<span id="om-waiting-bet">0</span> 隻</div>
                             <button class="gg-btn gg-btn-cashout" onclick="cancelOldMaid()">取り消す</button>
                         </div>
@@ -5727,7 +5730,7 @@ animation:facilitySweep 6s linear infinite;
                 omMatchId = data.matchId;
                 if (data.status === 'matched') { enterOldMaidTable(data); }
                 else {
-                    if (data.need) setOmMessage(`${data.joined || 1} / ${data.need} 人`);
+                    updateOmWaitingCount(data.joined, data.need || (omGame === 'oldmaid3' ? 3 : 2));
                     startOmPolling();
                 }
             })
@@ -5752,14 +5755,22 @@ animation:facilitySweep 6s linear infinite;
                     } else if (data.status === 'playing') {
                         stopOmPolling();
                         enterOldMaidTable(data);
-                    } else if (data.joined) {
-                        setOmMessage(`${data.joined} / ${data.need} 人`);
+                    } else if (data.status === 'waiting') {
+                        updateOmWaitingCount(data.joined, data.need);
                     }
                 }).catch(() => {});
-        }, 2000);
+        }, 1200);
     }
 
     function stopOmPolling() { if (omPollTimer) { clearInterval(omPollTimer); omPollTimer = null; } }
+
+    // 待機中の集まり具合を大きく表示する
+    function updateOmWaitingCount(joined, need) {
+        const el = document.getElementById('om-waiting-count');
+        if (!el) return;
+        if (!need || need <= 2) { el.textContent = ''; return; }
+        el.innerHTML = `<span class="omw-num">${joined || 1}</span> / ${need} 人`;
+    }
 
     function cancelOldMaid() {
         if (!omMatchId) { showOmPhase('idle'); return; }
