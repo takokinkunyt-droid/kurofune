@@ -17,11 +17,23 @@ const https = require('https');
 const MATCH_TTL      = 600;   // 対戦データの保持時間（秒）
 const WAIT_TTL       = 120;   // 待機列に並んでいられる時間（秒）
 const SUBMIT_TIMEOUT = 45000; // 相手のスコア提出を待つ上限（ミリ秒）
-const GAMES = ['tap', 'oldmaid']; // 現在対応しているゲーム種別
+const GAMES = ['tap', 'oldmaid', 'oldmaid3', 'rta']; // 現在対応しているゲーム種別
+
+// 対戦中チャットの設定
+const CHAT_MAX_LEN = 100;
+const CHAT_MAX_KEEP = 40;   // 保持する発言数
+const CHAT_RATE_MS = 2000;  // 連投制限
+
+// 黒船競い（rta）の設定
+const RTA_DURATION_SEC = 300;  // 本番の長さ（5分）
+const RTA_READY_TIMEOUT = 60000; // 準備完了を待つ上限（ミリ秒）。超えたら強制開始
+// 3分間で理論上到達しうる上限。これを超える申告は不正とみなして切り捨てる。
+const RTA_MAX_SCORE = 50000000;
 
 // 賭け金は決められた「卓」の額のみを受け付ける。
 // 自由な額を許すと待機列が分散してマッチしなくなるため。
 const ALLOWED_BETS = [
+  0,                  // ベータの間（賭け金なし・3人プレイ用）
   10000,              // 小判の間
   1000000,            // 千両の間
   100000000,          // 大判の間
@@ -74,6 +86,11 @@ function readBody(req) {
     req.on('end', () => { try { resolve(JSON.parse(raw || '{}')); } catch (e) { reject(e); } });
     req.on('error', reject);
   });
+}
+
+// そのゲームに必要な人数
+function requiredPlayers(game) {
+  return game === 'oldmaid3' ? 3 : 2;
 }
 
 function genId() {
@@ -167,58 +184,148 @@ function discardPairs(hand) {
   return discarded;
 }
 
-// 対戦開始時に手札を配る
+// 対戦開始時に手札を配る（2人でも3人でも同じ手順）
 function initOldMaid(match) {
   const deck = buildOldMaidDeck();
-  const hands = { [match.players[0].playerId]: [], [match.players[1].playerId]: [] };
+  const n = match.players.length;
+  const hands = {};
+  match.players.forEach(p => { hands[p.playerId] = []; });
   deck.forEach((card, i) => {
-    hands[match.players[i % 2].playerId].push(card);
+    hands[match.players[i % n].playerId].push(card);
   });
   Object.values(hands).forEach(h => discardPairs(h));
   match.hands = hands;
-  // 手札が多い方から開始する
-  const [p0, p1] = match.players;
-  match.turn = hands[p0.playerId].length >= hands[p1.playerId].length ? p0.playerId : p1.playerId;
+  // 最も手札が多い人から開始する
+  let first = match.players[0];
+  match.players.forEach(p => {
+    if (hands[p.playerId].length > hands[first.playerId].length) first = p;
+  });
+  match.turn = first.playerId;
+  match.finished = [];   // 上がった順に playerId が入る
   match.lastDraw = null;
+  match.chat = [];
   match.state = 'playing';
   return match;
 }
 
-// 自分から見た盤面。相手の手札は「枚数」しか返さない（中身が見えると不正になるため）
+// まだ手札が残っている人（＝対戦継続中の人）の一覧
+function activePlayers(match) {
+  return match.players.filter(p => (match.hands[p.playerId] || []).length > 0);
+}
+
+// 時計回りで次に手番が回る人を返す（上がった人は飛ばす）
+function nextTurnPlayer(match, currentId) {
+  const order = match.players.map(p => p.playerId);
+  const alive = activePlayers(match).map(p => p.playerId);
+  if (alive.length === 0) return null;
+  let idx = order.indexOf(currentId);
+  for (let i = 1; i <= order.length; i++) {
+    const cand = order[(idx + i) % order.length];
+    if (alive.includes(cand)) return cand;
+  }
+  return alive[0];
+}
+
+// 手番の人から見て、時計回りで次にいる「引く相手」を返す
+function drawTargetOf(match, playerId) {
+  const order = match.players.map(p => p.playerId);
+  const alive = activePlayers(match).map(p => p.playerId);
+  let idx = order.indexOf(playerId);
+  for (let i = 1; i <= order.length; i++) {
+    const cand = order[(idx + i) % order.length];
+    if (alive.includes(cand) && cand !== playerId) return cand;
+  }
+  return null;
+}
+
+// 自分から見た盤面。
+// 対戦中の相手の手札は「枚数」しか返さない（中身が見えると不正になるため）。
+// ただし上がった人＝観戦者には、残っている人の手札を公開する。
 function oldMaidViewOf(match, playerId) {
   const me = match.players.find(p => p.playerId === playerId);
-  const opponent = match.players.find(p => p.playerId !== playerId);
   if (!me) return null;
-  const myHand = match.hands ? (match.hands[playerId] || []) : [];
-  const oppHand = (match.hands && opponent) ? (match.hands[opponent.playerId] || []) : [];
+  const hands = match.hands || {};
+  const myHand = hands[playerId] || [];
+  const finished = match.finished || [];
+  const iAmSpectator = finished.includes(playerId) && match.state !== 'done';
+  const target = match.state === 'playing' ? drawTargetOf(match, match.turn) : null;
+
+  const others = match.players.filter(p => p.playerId !== playerId).map(p => {
+    const h = hands[p.playerId] || [];
+    const showCards = iAmSpectator || match.state === 'done';
+    return {
+      playerId: p.playerId,
+      name: p.name,
+      count: h.length,
+      cards: showCards ? h : null,      // 観戦中と決着後のみ中身を返す
+      finished: finished.includes(p.playerId),
+      rank: finished.indexOf(p.playerId) >= 0 ? finished.indexOf(p.playerId) + 1 : null,
+      isTurn: match.turn === p.playerId,
+      isDrawTarget: target === p.playerId && match.turn === playerId,
+    };
+  });
+
   return {
     matchId: match.matchId,
     state: match.state,
     bet: match.bet,
     game: match.game,
+    playerCount: match.players.length,
     myHand,
     myName: me.name,
-    opponentName: opponent ? opponent.name : null,
-    opponentCount: oppHand.length,
+    myFinished: finished.includes(playerId),
+    myRank: finished.indexOf(playerId) >= 0 ? finished.indexOf(playerId) + 1 : null,
+    isSpectator: iAmSpectator,
+    others,
     turn: match.turn,
-    isMyTurn: match.turn === playerId,
+    turnName: (match.players.find(p => p.playerId === match.turn) || {}).name || null,
+    isMyTurn: match.turn === playerId && !finished.includes(playerId),
+    drawTargetId: match.turn === playerId ? target : null,
     lastDraw: match.lastDraw,
+    chat: match.chat || [],
     result: match.result || null,
-    payout: (match.result && match.result.winnerId === playerId) ? match.pot : 0,
+    payout: computeOldMaidPayout(match, playerId),
   };
 }
 
-// 勝敗が決したかを判定する（手札が先に無くなった方の勝ち）
+// 賭け金の配分：1位が80%、2位が20%、最下位は無し。
+// 2人対戦のときは従来どおり勝者が総取り。
+function computeOldMaidPayout(match, playerId) {
+  if (!match.result) return 0;
+  const finished = match.finished || [];
+  if (match.players.length <= 2) {
+    return match.result.winnerId === playerId ? match.pot : 0;
+  }
+  const rank = finished.indexOf(playerId);
+  if (rank === 0) return Math.floor(match.pot * 0.8);
+  if (rank === 1) return Math.floor(match.pot * 0.2);
+  return 0;
+}
+
+// 勝敗が決したかを判定する
 function checkOldMaidEnd(match) {
-  const [p0, p1] = match.players;
-  const h0 = match.hands[p0.playerId];
-  const h1 = match.hands[p1.playerId];
-  let winnerId = null;
-  if (h0.length === 0) winnerId = p0.playerId;
-  else if (h1.length === 0) winnerId = p1.playerId;
-  if (winnerId) {
+  match.finished = match.finished || [];
+  // 新たに手札が0になった人を、上がった順に記録する
+  match.players.forEach(p => {
+    const h = match.hands[p.playerId] || [];
+    if (h.length === 0 && !match.finished.includes(p.playerId)) {
+      match.finished.push(p.playerId);
+    }
+  });
+
+  const alive = activePlayers(match);
+  // 残り1人になったら終了（その人がジョーカー持ち＝最下位）
+  if (alive.length <= 1) {
+    if (alive.length === 1 && !match.finished.includes(alive[0].playerId)) {
+      match.finished.push(alive[0].playerId);
+    }
     match.state = 'done';
-    match.result = { winnerId, draw: false, finishedAt: Date.now() };
+    match.result = {
+      winnerId: match.finished[0] || null,
+      ranking: match.finished.slice(),
+      draw: false,
+      finishedAt: Date.now(),
+    };
     return true;
   }
   return false;
@@ -252,7 +359,7 @@ module.exports = async (req, res) => {
       }
 
       // 申告された賭け金が、記録されている保有数を超えていないか確認する
-      const rec = await redis(['get', `player:${playerId}`]);
+      const rec = betAmount > 0 ? await redis(['get', `player:${playerId}`]) : { result: null };
       if (rec.result) {
         try {
           const known = JSON.parse(rec.result);
@@ -276,8 +383,9 @@ module.exports = async (req, res) => {
         break;
       }
 
+      const need = requiredPlayers(game);
+
       if (opponentMatchId) {
-        // 相手が見つかったので対戦成立。この時点で両者の賭け金を場に預かる。
         const match = await loadMatch(opponentMatchId);
         match.players.push({
           playerId,
@@ -285,13 +393,29 @@ module.exports = async (req, res) => {
           score: 0,
           submitted: false,
         });
+
+        // まだ人数が足りなければ、待機のまま列に戻す
+        if (match.players.length < need) {
+          await saveMatch(match);
+          await redis(['rpush', queueKey, match.matchId]);
+          await redis(['expire', queueKey, WAIT_TTL]);
+          return res.status(200).json({ status: 'waiting', matchId: match.matchId, joined: match.players.length, need });
+        }
+
+        // 人数が揃ったので対戦成立。この時点で全員の賭け金を場に預かる。
         match.state   = 'playing';
-        match.pot     = match.bet * 2;
+        match.pot     = match.bet * match.players.length;
         match.startAt = Date.now();
-        if (match.game === 'oldmaid') {
+        if (match.game === 'oldmaid' || match.game === 'oldmaid3') {
           initOldMaid(match);
           await saveMatch(match);
           return res.status(200).json({ status: 'matched', ...oldMaidViewOf(match, playerId) });
+        }
+        if (match.game === 'rta') {
+          match.state = 'ready';
+          match.readyDeadline = Date.now() + RTA_READY_TIMEOUT;
+          await saveMatch(match);
+          return res.status(200).json({ status: 'matched', ...rtaViewOf(match, playerId) });
         }
         await saveMatch(match);
         return res.status(200).json({ status: 'matched', ...viewOf(match, playerId) });
@@ -338,10 +462,22 @@ module.exports = async (req, res) => {
         }
       }
 
-      if (match.game === 'oldmaid') {
+      if (match.game === 'oldmaid' || match.game === 'oldmaid3') {
         const omView = oldMaidViewOf(match, playerId);
         if (!omView) return res.status(403).json({ error: 'この対戦の参加者ではありません' });
         return res.status(200).json({ status: match.state, ...omView });
+      }
+
+      if (match.game === 'rta') {
+        // 準備完了の待ち合わせ。60秒を過ぎたら揃っていなくても開始する
+        if (match.state === 'ready' && Date.now() > (match.readyDeadline || 0)) {
+          match.state = 'playing';
+          match.rtaStartAt = Date.now();
+          await saveMatch(match);
+        }
+        const rView = rtaViewOf(match, playerId);
+        if (!rView) return res.status(403).json({ error: 'この対戦の参加者ではありません' });
+        return res.status(200).json({ status: match.state, ...rView });
       }
 
       const view = viewOf(match, playerId);
@@ -362,7 +498,12 @@ module.exports = async (req, res) => {
         // 人間には出せない値は切り捨てる
         let s = Math.floor(Number(score) || 0);
         if (s < 0) s = 0;
-        if (s > TAP_MAX_SCORE) s = TAP_MAX_SCORE;
+        const cap = (match.game === 'rta') ? RTA_MAX_SCORE : TAP_MAX_SCORE;
+        if (s > cap) s = cap;
+        // 開始からの経過が短すぎる申告は無効（本番前に送る不正を防ぐ）
+        if (match.game === 'rta' && match.rtaStartAt && Date.now() - match.rtaStartAt < (RTA_DURATION_SEC - 5) * 1000) {
+          return res.status(400).json({ error: 'まだ勝負の途中です' });
+        }
         me.score = s;
         me.submitted = true;
         me.submittedAt = Date.now();
@@ -372,43 +513,104 @@ module.exports = async (req, res) => {
       if (allSubmitted && match.state !== 'done') resolveMatch(match);
       await saveMatch(match);
 
+      if (match.game === 'rta') {
+        return res.status(200).json({ status: match.state, ...rtaViewOf(match, playerId) });
+      }
       return res.status(200).json({ status: match.state, ...viewOf(match, playerId) });
+    }
+
+    // ── 黒船競い：準備完了を伝える ──────────────────
+    if (action === 'ready') {
+      const { matchId } = body;
+      const match = await loadMatch(matchId);
+      if (!match) return res.status(200).json({ status: 'expired' });
+      if (match.game !== 'rta') return res.status(400).json({ error: 'このゲームでは使えません' });
+
+      const me = match.players.find(p => p.playerId === playerId);
+      if (!me) return res.status(403).json({ error: 'この対戦の参加者ではありません' });
+      me.ready = true;
+
+      // 両者が押したら即開始する
+      if (match.state === 'ready' && match.players.length === 2 && match.players.every(p => p.ready)) {
+        match.state = 'playing';
+        match.rtaStartAt = Date.now();
+      }
+      await saveMatch(match);
+      return res.status(200).json({ status: match.state, ...rtaViewOf(match, playerId) });
     }
 
     // ── ババ抜き：相手の手札から1枚引く ──────────────
     if (action === 'draw') {
-      const { matchId, index } = body;
+      const { matchId, index, targetId } = body;
       const match = await loadMatch(matchId);
       if (!match) return res.status(200).json({ status: 'expired' });
-      if (match.game !== 'oldmaid') return res.status(400).json({ error: 'このゲームでは使えません' });
+      if (match.game !== 'oldmaid' && match.game !== 'oldmaid3') return res.status(400).json({ error: 'このゲームでは使えません' });
       if (match.state !== 'playing') return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId) });
 
       const me = match.players.find(p => p.playerId === playerId);
-      const opponent = match.players.find(p => p.playerId !== playerId);
       if (!me) return res.status(403).json({ error: 'この対戦の参加者ではありません' });
 
-      // 手番でなければ引けない（順番を飛ばす不正を防ぐ）
+      // 手番でなければ引けない
       if (match.turn !== playerId) {
         return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId), error: 'まだあなたの番ではありません' });
       }
 
-      const oppHand = match.hands[opponent.playerId];
+      // 引く相手はサーバーが決める（時計回りの次の人）
+      const expected = drawTargetOf(match, playerId);
+      if (!expected) return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId) });
+      if (targetId && targetId !== expected) {
+        return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId), error: 'その相手からは引けません' });
+      }
+
+      const oppHand = match.hands[expected];
       const i = Math.floor(Number(index));
       if (!(i >= 0 && i < oppHand.length)) {
         return res.status(400).json({ error: '引く位置が不正です' });
       }
 
-      // 相手の手札から抜き取って自分の手札に加える
       const drawn = oppHand.splice(i, 1)[0];
       const myHand = match.hands[playerId];
       myHand.push(drawn);
       const discarded = discardPairs(myHand);
 
-      match.lastDraw = { by: playerId, card: drawn, paired: discarded > 0, at: Date.now() };
+      match.lastDraw = { by: playerId, from: expected, card: drawn, paired: discarded > 0, at: Date.now() };
 
       if (!checkOldMaidEnd(match)) {
-        match.turn = opponent.playerId; // 手番を相手へ渡す
+        match.turn = nextTurnPlayer(match, playerId);
       }
+      await saveMatch(match);
+      return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId) });
+    }
+
+    // ── 対戦中チャット ─────────────────────────────
+    if (action === 'chat') {
+      const { matchId, text } = body;
+      const match = await loadMatch(matchId);
+      if (!match) return res.status(200).json({ status: 'expired' });
+
+      const me = match.players.find(p => p.playerId === playerId);
+      if (!me) return res.status(403).json({ error: 'この対戦の参加者ではありません' });
+
+      // 上がった人（観戦者）は発言できない。手札が見えているため。
+      const finished = match.finished || [];
+      if (finished.includes(playerId) && match.state !== 'done') {
+        return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId), error: '観戦中は発言できません' });
+      }
+
+      const msg = String(text || '').trim().slice(0, CHAT_MAX_LEN);
+      if (!msg) return res.status(400).json({ error: 'メッセージが空です' });
+
+      // 連投制限
+      const rateKey = `match_chat_rate:${playerId}`;
+      const rate = await redis(['exists', rateKey]);
+      if (rate.result === 1) {
+        return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId), error: '少し待ってから送信してください' });
+      }
+      await redis(['setex', rateKey, Math.ceil(CHAT_RATE_MS / 1000), '1']);
+
+      match.chat = match.chat || [];
+      match.chat.push({ playerId, name: me.name, text: msg, at: Date.now() });
+      if (match.chat.length > CHAT_MAX_KEEP) match.chat = match.chat.slice(-CHAT_MAX_KEEP);
       await saveMatch(match);
       return res.status(200).json({ status: match.state, ...oldMaidViewOf(match, playerId) });
     }
