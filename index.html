@@ -4544,6 +4544,15 @@ animation:facilitySweep 6s linear infinite;
     };
 
     let netlifyEnabled = true;
+    // 読み込みに失敗したかどうかを記録する。
+    // 失敗しているのに気づかず遊び続けると、0隻の状態が
+    // クラウドの正しいデータを上書きして永久に失われるため、
+    // このフラグが立っている間はクラウドへの保存を一切行わない。
+    let cloudLoadFailed = false;
+    // 直近でクラウドにあった隻数。これより極端に少ない保存は事故とみなす。
+    let lastKnownCloudScore = 0;
+    // 転生など、意図的に隻数が減る操作のときだけ true にする
+    let allowShrinkSave = false;
 </script>
 
 <script>
@@ -4995,6 +5004,8 @@ animation:facilitySweep 6s linear infinite;
 
     // 全リセットを行い、縄文時代を開始する
     function executeTrueReincarnation() {
+        allowShrinkSave = true; // 全リセットは意図した操作
+        lastKnownCloudScore = 0;
         // 進行状況をすべて初期化
         clickerScore = 0; currentLifeScore = 0;
         clickPower = 1; upClickCost = 15; upClickLevel = 1;
@@ -7014,6 +7025,28 @@ animation:facilitySweep 6s linear infinite;
 
     function syncToCloud(saveData) {
         if (!netlifyEnabled || !playerId) return;
+        // 読み込みに失敗した状態では絶対に保存しない。
+        // ここを通すと、0隻の初期状態がクラウドの正しいデータを消してしまう。
+        if (cloudLoadFailed) {
+            updateCloudStatus('⚠️ 読込失敗のため保存を停止中');
+            return;
+        }
+
+        // 直前に読み込んだデータより極端に後退した保存は拒否する。
+        // 転生・本当の転生のように意図して減る場合は、その操作の中で
+        // lastKnownCloudScore を更新しているので誤検知しない。
+        if (lastKnownCloudScore > 1000 && !allowShrinkSave) {
+            const now = Number(saveData.clickerScore) || 0;
+            if (now < lastKnownCloudScore * 0.01) {
+                console.warn('極端に少ないデータの保存を拒否しました', now, '<', lastKnownCloudScore);
+                updateCloudStatus('⚠️ 異常を検知したため保存を見送りました');
+                showCloudLoadFailureWarning();
+                return;
+            }
+        }
+        lastKnownCloudScore = Number(saveData.clickerScore) || 0;
+        allowShrinkSave = false;
+
         isCloudSyncing = true;
         updateCloudStatus('同期中…');
         
@@ -7054,24 +7087,53 @@ animation:facilitySweep 6s linear infinite;
         });
     }
 
-    function loadFromCloud() {
+    function loadFromCloud(retry) {
         if (!netlifyEnabled || !playerId) return Promise.resolve(null);
         updateCloudStatus('クラウドから読込中…');
         return fetch(getNetlifyFunctionUrl('load-game') + `?playerId=${encodeURIComponent(playerId)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
             .then(data => {
                 if (data.success && data.data) {
+                    cloudLoadFailed = false;
+                    lastKnownCloudScore = Number(data.data.clickerScore) || 0;
                     updateCloudStatus('オンライン保存済み');
                     return data.data;
                 }
+                // サーバーは応答したが保存データが無い＝本当に新規のプレイヤー
+                cloudLoadFailed = false;
                 updateCloudStatus('オンライン保存済み');
                 return null;
             })
             .catch((e) => {
                 console.error('クラウド読込エラー:', e);
-                updateCloudStatus('オンライン読込失敗（ローカルデータで起動）');
+                // 一度だけ時間をおいて再試行する
+                if (!retry) {
+                    updateCloudStatus('読込に失敗。再試行しています…');
+                    return new Promise(res => setTimeout(res, 1500)).then(() => loadFromCloud(true));
+                }
+                cloudLoadFailed = true;
+                updateCloudStatus('⚠️ 読込失敗：保存を停止中');
+                showCloudLoadFailureWarning();
                 return null;
             });
+    }
+
+    // 読み込み失敗をプレイヤーにはっきり伝える。
+    // 黙って新規扱いにすると、気づかないまま上書きされてしまう。
+    function showCloudLoadFailureWarning() {
+        if (document.getElementById('cloud-fail-banner')) return;
+        const bar = document.createElement('div');
+        bar.id = 'cloud-fail-banner';
+        bar.style.cssText = 'position:fixed; top:0; left:0; right:0; z-index:100010;' +
+            'background:#c0392b; color:#fff; padding:12px 16px; text-align:center;' +
+            'font-size:0.85rem; line-height:1.6; box-shadow:0 4px 14px rgba(0,0,0,0.4);';
+        bar.innerHTML = '⚠️ <b>セーブデータの読み込みに失敗しました。</b><br>' +
+            'データを守るため、保存を一時停止しています。<b>このまま遊ばず</b>、ページを再読み込みしてください。' +
+            '<button onclick="location.reload()" style="margin-left:12px; padding:5px 14px; border:none; border-radius:5px; background:#fff; color:#c0392b; font-weight:bold; cursor:pointer;">再読み込み</button>';
+        document.body.appendChild(bar);
     }
 
     function updateCloudStatus(text) {
@@ -7332,6 +7394,8 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function resetSaveData() {
+        allowShrinkSave = true;
+        lastKnownCloudScore = 0;
         unlockAchievement('deleteSave');
         if(confirm('本当にこれまでの歴史（セーブデータ）を消し去りますか？\nオンラインに保存されたデータも削除されます。')) {
             localStorage.removeItem('kurofuneSaveData');
@@ -8398,6 +8462,8 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function doReincarnation() {
+        allowShrinkSave = true; // 転生では隻数が減るのが正常
+        lastKnownCloudScore = 0;
         // かけらの計算は reincarnationCount を増やす「前」に行う。
         // 先にカウントを増やすと必要隻数の基準が1.4倍に上がってしまい、
         // 本来もらえるはずのかけらが0個になってしまうため。
