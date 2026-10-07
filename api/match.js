@@ -61,9 +61,10 @@ function redis(command) {
         'Content-Length': Buffer.byteLength(data),
       },
     }, (r) => {
-      let body = '';
-      r.on('data', c => { body += c; });
-      r.on('end', () => { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });
+      const _chunks = [];
+      r.on('data', c => { _chunks.push(Buffer.from(c)); });
+      r.on('end', () => {
+        const body = Buffer.concat(_chunks).toString('utf8'); try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });
     });
     req.on('error', reject);
     req.write(data);
@@ -81,9 +82,10 @@ function setCORS(res) {
 function readBody(req) {
   if (req.body && typeof req.body === 'object') return Promise.resolve(req.body);
   return new Promise((resolve, reject) => {
-    let raw = '';
-    req.on('data', c => { raw += c; });
-    req.on('end', () => { try { resolve(JSON.parse(raw || '{}')); } catch (e) { reject(e); } });
+    const _chunks = [];
+    req.on('data', c => { _chunks.push(Buffer.from(c)); });
+    req.on('end', () => {
+      const raw = Buffer.concat(_chunks).toString('utf8'); try { resolve(JSON.parse(raw || '{}')); } catch (e) { reject(e); } });
     req.on('error', reject);
   });
 }
