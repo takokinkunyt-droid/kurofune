@@ -33,6 +33,19 @@ module.exports = async (req, res) => {
       const raw = await redisRequest(['lrange', `save_hist:${playerId}`, 0, 49]);
       const items = raw.result || [];
 
+      if (action === 'status') {
+        // ADMIN_SECRET が設定されているかだけを返す。鍵そのものは絶対に返さない。
+        // 「環境変数の未設定」と「鍵の不一致」を切り分けるための入口。
+        return res.status(200).json({
+          success: true,
+          adminSecretConfigured: !!SECRET,
+          secretLength: SECRET ? SECRET.length : 0,
+          hint: SECRET
+            ? 'ADMIN_SECRET は設定済み。Forbidden が出るなら送っている鍵が違う。'
+            : 'ADMIN_SECRET が未設定、または設定後に Redeploy していない。',
+        });
+      }
+
       if (action === 'list') {
         // 要約だけ返す。中身は出さない。
         const history = items.map((s, i) => {
