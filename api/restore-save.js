@@ -97,7 +97,18 @@ module.exports = async (req, res) => {
       }
       commands.push(['set', `save:${playerId}`, JSON.stringify(toWrite)]);
       // ランキングも復元後の値に合わせる
+      // ランキングは並び順（zset）と表示用の記録（player:<id>）の2つがある。
+      // 片方だけ直すと、順位は正しいのに転生回数やかけらが古い値のまま表示される。
       commands.push(['zadd', 'ranking', Math.floor(Number(toWrite.clickerScore) || 0), playerId]);
+      commands.push(['set', `player:${playerId}`, JSON.stringify({
+        playerId,
+        playerName: String(toWrite.playerName || '名無しの船長').substring(0, 20),
+        clickerScore: Math.floor(Number(toWrite.clickerScore) || 0),
+        reincarnationCount: Number(toWrite.reincarnationCount) || 0,
+        fragments: Number(toWrite.fragments) || 0,
+        era: eraLabelOf(toWrite),
+        updatedAt: Date.now(),
+      })]);
       await redisPipeline(commands);
 
       return res.status(200).json({
@@ -120,6 +131,14 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+// セーブの状態からランキングに出す時代名を決める
+function eraLabelOf(save) {
+  if (save.currentEra === 'jomon') return '縄文時代';
+  if (save.superSkills && save.superSkills.meijiRestoration) return '明治時代';
+  if (save.skills && save.skills.kaikoku) return '江戸時代（開国）';
+  return '江戸時代（初期）';
+}
 
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : 0; }
 function countTrue(o) { return (o && typeof o === 'object') ? Object.values(o).filter(Boolean).length : 0; }
