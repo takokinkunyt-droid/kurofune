@@ -4640,6 +4640,10 @@ animation:facilitySweep 6s linear infinite;
     let playerName = "名無しの船長"; // ランキングに表示される名前
     let cloudSyncTimer = null;
     let isCloudSyncing = false;
+    // この端末だけが知っている秘密の鍵。
+    // サーバー側は playerId とこの鍵の組が一致しない保存・削除を拒否する。
+    // （以前は playerId だけで誰のセーブでも書き換えられる状態だった）
+    let saveToken = null;
 
     // 実績データ (レア実績フラグ isRare を追加し、新しい実績を追加)
     const achievementsData = {
@@ -6963,6 +6967,15 @@ animation:facilitySweep 6s linear infinite;
             playerName,
             lastSaveTime: Date.now()
         };
+        // クラウドの読み込みに失敗している間は、ローカルにも書き込まない。
+        // ここを通すと、端末に残っている正しいセーブが
+        // 0隻の初期状態で上書きされて失われる。
+        // （クラウド側は syncToCloud で守られていたが、localStorage は
+        //   無条件に書いていたため、こちらだけ消えてしまっていた）
+        if (cloudLoadFailed) {
+            updateCloudStatus('⚠️ 読込失敗のため保存を停止中（端末のデータを保護しています）');
+            return;
+        }
         localStorage.setItem('kurofuneSaveData', JSON.stringify(saveData));
 
         // クラウドへの同期は連打防止のためデバウンス（3秒間隔）
@@ -7023,6 +7036,24 @@ animation:facilitySweep 6s linear infinite;
         return id;
     }
 
+    // セーブ用の秘密鍵を用意する。playerId はランキングから誰でも読めてしまうので、
+    // 「自分のセーブを書き換えてよいのは自分だけ」を示すための鍵を別に持つ。
+    function getOrCreateSaveToken() {
+        let t = localStorage.getItem('kurofuneSaveToken');
+        if (!t) {
+            if (window.crypto && crypto.getRandomValues) {
+                const buf = new Uint8Array(24);
+                crypto.getRandomValues(buf);
+                t = Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join('');
+            } else {
+                t = (Date.now().toString(36) + Math.random().toString(36).substring(2) +
+                     Math.random().toString(36).substring(2)).padEnd(32, '0').substring(0, 32);
+            }
+            localStorage.setItem('kurofuneSaveToken', t);
+        }
+        return t;
+    }
+
     function syncToCloud(saveData) {
         if (!netlifyEnabled || !playerId) return;
         // 読み込みに失敗した状態では絶対に保存しない。
@@ -7045,19 +7076,38 @@ animation:facilitySweep 6s linear infinite;
             }
         }
         lastKnownCloudScore = Number(saveData.clickerScore) || 0;
+        // サーバー側の巻き戻しガードにも、意図した減少かどうかを伝える
+        const shrinkIsIntended = allowShrinkSave;
         allowShrinkSave = false;
 
         isCloudSyncing = true;
         updateCloudStatus('同期中…');
-        
-        // セーブデータをNetlify Functionsに送信
+
+        // セーブデータをサーバーに送信
         fetch(getNetlifyFunctionUrl('save-game'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ playerId, saveData })
+            body: JSON.stringify({
+                playerId,
+                saveData,
+                saveToken: saveToken || getOrCreateSaveToken(),
+                allowShrink: shrinkIsIntended
+            })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(response => response.json().then(body => ({ status: response.status, body })))
+        .then(({ status, body: data }) => {
+            // サーバーが異常を検知して弾いた場合は、必ず本人に知らせる。
+            // 黙って失敗させると、原因不明の消失として扱われてしまう。
+            if (status === 409 || status === 403) {
+                isCloudSyncing = false;
+                cloudLoadFailed = true;   // 以降の自動保存を止める
+                console.error('サーバーが保存を拒否しました:', data);
+                updateCloudStatus(status === 403
+                    ? '⚠️ 保存を拒否されました（認証不一致）'
+                    : '⚠️ 異常を検知。保存を停止しました');
+                showCloudLoadFailureWarning();
+                throw new Error(data.code || 'REJECTED');
+            }
             if (data.success) {
                 // ランキング用データも同時更新
                 return fetch(getNetlifyFunctionUrl('update-ranking'), {
@@ -7168,7 +7218,9 @@ animation:facilitySweep 6s linear infinite;
 
         listEl.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">読み込み中…</p>`;
 
-        fetch(getNetlifyFunctionUrl('get-ranking'))
+        // 自分の行を光らせるために自分のIDだけを渡す。
+        // サーバーは他人のIDを一切返さなくなった（以前は全員のIDが見えていた）。
+        fetch(getNetlifyFunctionUrl('get-ranking') + '?me=' + encodeURIComponent(playerId || ''))
             .then(response => response.json())
             .then(data => {
                 if (!data.success || !data.data || data.data.length === 0) {
@@ -7179,7 +7231,7 @@ animation:facilitySweep 6s linear infinite;
                 let rank = 0;
                 data.data.forEach((playerData) => {
                     rank++;
-                    const isMe = playerData.playerId === playerId;
+                    const isMe = !!playerData.isMe;
                     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}位`;
                     html += `
                         <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-radius:8px; margin-bottom:8px;
@@ -7343,6 +7395,7 @@ animation:facilitySweep 6s linear infinite;
     function loadGame() {
         // プレイヤーID・名前の初期化
         playerId = getOrCreatePlayerId();
+        saveToken = getOrCreateSaveToken();
         playerName = localStorage.getItem('kurofunePlayerName') || '名無しの船長';
         const nameInput = document.getElementById('player-name-input');
         if (nameInput) nameInput.value = playerName;
@@ -7394,16 +7447,19 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function resetSaveData() {
-        allowShrinkSave = true;
-        lastKnownCloudScore = 0;
         unlockAchievement('deleteSave');
         if(confirm('本当にこれまでの歴史（セーブデータ）を消し去りますか？\nオンラインに保存されたデータも削除されます。')) {
+            // ガードの解除は「本当に消す」と答えた後だけ行う。
+            // 以前はここより前で解除していたため、キャンセルを押しただけで
+            // そのセッションの巻き戻し保護が効かなくなっていた。
+            allowShrinkSave = true;
+            lastKnownCloudScore = 0;
             localStorage.removeItem('kurofuneSaveData');
             if (netlifyEnabled && playerId) {
                 fetch(getNetlifyFunctionUrl('delete-save'), {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ playerId })
+                    body: JSON.stringify({ playerId, saveToken: saveToken || getOrCreateSaveToken() })
                 })
                 .then(response => response.json())
                 .then(data => {

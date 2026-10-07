@@ -23,11 +23,47 @@ function redisRequest(command) {
       },
     };
     const req = https.request(opts, (r) => {
-      let body = '';
-      r.on('data', chunk => { body += chunk; });
+      const _chunks = [];
+      r.on('data', chunk => { _chunks.push(Buffer.from(chunk)); });
       r.on('end', () => {
+        const body = Buffer.concat(_chunks).toString('utf8');
         try { resolve(JSON.parse(body)); }
         catch (e) { reject(new Error('Redis parse error: ' + body)); }
+      });
+    });
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
+
+
+// 複数コマンドをまとめて1往復で投げる（履歴退避と本保存を同時に行うため）
+function redisPipeline(commands) {
+  return new Promise((resolve, reject) => {
+    if (!REDIS_URL || !REDIS_TOKEN) {
+      return reject(new Error('UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN is not set'));
+    }
+    const url  = new URL(REDIS_URL);
+    const data = JSON.stringify(commands);
+    const opts = {
+      hostname: url.hostname,
+      port:     443,
+      path:     (url.pathname.replace(/\/$/, '') || '') + '/pipeline' + (url.search || ''),
+      method:   'POST',
+      headers: {
+        'Authorization':  `Bearer ${REDIS_TOKEN}`,
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(data),
+      },
+    };
+    const req = https.request(opts, (r) => {
+      const _chunks = [];
+      r.on('data', chunk => { _chunks.push(Buffer.from(chunk)); });
+      r.on('end', () => {
+        const body = Buffer.concat(_chunks).toString('utf8');
+        try { resolve(JSON.parse(body)); }
+        catch (e) { reject(new Error('Redis pipeline parse error: ' + body)); }
       });
     });
     req.on('error', reject);
@@ -48,9 +84,10 @@ const CORS = {
 function parseBody(req) {
   if (req.body && typeof req.body === 'object') return Promise.resolve(req.body);
   return new Promise((resolve, reject) => {
-    let raw = '';
-    req.on('data', chunk => { raw += chunk; });
+    const _chunks = [];
+    req.on('data', chunk => { _chunks.push(Buffer.from(chunk)); });
     req.on('end', () => {
+      const raw = Buffer.concat(_chunks).toString('utf8');
       try { resolve(raw ? JSON.parse(raw) : {}); }
       catch (e) { reject(new Error('Invalid JSON body')); }
     });
@@ -58,4 +95,4 @@ function parseBody(req) {
   });
 }
 
-module.exports = { redisRequest, CORS, parseBody };
+module.exports = { redisRequest, redisPipeline, CORS, parseBody };
