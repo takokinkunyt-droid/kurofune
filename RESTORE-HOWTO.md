@@ -1,7 +1,19 @@
 # セーブ復元の手順（管理者用）
 
-消えたセーブを `api/restore-save.js` 経由で戻す手順です。
+消えたセーブを `api/restore-save.js` 経由で戻します。
 このエンドポイントは `ADMIN_SECRET` を知っている人だけが使えます。
+
+> ## ⚠️ 貼り付ける場所に注意
+>
+> この手順のコマンドは **ターミナル** 用です。
+>
+> - Windows → **PowerShell**（スタートメニューで「PowerShell」と検索）
+> - Mac → **ターミナル**（Launchpad →「ターミナル」）
+>
+> **ブラウザの F12 コンソールに貼ると `Uncaught SyntaxError` になります。**
+> あれは JavaScript しか動きません。
+
+---
 
 ## 1. Vercel に ADMIN_SECRET を設定する
 
@@ -12,49 +24,94 @@
    |---|---|
    | `ADMIN_SECRET` | 自分で決めた長い文字列（他人に教えない） |
 
-3. **Deployments** から最新のデプロイを **Redeploy**
+3. **Deployments** → 最新のものを **Redeploy**
    （環境変数は再デプロイしないと反映されません）
 
-`admin-ban.js` も同じ `ADMIN_SECRET` を使うので、設定は1つで足ります。
+`admin-ban.js` も同じ鍵を使うので、設定は1つで足ります。
 
-## 2. 復元を実行する
+---
 
-`restore-payload.json` が書き戻す内容です。
-中身は 10/06 の記録を土台に、失われた項目だけを戻したものです。
-施設の個数・強化レベル・実績は**一切変更していません**。
+## 2. restore-payload.json を置く
 
-ターミナルから実行する場合：
+ダウンロードした `restore-payload.json` の場所でターミナルを開きます。
+ふつうはダウンロードフォルダです。
+
+**Windows (PowerShell)**
+```powershell
+cd ~\Downloads
+```
+
+**Mac**
+```sh
+cd ~/Downloads
+```
+
+---
+
+## 3. 復元を実行する
+
+### Windows (PowerShell)
+
+`ここにADMIN_SECRET` と `ここにドメイン` の2か所を書き換えてから、
+**全部まとめて** PowerShell に貼り付けてください。
+
+```powershell
+$secret = 'ここにADMIN_SECRET'
+$domain = 'https://ここにドメイン'
+
+# payload の先頭に secret を差し込む（JSONを作り直さないので壊れません）
+$raw  = Get-Content -Raw -Encoding UTF8 .\restore-payload.json
+$body = '{"secret":"' + $secret + '",' + $raw.Substring(1)
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($body)
+
+Invoke-RestMethod -Uri "$domain/api/restore-save" -Method Post `
+  -ContentType 'application/json' -Body $bytes
+```
+
+### Mac / Linux
 
 ```sh
-# SECRET と DOMAIN を自分のものに置き換える
 SECRET='ここにADMIN_SECRET'
-DOMAIN='https://ここにゲームのドメイン'
+DOMAIN='https://ここにドメイン'
 
-# payload に secret を足して送る
-python3 - "$SECRET" <<'PY' > /tmp/req.json
-import json,sys
-d=json.load(open('restore-payload.json'))
-d['secret']=sys.argv[1]
-json.dump(d,open('/tmp/req.json','w'),ensure_ascii=False)
-PY
+# payload の先頭に secret を差し込む
+{ printf '{"secret":"%s",' "$SECRET"; tail -c +2 restore-payload.json; } > req.json
 
 curl -X POST "$DOMAIN/api/restore-save" \
   -H 'Content-Type: application/json' \
-  --data-binary @/tmp/req.json
+  --data-binary @req.json
+
+rm req.json
 ```
 
-成功すると、戻した内容が返ってきます。
+### 成功した時の返り
 
 ```json
 {"success":true,"restored":{"clickerScore":1.4e17,"reincarnationCount":40,
- "fragments":2000,"sakokuShards":36000,"skillCount":25,"facilityCount":231}}
+ "fragments":2000,"sakokuShards":36000,"currentEra":"edo",
+ "skillCount":25,"facilityCount":231}}
 ```
 
-## 3. 確認する
+`skillCount: 25` は 昇天15 + 超昇天10 の合計です。
+
+### うまくいかない時
+
+| 返り | 原因 |
+|---|---|
+| `{"error":"Forbidden"}` | `ADMIN_SECRET` が違う、または再デプロイしていない |
+| `{"error":"Missing playerId"}` | payload の差し込みが失敗している。`$body` の先頭が `{"secret":"...","playerId":"player_...` になっているか確認 |
+| 404 | ドメインが違う、または `api/restore-save.js` がまだデプロイされていない |
+| `Invalid JSON body` | ファイルの文字コードが UTF-8 以外になっている |
+
+---
+
+## 4. 確認する
 
 1. ゲームのページを開いて再読み込み
 2. 隻数・転生回数・かけら・昇天ツリーが戻っているか確認
 3. ランキングにも反映されます（並び順と表示用の記録の両方を更新します）
+
+---
 
 ## 書き戻す内容
 
@@ -67,25 +124,38 @@ curl -X POST "$DOMAIN/api/restore-save" \
 | 鎖国のかけら | 36,000 | 推定（時間操作 35,000 を払える額） |
 | 転生 / 超転生 | 40 / 5 | 推定。実際の値は記録が残っていない |
 | 条約 | 両方締結済み | 「開国」実績が解除済み |
-| 施設・実績 | 変更なし | 無傷だったので触らない |
+| 施設・実績 | **変更なし** | 無傷だったので触らない |
 
-## 元に戻したい場合
+---
+
+## やり直したい場合
 
 `restore-save.js` は書き込む前に、いま入っているデータも履歴へ積みます。
-やり直したい時は履歴の一覧を見て、番号を指定して戻せます。
 
+**履歴の一覧**（要約だけなので鍵は不要。ブラウザのアドレスバーに直接入れてもOK）
+```
+https://ここにドメイン/api/restore-save?playerId=player_mqn98q4c_ja51ya9s&action=list
+```
+
+**番号を指定して戻す（PowerShell）**
+```powershell
+$secret = 'ここにADMIN_SECRET'
+$domain = 'https://ここにドメイン'
+Invoke-RestMethod -Uri "$domain/api/restore-save" -Method Post `
+  -ContentType 'application/json' `
+  -Body "{""secret"":""$secret"",""playerId"":""player_mqn98q4c_ja51ya9s"",""index"":0}"
+```
+
+**番号を指定して戻す（Mac / Linux）**
 ```sh
-# 履歴の一覧（要約だけなので secret 不要）
-curl "$DOMAIN/api/restore-save?playerId=player_mqn98q4c_ja51ya9s&action=list"
-
-# 番号を指定して戻す
-curl -X POST "$DOMAIN/api/restore-save" \
-  -H 'Content-Type: application/json' \
+curl -X POST "$DOMAIN/api/restore-save" -H 'Content-Type: application/json' \
   -d "{\"secret\":\"$SECRET\",\"playerId\":\"player_mqn98q4c_ja51ya9s\",\"index\":0}"
 ```
+
+---
 
 ## 他の人のデータが消えた時
 
 これ以降は `save-game.js` が上書きの前に20世代分のバックアップを残します。
-消えた人が出たら、履歴の一覧を見て、壊れる前の番号を指定するだけで戻せます。
-payload を手で組む必要はありません。
+消えた人が出たら、上の「履歴の一覧」を開いて壊れる前の番号を見つけ、
+`index` 指定で戻すだけです。payload を手で組む必要はありません。
