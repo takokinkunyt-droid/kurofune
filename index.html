@@ -6967,6 +6967,15 @@ animation:facilitySweep 6s linear infinite;
             playerName,
             lastSaveTime: Date.now()
         };
+        // クラウドの読み込みに失敗している間は、ローカルにも書き込まない。
+        // ここを通すと、端末に残っている正しいセーブが
+        // 0隻の初期状態で上書きされて失われる。
+        // （クラウド側は syncToCloud で守られていたが、localStorage は
+        //   無条件に書いていたため、こちらだけ消えてしまっていた）
+        if (cloudLoadFailed) {
+            updateCloudStatus('⚠️ 読込失敗のため保存を停止中（端末のデータを保護しています）');
+            return;
+        }
         localStorage.setItem('kurofuneSaveData', JSON.stringify(saveData));
 
         // クラウドへの同期は連打防止のためデバウンス（3秒間隔）
