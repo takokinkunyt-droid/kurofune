@@ -8451,7 +8451,8 @@ animation:facilitySweep 6s linear infinite;
         }, 100);
     }
     
-    function stopClickerLoop() { 
+    function stopClickerLoop() {
+        clearClickParticles(); 
         if (typeof clickerInterval !== 'undefined' && clickerInterval) { clearInterval(clickerInterval); clickerInterval = null; }
         window.removeEventListener('keydown', handleSpaceBarClick); 
     }
@@ -8473,6 +8474,78 @@ animation:facilitySweep 6s linear infinite;
         }
     }
 
+    // ==========================================
+    // クリック時のパーティクル
+    //
+    // 以前は1個ずつ別の requestAnimationFrame ループを持ち、毎フレーム
+    // left / top を書き換えていた。これには2つ問題があった。
+    //   ・left / top はレイアウトを起こすので、個数が増えると一気に重くなる
+    //   ・寿命が「40フレーム」基準なので、重くなってFPSが落ちると
+    //     寿命が実時間で伸び、さらに溜まるという悪循環になる
+    //     （777倍や7倍で連打したときに数百個まで増えていた）
+    //
+    // ループは全体で1つだけ。位置は transform のみで動かし、
+    // 寿命は実時間で決める。同時に出せる数にも上限を設ける。
+    // ==========================================
+    const PARTICLE_EMOJIS = ['✨','⭐','💥','💰','🌊'];
+    const PARTICLE_LIFE_MS = 620;
+    const PARTICLE_MAX = 60;      // これ以上は作らない（連打の暴走を止める）
+    const POP_MAX = 14;           // 「+N」の表示数の上限
+    let activeParticles = [];
+    let lastClickUiUpdate = 0;
+    let particleRafId = 0;
+
+    function spawnClickParticles(base, posX, posY) {
+        const room = PARTICLE_MAX - activeParticles.length;
+        if (room <= 0) return;
+        const n = Math.min(5, room);
+        const now = performance.now();
+        for (let i = 0; i < n; i++) {
+            const el = document.createElement('div');
+            el.className = 'particle';
+            el.textContent = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)];
+            // 位置の基準は最初に一度だけ決める。以後は transform だけで動かす。
+            el.style.left = posX + 'px';
+            el.style.top = posY + 'px';
+            el.style.willChange = 'transform';
+            el.style.transform = 'translate(-50%, -50%)';
+            base.appendChild(el);
+            activeParticles.push({
+                el, t0: now,
+                vx: (Math.random() - 0.5) * 900,          // px/秒
+                vy: (Math.random() * -600) - 300,
+                rotSpeed: (Math.random() - 0.5) * 1200,   // 度/秒
+            });
+        }
+        if (!particleRafId) particleRafId = requestAnimationFrame(stepParticles);
+    }
+
+    function stepParticles(now) {
+        const gravity = 2800;   // px/秒^2
+        let write = 0;
+        for (let i = 0; i < activeParticles.length; i++) {
+            const p = activeParticles[i];
+            const t = (now - p.t0) / 1000;
+            if (now - p.t0 >= PARTICLE_LIFE_MS) { p.el.remove(); continue; }
+            const x = p.vx * t;
+            const y = p.vy * t + 0.5 * gravity * t * t;
+            const scale = 1 - (now - p.t0) / PARTICLE_LIFE_MS;
+            p.el.style.transform =
+                'translate(-50%, -50%) translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)' +
+                ' scale(' + scale.toFixed(3) + ') rotate(' + (p.rotSpeed * t).toFixed(0) + 'deg)';
+            activeParticles[write++] = p;
+        }
+        activeParticles.length = write;
+        particleRafId = activeParticles.length ? requestAnimationFrame(stepParticles) : 0;
+    }
+
+    // 画面を離れるときに取り残さない
+    function clearClickParticles() {
+        activeParticles.forEach(p => p.el.remove());
+        activeParticles.length = 0;
+        if (particleRafId) { cancelAnimationFrame(particleRafId); particleRafId = 0; }
+    }
+
     function clickKurofune(e) {
         const base = document.getElementById('clicker-base');
         if(!base) return;
@@ -8487,51 +8560,10 @@ animation:facilitySweep 6s linear infinite;
 
         playSE('click'); 
         
-        // パーティクル生成処理の統合（軽量化モード時はスキップ）
+        // パーティクル生成（軽量化モード時はスキップ）
         const base = document.getElementById('clicker-base');
         if (base && !liteMode) {
-            const emojis = ['✨','⭐','💥','💰','🌊'];
-            for (let i = 0; i < 5; i++) {
-                let p = document.createElement('div'); 
-                p.className = 'particle'; 
-                p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-                
-                let vx = (Math.random() - 0.5) * 15;
-                let vy = (Math.random() * -10) - 5; 
-                let gravity = 0.8;
-                let rot = 0;
-                let rotSpeed = (Math.random() - 0.5) * 20;
-                
-                let curX = posX;
-                let curY = posY;
-                let life = 40; 
-                let currentFrame = 0;
-                
-                p.style.left = curX + 'px'; 
-                p.style.top = curY + 'px';
-                p.style.transform = `translate(-50%, -50%) scale(1) rotate(0deg)`;
-                base.appendChild(p);
-
-                function updateP() {
-                    currentFrame++;
-                    vy += gravity; 
-                    curX += vx;
-                    curY += vy;
-                    rot += rotSpeed;
-                    
-                    let scale = 1 - (currentFrame / life);
-                    p.style.left = curX + 'px';
-                    p.style.top = curY + 'px';
-                    p.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rot}deg)`;
-                    
-                    if (currentFrame < life) {
-                        requestAnimationFrame(updateP);
-                    } else {
-                        p.remove();
-                    }
-                }
-                requestAnimationFrame(updateP);
-            }
+            spawnClickParticles(base, posX, posY);
         }
 
         let currentClickPower = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1); let isCrit = false;
@@ -8547,7 +8579,13 @@ animation:facilitySweep 6s linear infinite;
         
         pop.style.left = `${posX}px`; pop.style.top = `${posY}px`;
         
-        if (base) base.appendChild(pop); setTimeout(() => pop.remove(), 800);
+        if (base) {
+            // 連打で「+N」が溜まらないよう、古いものから間引く
+            const pops = base.getElementsByClassName('click-pop-num');
+            while (pops.length >= POP_MAX) pops[0].remove();
+            base.appendChild(pop);
+            setTimeout(() => pop.remove(), 800);
+        }
         
         if (clickerScore >= 1000) unlockAchievement('ship1000');
         if (clickerScore >= 10000) unlockAchievement('ship10000');
@@ -8559,7 +8597,11 @@ animation:facilitySweep 6s linear infinite;
         if (typeof facilities !== 'undefined' && facilities.flag && facilities.flag.count >= 1000000) unlockAchievement('flagLover');
         if (clickPower >= 100) unlockAchievement('clickLover');
 
-        updateClickerUI();
+        // updateClickerUI は1回 6ms 前後かかる。連打中にクリックごとに
+        // 呼ぶと、それだけで処理時間を食い潰す。
+        // 100ms ごとのループでも呼ばれているので、ここでは間引く。
+        const nowUi = performance.now();
+        if (nowUi - lastClickUiUpdate >= 90) { lastClickUiUpdate = nowUi; updateClickerUI(); }
     }
 
     function spawnGoldenShip() {
