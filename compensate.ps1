@@ -1,6 +1,8 @@
 # ============================================================
 #  黒船クリッカー 補填スクリプト（PowerShell）
 #
+#  ※ exit を使っていません。コンソールに貼り付けても窓は閉じません。
+#
 #  使い方
 #    1. 下の $secret と $domain を書き換える
 #    2. PowerShell でこのファイルがある場所へ移動
@@ -59,7 +61,8 @@ function Find-Player($name) {
 $st = Invoke-RestMethod -Uri "$domain/api/restore-save?action=status"
 if (-not $st.adminSecretConfigured) {
   Write-Host "ADMIN_SECRET が未設定です。Vercel に設定して Redeploy してください。" -ForegroundColor Red
-  exit 1
+  Read-Host '何かキーを押すと終了します'
+  return
 }
 Write-Host "ADMIN_SECRET 設定済み（$($st.secretLength) 文字）`n" -ForegroundColor Green
 
@@ -82,11 +85,11 @@ foreach ($pair in @(
   $targets += @{ playerId = $h.playerId; name = $h.playerName; set = $pair.set }
 }
 
-if ($targets.Count -eq 0) { Write-Host "対象がありません。中止します。" -ForegroundColor Red; exit 1 }
+if ($targets.Count -eq 0) { Write-Host "対象がありません。中止します。" -ForegroundColor Red; Read-Host "何かキーを押すと終了します"; return }
 
 # ---- 2. 確認 -------------------------------------------------
 $ans = Read-Host "この $($targets.Count) 件を実行しますか？ (y/n)"
-if ($ans -ne 'y') { Write-Host "中止しました。" -ForegroundColor Yellow; exit 0 }
+if ($ans -ne 'y') { Write-Host "中止しました。" -ForegroundColor Yellow; Read-Host "何かキーを押すと終了します"; return }
 
 # ---- 3. 実行 -------------------------------------------------
 foreach ($t in $targets) {
@@ -109,3 +112,5 @@ foreach ($t in $targets) {
 Write-Host "`n完了しました。本人にページの再読み込みを伝えてください。" -ForegroundColor Cyan
 Write-Host "書き換える前の状態は履歴に積まれているので、やり直せます。"
 Write-Host "  $domain/api/restore-save?playerId=<ID>&action=list"
+
+Read-Host "`n何かキーを押すと終了します"

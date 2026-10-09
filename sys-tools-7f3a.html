@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>保守用コンソール</title>
+<style>
+  :root {
+    --bg:#0e1117; --panel:#161b22; --line:#2a313c; --fg:#e6edf3; --dim:#8b949e;
+    --accent:#d4af37; --ok:#3fb950; --warn:#d29922; --err:#f85149; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+         font-size:15px; line-height:1.6; }
+  .wrap { max-width:900px; margin:0 auto; padding:24px 16px 80px; }
+  h1 { font-size:1.25rem; margin:0 0 4px; letter-spacing:.04em; }
+  .sub { color:var(--dim); font-size:.85rem; margin-bottom:24px; }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+            padding:18px; margin-bottom:16px; }
+  h2 { font-size:1rem; margin:0 0 12px; color:var(--accent); letter-spacing:.03em; }
+  label { display:block; font-size:.8rem; color:var(--dim); margin:10px 0 4px; }
+  input, select, textarea {
+    width:100%; background:#0b0e13; color:var(--fg); border:1px solid var(--line);
+    border-radius:6px; padding:9px 11px; font-size:.95rem; font-family:inherit;
+  }
+  input[type=number], .mono, textarea { font-family:var(--mono); }
+  button { background:#21262d; color:var(--fg); border:1px solid var(--line);
+           border-radius:6px; padding:9px 16px; font-size:.9rem; cursor:pointer;
+           font-family:inherit; margin:10px 8px 0 0; }
+  button:hover { background:#2d333b; border-color:#3d444d; }
+  button.primary { background:var(--accent); color:#1a1200; border-color:var(--accent); font-weight:700; }
+  button.primary:hover { filter:brightness(1.1); }
+  button.danger { border-color:var(--err); color:var(--err); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  pre { background:#0b0e13; border:1px solid var(--line); border-radius:6px;
+        padding:12px; overflow:auto; max-height:360px; font-family:var(--mono);
+        font-size:.8rem; white-space:pre-wrap; word-break:break-all; margin:12px 0 0; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; margin-top:12px; }
+  th, td { text-align:left; padding:7px 9px; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:600; font-size:.75rem; }
+  td.mono { font-family:var(--mono); font-size:.76rem; }
+  tr.pick:hover { background:#1c222b; cursor:pointer; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  .row > * { flex:1 1 180px; }
+  .pill { display:inline-block; font-size:.72rem; padding:2px 8px; border-radius:99px;
+          border:1px solid var(--line); color:var(--dim); margin-left:8px; }
+  .ok { color:var(--ok); } .warn { color:var(--warn); } .err { color:var(--err); }
+  .note { font-size:.8rem; color:var(--dim); margin-top:10px; }
+  .hr { height:1px; background:var(--line); margin:16px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>保守用コンソール</h1>
+  <div class="sub">鍵はこのタブを閉じると消えます。保存されません。</div>
+
+  <!-- 1. 鍵 -->
+  <section>
+    <h2>1. 管理キー</h2>
+    <label>ADMIN_SECRET</label>
+    <input id="secret" type="password" class="mono" placeholder="Vercel に設定した文字列" autocomplete="off">
+    <button class="primary" onclick="checkSecret()">確認する</button>
+    <div id="secretState" class="note">未確認</div>
+  </section>
+
+  <!-- 2. 検索 -->
+  <section>
+    <h2>2. プレイヤーを探す</h2>
+    <label>プレイヤー名（部分一致でも可）</label>
+    <input id="whoisName" placeholder="武蔵野東中学校">
+    <button onclick="whois()">検索</button>
+    <div id="whoisOut"></div>
+  </section>
+
+  <!-- 3. 選択中 -->
+  <section>
+    <h2>3. 対象 <span id="pickedPill" class="pill">未選択</span></h2>
+    <label>playerId</label>
+    <input id="playerId" class="mono" placeholder="player_xxxxxxxx_xxxxxxxx">
+    <button onclick="listHistory()">セーブ履歴を見る</button>
+    <div id="histOut"></div>
+  </section>
+
+  <!-- 4. 補填 -->
+  <section>
+    <h2>4. 補填する</h2>
+    <label>内容のひな形</label>
+    <select id="preset" onchange="applyPreset()">
+      <option value="ships">隻数だけ戻す（既存プレイヤー向け）</option>
+      <option value="full">補填一式を渡す（新規・サブ垢向け）</option>
+      <option value="custom">手入力</option>
+    </select>
+    <label>送る内容（set）</label>
+    <textarea id="setJson" rows="12" spellcheck="false"></textarea>
+    <div class="note">
+      触れるのは隻数・かけら・転生回数・チケットと、昇天／超昇天アップグレードだけです。
+      施設・実績・プレイヤー名は変更されません。<br>
+      書き換える前の状態は履歴に積まれるので、あとから戻せます。
+    </div>
+    <button class="primary" onclick="doPatch()">この内容で補填する</button>
+    <div id="patchOut"></div>
+  </section>
+
+  <!-- 5. 履歴から復元 -->
+  <section>
+    <h2>5. 履歴から復元する</h2>
+    <div class="row">
+      <div><label>戻す世代（index）</label><input id="restoreIndex" type="number" value="0" min="0"></div>
+    </div>
+    <button class="danger" onclick="doRestore()">この世代に戻す</button>
+    <div class="note">いま入っているデータも履歴に積まれるので、取り消せます。</div>
+    <div id="restoreOut"></div>
+  </section>
+
+  <!-- 6. シーズン -->
+  <section>
+    <h2>6. シーズンの退避</h2>
+    <div class="row">
+      <div><label>シーズン番号</label><input id="season" type="number" value="1" min="1"></div>
+    </div>
+    <button onclick="season('preview')">件数を数える</button>
+    <button onclick="season('archive')">全員を退避する</button>
+    <button onclick="season('verify')">退避できたか検算する</button>
+    <div class="note">
+      一斉リセットの前に必ず退避してください。検算で <span class="mono">safeToReset: true</span>
+      が出るまでリセットしないこと。
+    </div>
+    <div id="seasonOut"></div>
+  </section>
+
+</div>
+
+<script>
+const API = location.origin + '/api';
+const $ = id => document.getElementById(id);
+const secret = () => $('secret').value.trim();
+
+function show(elId, data, cls) {
+  const txt = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
+  $(elId).innerHTML = '<pre class="' + (cls || '') + '">' + escapeHtml(txt) + '</pre>';
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+async function api(path, opts) {
+  const res = await fetch(API + path, opts);
+  let body;
+  try { body = await res.json(); } catch (e) { body = { error: 'JSONを返しませんでした', status: res.status }; }
+  return { status: res.status, body };
+}
+async function post(path, obj) {
+  return api(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(obj),
+  });
+}
+
+// ---- 1. 鍵 ----------------------------------------------------
+async function checkSecret() {
+  const { body } = await api('/restore-save?action=status');
+  if (!body.adminSecretConfigured) {
+    $('secretState').innerHTML = '<span class="err">ADMIN_SECRET が未設定です。'
+      + 'Vercel の Settings → Environment Variables に追加して、Deployments から Redeploy してください。</span>';
+    return;
+  }
+  if (!secret()) {
+    $('secretState').innerHTML = '<span class="warn">サーバー側は設定済み（'
+      + body.secretLength + ' 文字）。上の欄に鍵を入れてください。</span>';
+    return;
+  }
+  if (secret().length !== body.secretLength) {
+    $('secretState').innerHTML = '<span class="err">文字数が合いません。'
+      + 'サーバー側 ' + body.secretLength + ' 文字 / 入力 ' + secret().length + ' 文字。'
+      + '前後に空白が入っていないか確認してください。</span>';
+    return;
+  }
+  // 実際に鍵が通るか、無害な検索で試す
+  const t = await api('/restore-save?action=whois&secret='
+    + encodeURIComponent(secret()) + '&name=' + encodeURIComponent('__keycheck__'));
+  if (t.status === 403) {
+    $('secretState').innerHTML = '<span class="err">鍵が違います。</span>';
+  } else {
+    $('secretState').innerHTML = '<span class="ok">鍵が通りました。</span>';
+  }
+}
+
+// ---- 2. 検索 --------------------------------------------------
+async function whois() {
+  if (!secret()) return show('whoisOut', '先に管理キーを入れてください。');
+  const name = $('whoisName').value.trim();
+  if (!name) return show('whoisOut', 'プレイヤー名を入れてください。');
+  const { status, body } = await api('/restore-save?action=whois&secret='
+    + encodeURIComponent(secret()) + '&name=' + encodeURIComponent(name));
+  if (status !== 200) return show('whoisOut', body);
+  if (!body.hits || !body.hits.length) return show('whoisOut', '見つかりませんでした。');
+
+  let h = '<table><tr><th>名前</th><th>隻数</th><th>転生</th><th>かけら</th><th>時代</th><th></th></tr>';
+  body.hits.forEach((p, i) => {
+    h += '<tr class="pick" onclick="pick(' + i + ')">'
+      + '<td>' + escapeHtml(p.playerName) + (p.exact ? '' : ' <span class="pill">部分一致</span>') + '</td>'
+      + '<td class="mono">' + Number(p.clickerScore).toLocaleString() + '</td>'
+      + '<td class="mono">' + p.reincarnationCount + '</td>'
+      + '<td class="mono">' + Number(p.fragments).toLocaleString() + '</td>'
+      + '<td>' + escapeHtml(p.era || '') + '</td>'
+      + '<td><button>選ぶ</button></td></tr>';
+  });
+  h += '</table>';
+  $('whoisOut').innerHTML = h;
+  window._hits = body.hits;
+}
+function pick(i) {
+  const p = window._hits[i];
+  $('playerId').value = p.playerId;
+  $('pickedPill').textContent = p.playerName;
+  $('pickedPill').className = 'pill ok';
+  listHistory();
+}
+
+// ---- 3. 履歴 --------------------------------------------------
+async function listHistory() {
+  const pid = $('playerId').value.trim();
+  if (!pid) return show('histOut', 'playerId を入れてください。');
+  const { status, body } = await api('/restore-save?action=list&playerId=' + encodeURIComponent(pid));
+  if (status !== 200) return show('histOut', body);
+  if (!body.history || !body.history.length) {
+    return show('histOut', '履歴がありません。（バックアップ導入より前の状態か、まだ保存されていません）');
+  }
+  let h = '<table><tr><th>index</th><th>保存時刻</th><th>隻数</th><th>転生</th>'
+        + '<th>スキル</th><th>施設</th><th>実績</th></tr>';
+  body.history.forEach(r => {
+    h += '<tr><td class="mono">' + r.index + '</td>'
+      + '<td class="mono">' + new Date(r.lastSaveTime).toLocaleString('ja-JP') + '</td>'
+      + '<td class="mono">' + Number(r.clickerScore).toLocaleString() + '</td>'
+      + '<td class="mono">' + r.reincarnationCount + '</td>'
+      + '<td class="mono">' + r.skillCount + '</td>'
+      + '<td class="mono">' + r.facilityCount + '</td>'
+      + '<td class="mono">' + r.achievementCount + '</td></tr>';
+  });
+  h += '</table>';
+  $('histOut').innerHTML = h;
+}
+
+// ---- 4. 補填 --------------------------------------------------
+const PRESETS = {
+  ships: {
+    clickerScore: 1e15,
+    superSkills: { carryOver: true }
+  },
+  full: {
+    clickerScore: 1e15,
+    reincarnationCount: 10,
+    superReincarnationCount: 1,
+    fragments: 10000,
+    sakokuShards: 500,
+    skills: {
+      dawn: true, modShip: true, rebellion: true, modernization: true,
+      addBase1: true, addBase2: true,
+      kakera1: true, kakera2: true, kakera3: true,
+      senpan: true, senpanKill: true, achievementBoost: true,
+      keiyaku: true, kaikoku: true, ifSkill: true
+    },
+    superSkills: { root: true, carryOver: true }
+  }
+};
+function applyPreset() {
+  const k = $('preset').value;
+  if (k === 'custom') return;
+  $('setJson').value = JSON.stringify(PRESETS[k], null, 2);
+}
+async function doPatch() {
+  if (!secret()) return show('patchOut', '先に管理キーを入れてください。');
+  const pid = $('playerId').value.trim();
+  if (!pid) return show('patchOut', 'playerId を入れてください。');
+  let set;
+  try { set = JSON.parse($('setJson').value); }
+  catch (e) { return show('patchOut', 'JSONが壊れています: ' + e.message); }
+
+  const names = Object.keys(set).join(', ');
+  if (!confirm(pid + '\n\nこの項目を書き換えます:\n  ' + names
+      + '\n\n書き換える前の状態は履歴に積まれるので、あとから戻せます。\n実行しますか？')) return;
+
+  const { status, body } = await post('/restore-save', {
+    secret: secret(), playerId: pid, action: 'patch', set,
+  });
+  if (body.code === 'CARRYOVER_TRAP') {
+    return show('patchOut',
+      '拒否されました（CARRYOVER_TRAP）\n\n'
+      + '「If」を持っていて「持ち越し」が無い状態で隻数を渡すと、\n'
+      + '次の転生で隻数が全部消えます。前回それで2人の隻数が消えました。\n\n'
+      + 'set に superSkills.carryOver = true を足してください。\n\n'
+      + JSON.stringify(body, null, 2), 'err');
+  }
+  show('patchOut', body, status === 200 ? 'ok' : 'err');
+  if (status === 200) listHistory();
+}
+
+// ---- 5. 復元 --------------------------------------------------
+async function doRestore() {
+  if (!secret()) return show('restoreOut', '先に管理キーを入れてください。');
+  const pid = $('playerId').value.trim();
+  if (!pid) return show('restoreOut', 'playerId を入れてください。');
+  const idx = parseInt($('restoreIndex').value, 10);
+  if (!(idx >= 0)) return show('restoreOut', 'index を入れてください。');
+  if (!confirm(pid + '\n\n履歴 index ' + idx + ' の状態に戻します。\n'
+      + 'いま入っているデータも履歴に積まれるので、取り消せます。\n実行しますか？')) return;
+  const { status, body } = await post('/restore-save', { secret: secret(), playerId: pid, index: idx });
+  show('restoreOut', body, status === 200 ? 'ok' : 'err');
+  if (status === 200) listHistory();
+}
+
+// ---- 6. シーズン ----------------------------------------------
+async function season(action) {
+  const n = parseInt($('season').value, 10) || 1;
+  if (action === 'preview') {
+    const { body } = await api('/archive-season?action=preview&season=' + n);
+    return show('seasonOut', body);
+  }
+  if (!secret()) return show('seasonOut', '先に管理キーを入れてください。');
+  if (action === 'archive' &&
+      !confirm('シーズン ' + n + ' として全員のセーブを退避します。\n実行しますか？')) return;
+  const { status, body } = await post('/archive-season', { secret: secret(), action, season: n });
+  show('seasonOut', body, status === 200 ? 'ok' : 'err');
+}
+
+applyPreset();
+</script>
+</body>
+</html>
