@@ -13,6 +13,38 @@
            基本設定・リセット
            ========================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        /* ===== iOS Safari の勝手な拡大を止める =====
+           viewport の maximum-scale / user-scalable=no は iOS 10 以降
+           無視されるので、CSS 側で止める必要がある。
+
+           原因は2つある。
+           (1) ダブルタップ拡大
+               連打すると2回目が「ダブルタップ＝拡大」と判定される。
+               touch-action: manipulation がこれを無効にする。
+               ピンチ操作とスクロールは残るので、拡大したい人は困らない。
+           (2) 入力欄にフォーカスしたときの拡大
+               文字サイズが 16px 未満の input に触ると必ず拡大される。
+               賭け金の入力欄(0.95rem)とチャット欄(0.78rem)が該当していた。 */
+        html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        html, body { touch-action: manipulation; }
+        button, .nav-item, .hgc-btn, .home-game-card, .shop-card, .facility-row,
+        .circle-node, .kurofune-click-target, .gacha-box-img, .music-record,
+        .modal-close, .mobile-tab-btn, [onclick] {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        /* 連打で文字が選択されたり、長押しメニューが出るのを防ぐ */
+        .kurofune-click-target {
+            -webkit-user-select: none; user-select: none;
+            -webkit-touch-callout: none;
+        }
+        /* 入力欄は 16px 以上にする。小さいままだとフォーカスで拡大される。
+           見た目を変えたくないので、拡大が起きるスマホ幅だけ上書きする。 */
+        @media (max-width: 820px) {
+            input, textarea, select { font-size: 16px !important; }
+        }
         
         :root {
             --primary-color: #1a1a1a;
@@ -3258,7 +3290,12 @@
 
         /* 実績トースト通知 */
         #achievement-toast-container { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 100000; pointer-events: none; }
-        .achievement-toast { background: rgba(44, 62, 80, 0.95); color: white; border-left: 5px solid var(--gold-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 15px; pointer-events: auto; animation: slideUpToast 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; width: 350px; }
+        /* 実績の通知は読むだけのものなので、タップを通す。
+           pointer-events: auto のままだと、通知が出ている数秒間は
+           下にある黒船が押せなくなる（スマホでは通知が黒船に重なる）。
+           閉じる「×」だけは押せるように auto へ戻す。 */
+        .achievement-toast { background: rgba(44, 62, 80, 0.95); color: white; border-left: 5px solid var(--gold-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 15px; pointer-events: none; animation: slideUpToast 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; position: relative; width: min(350px, calc(100vw - 32px)); }
+        .achievement-toast .close-toast { pointer-events: auto; }
         
         /* レア実績トースト用デザイン追加 */
         .achievement-toast.rare {
