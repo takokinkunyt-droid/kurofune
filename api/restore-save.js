@@ -33,6 +33,41 @@ module.exports = async (req, res) => {
       const raw = await redisRequest(['lrange', `save_hist:${playerId}`, 0, 49]);
       const items = raw.result || [];
 
+      if (action === 'whois') {
+        // 管理者用の名前検索。
+        // get-ranking から playerId を取り除いたので（他人のセーブを
+        // 書き換えられる穴を塞ぐため）、補填先を名前から引けなくなった。
+        // 鍵を持っている人だけが引けるようにする。
+        if (!SECRET || q.secret !== SECRET) return res.status(403).json({ error: 'Forbidden' });
+        const needle = String(q.name || '').trim();
+        if (!needle) return res.status(400).json({ error: 'Missing name' });
+
+        const rank = await redisRequest(['zrevrange', 'ranking', 0, 999]);
+        const ids = rank.result || [];
+        const rows = await Promise.all(ids.map(id => redisRequest(['get', `player:${id}`])));
+
+        const hits = [];
+        ids.forEach((id, i) => {
+          const raw = rows[i] && rows[i].result;
+          if (!raw) return;
+          let p; try { p = JSON.parse(raw); } catch (e) { return; }
+          const name = String(p.playerName || '');
+          if (name === needle || name.includes(needle)) {
+            hits.push({
+              playerId: id,
+              playerName: name,
+              exact: name === needle,
+              clickerScore: p.clickerScore,
+              reincarnationCount: p.reincarnationCount,
+              fragments: p.fragments,
+              era: p.era,
+              rankingUpdatedAt: p.updatedAt,
+            });
+          }
+        });
+        return res.status(200).json({ success: true, query: needle, count: hits.length, hits });
+      }
+
       if (action === 'status') {
         // ADMIN_SECRET が設定されているかだけを返す。鍵そのものは絶対に返さない。
         // 「環境変数の未設定」と「鍵の不一致」を切り分けるための入口。
