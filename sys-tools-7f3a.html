@@ -162,7 +162,16 @@ async function post(path, obj) {
 
 // ---- 1. 鍵 ----------------------------------------------------
 async function checkSecret() {
-  const { body } = await api('/restore-save?action=status');
+  const { status, body } = await api('/restore-save?action=status');
+  // サーバーが status を返せていない場合を「未設定」と混同しない。
+  // 以前、restore-save.js が playerId の必須チェックを先に実行していたため
+  // status が 400 になり、ここで「未設定」と誤表示していた。
+  if (status !== 200 || body.adminSecretConfigured === undefined) {
+    $('secretState').innerHTML = '<span class="err">サーバーが状態を返しませんでした（HTTP '
+      + status + '）。デプロイが完了していない可能性があります。</span>'
+      + '<pre>' + escapeHtml(JSON.stringify(body, null, 2)) + '</pre>';
+    return;
+  }
   if (!body.adminSecretConfigured) {
     $('secretState').innerHTML = '<span class="err">ADMIN_SECRET が未設定です。'
       + 'Vercel の Settings → Environment Variables に追加して、Deployments から Redeploy してください。</span>';
