@@ -8376,8 +8376,37 @@ animation:facilitySweep 6s linear infinite;
         return accumulatedRequired + currentCost;
     }
 
+    // 超転生で隻数が全部消える場合だけ、押す前に確認を出す。
+    // 「If」を取ると転生が超転生に置き換わるので、「持ち越し」を
+    // 持っていない人は、警告なしに隻数を全部失ってしまう。
+    // 通常の転生（施設だけリセット）は想定どおりの挙動なので確認しない。
+    function confirmDestructiveReincarnation() {
+        const isSuper = !!skills.ifSkill;
+        if (!isSuper || superSkills.carryOver) return true;   // 危険なのはこの組み合わせだけ
+
+        const frags  = calcEquivalentNormalFragments(currentLifeScore);
+        const shards = getSuperShardGainPreview();
+        const now    = formatNumber(Math.floor(clickerScore));
+
+        const msg =
+            '【超転生】ちょっと待ってください。\n\n' +
+            'いま超転生すると、保有している黒船がすべて失われます。\n' +
+            '  ' + now + ' 隻  →  0 隻\n' +
+            '  施設もすべてリセットされます。\n\n' +
+            '得られるもの\n' +
+            '  開国のかけら +' + frags + '\n' +
+            '  鎖国のかけら +' + shards + '\n\n' +
+            '超昇天アップグレード「持ち越し」（鎖国のかけら 1個）を\n' +
+            '先に取得すると、隻数を維持したまま超転生できます。\n' +
+            '所持している鎖国のかけら: ' + sakokuShards + ' 個\n\n' +
+            'このまま隻数を捨てて超転生しますか？';
+
+        return confirm(msg);
+    }
+
     function triggerReincarnation() {
         if(calcPendingFragments() <= 0) return;
+        if(!confirmDestructiveReincarnation()) return;
         const overlay = document.getElementById('reincarnation-overlay');
         if (!overlay) {
             doReincarnation();
