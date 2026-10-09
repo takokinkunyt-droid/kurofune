@@ -5381,6 +5381,7 @@ animation:facilitySweep 6s linear infinite;
             if (resEl) { resEl.className = 'gg-result lose'; resEl.textContent = '黒船が足りません。'; }
             return 0;
         }
+        allowShrinkSave = true;   // 賭け金を場に出す＝意図した減少
         clickerScore -= bet;
         return bet;
     }
@@ -5663,6 +5664,10 @@ animation:facilitySweep 6s linear infinite;
         }
 
         // 卓に着いた時点で賭け金を場に預ける
+        // 賭け金を場に出す＝意図して隻数が減る操作。
+        // これを立てないと、巻き戻しガードが「データ破損」と誤検知して
+        // 保存を止め、警告バナーを出してしまう。
+        allowShrinkSave = true;
         clickerScore -= bet;
         tapMatchBet = bet;
         tapCount = 0;
@@ -5971,6 +5976,10 @@ animation:facilitySweep 6s linear infinite;
         bet = Math.floor(bet);
         if (!bet || clickerScore < bet) { setRtaMessage('この卓に着くには黒船が足りません。', true); return; }
         rtaPracticeMode = false;
+        // 賭け金を場に出す＝意図して隻数が減る操作。
+        // これを立てないと、巻き戻しガードが「データ破損」と誤検知して
+        // 保存を止め、警告バナーを出してしまう。
+        allowShrinkSave = true;
         clickerScore -= bet;
         rtaMatchBet = bet;
         setRtaMessage('');
@@ -6460,6 +6469,10 @@ animation:facilitySweep 6s linear infinite;
         omGame = game || 'oldmaid';
         if (bet > 0 && clickerScore < bet) { setOmMessage('この卓に着くには黒船が足りません。', true); return; }
 
+        // 賭け金を場に出す＝意図して隻数が減る操作。
+        // これを立てないと、巻き戻しガードが「データ破損」と誤検知して
+        // 保存を止め、警告バナーを出してしまう。
+        allowShrinkSave = true;
         if (bet > 0) clickerScore -= bet;
         omMatchBet = bet;
         omLastSeenDraw = null;
@@ -7242,9 +7255,12 @@ animation:facilitySweep 6s linear infinite;
         if (lastKnownCloudScore > 1000 && !allowShrinkSave) {
             const now = Number(saveData.clickerScore) || 0;
             if (now < lastKnownCloudScore * 0.01) {
-                console.warn('極端に少ないデータの保存を拒否しました', now, '<', lastKnownCloudScore);
-                updateCloudStatus('⚠️ 異常を検知したため保存を見送りました');
-                showCloudLoadFailureWarning();
+                // この1回の保存だけ見送る。読み込みは成功しているので
+                // cloudLoadFailed は立てず、以降の保存も普通に試す。
+                // 「破損した」という警告を出すのはやめた。賭けで全額失うなど、
+                // 正当に大きく減る場面があるため、脅かす文面はふさわしくない。
+                console.warn('大きく減った保存を1回見送りました', now, '<', lastKnownCloudScore);
+                updateCloudStatus('同期を待機中…');
                 return;
             }
         }
@@ -7273,12 +7289,17 @@ animation:facilitySweep 6s linear infinite;
             // 黙って失敗させると、原因不明の消失として扱われてしまう。
             if (status === 409 || status === 403) {
                 isCloudSyncing = false;
-                cloudLoadFailed = true;   // 以降の自動保存を止める
                 console.error('サーバーが保存を拒否しました:', data);
-                updateCloudStatus(status === 403
-                    ? '⚠️ 保存を拒否されました（認証不一致）'
-                    : '⚠️ 異常を検知。保存を停止しました');
-                showCloudLoadFailureWarning();
+                if (status === 403) {
+                    // 認証の不一致は本当に危ない。別の端末が同じIDを使っている。
+                    cloudLoadFailed = true;
+                    updateCloudStatus('⚠️ 保存を拒否されました（認証不一致）');
+                    showCloudLoadFailureWarning();
+                } else {
+                    // 巻き戻しの拒否はクラウド側を守れている状態。
+                    // 保存は止めず、警告も出さない。次回の保存で通ることが多い。
+                    updateCloudStatus('同期を待機中…');
+                }
                 throw new Error(data.code || 'REJECTED');
             }
             if (data.success) {
@@ -7365,7 +7386,7 @@ animation:facilitySweep 6s linear infinite;
         bar.style.cssText = 'position:fixed; top:0; left:0; right:0; z-index:100010;' +
             'background:#c0392b; color:#fff; padding:12px 16px; text-align:center;' +
             'font-size:0.85rem; line-height:1.6; box-shadow:0 4px 14px rgba(0,0,0,0.4);';
-        bar.innerHTML = '⚠️ <b>セーブデータの読み込みに失敗しました。</b><br>' +
+        bar.innerHTML = '⚠️ <b>セーブデータの読み込みに失敗しました。</b>（通信エラー）<br>' +
             'データを守るため、保存を一時停止しています。<b>このまま遊ばず</b>、ページを再読み込みしてください。' +
             '<button onclick="location.reload()" style="margin-left:12px; padding:5px 14px; border:none; border-radius:5px; background:#fff; color:#c0392b; font-weight:bold; cursor:pointer;">再読み込み</button>';
         document.body.appendChild(bar);
