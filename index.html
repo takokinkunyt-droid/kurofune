@@ -7278,18 +7278,30 @@ animation:facilitySweep 6s linear infinite;
         updateCloudStatus('クラウドから読込中…');
         return fetch(getNetlifyFunctionUrl('load-game') + `?playerId=${encodeURIComponent(playerId)}`)
             .then(response => {
+                // 404 は「まだセーブが無い」という正常な応答。新規プレイヤーは必ずこれになる。
+                // ここを失敗として扱っていたため、新規ユーザー全員に
+                // 「読込失敗」の警告が出て、保存まで止まっていた。
+                if (response.status === 404) return { __noSave: true };
+                // それ以外の異常（5xx・壊れたセーブ・ネットワーク断）は本物の失敗。
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 return response.json();
             })
             .then(data => {
-                if (data.success && data.data) {
+                if (data && data.__noSave) {
+                    cloudLoadFailed = false;
+                    lastKnownCloudScore = 0;
+                    updateCloudStatus('オンライン保存済み（新規）');
+                    return null;
+                }
+                if (data && data.success && data.data) {
                     cloudLoadFailed = false;
                     lastKnownCloudScore = Number(data.data.clickerScore) || 0;
                     updateCloudStatus('オンライン保存済み');
                     return data.data;
                 }
-                // サーバーは応答したが保存データが無い＝本当に新規のプレイヤー
+                // サーバーは200で応答したが保存データが無い＝これも新規扱い
                 cloudLoadFailed = false;
+                lastKnownCloudScore = 0;
                 updateCloudStatus('オンライン保存済み');
                 return null;
             })
