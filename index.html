@@ -228,32 +228,51 @@
         #sidebar.collapsed .sidebar-header h1 { font-size: 1.2rem; writing-mode: vertical-rl; text-orientation: upright; margin: 0 auto;}
 
         .nav-menu { display: flex; flex-direction: column; padding-top: 10px; flex-grow: 1; overflow-x: hidden;}
-        /* シーズン1終了イベントの告知バー */
+        /* シーズン1終了イベントの告知バー
+           #app-container は position:fixed の flex 行なので、バーは
+           absolute で重ねている。そのぶん下のUIのタップを奪いやすいので
+           pointer-events: none を必ず付ける。
+           （これが無かったため、スマホでホームのスタートボタンが
+             押せなくなっていた）
+           高さは固定する。折り返して背が高くなると、下に確保した
+           余白と合わなくなって同じ事故が起きる。 */
+        :root { --sev-h: 34px; }
         #season-event-bar {
             position: absolute; top: 0; left: 0; right: 0; z-index: 60;
-            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-            padding: 7px 18px; cursor: pointer;
+            height: var(--sev-h); box-sizing: border-box;
+            display: flex; align-items: center; gap: 12px;
+            flex-wrap: nowrap; overflow: hidden; white-space: nowrap;
+            padding: 0 18px;
+            pointer-events: none;            /* 下のUIを塞がない */
             background: linear-gradient(90deg, #2b1206 0%, #5a2a0c 45%, #8a4a12 100%);
             border-bottom: 1px solid rgba(255, 180, 90, 0.45);
             box-shadow: 0 2px 14px rgba(0,0,0,0.5);
             font-size: 0.82rem; color: #ffe8c8; letter-spacing: 0.03em;
         }
-        #season-event-bar:hover { filter: brightness(1.12); }
         #season-event-bar .sev-badge {
             font-weight: bold; color: #1a0d00; background: #f0b445;
-            padding: 2px 10px; border-radius: 3px; font-size: 0.78rem;
+            padding: 2px 10px; border-radius: 3px; font-size: 0.78rem; flex: none;
         }
+        #season-event-bar .sev-text { flex: none; }
         #season-event-bar .sev-time {
             font-family: ui-monospace, Menlo, Consolas, monospace;
-            font-size: 1rem; font-weight: bold; color: #ffd37a;
+            font-size: 1rem; font-weight: bold; color: #ffd37a; flex: none;
             text-shadow: 0 0 10px rgba(255, 170, 60, 0.6);
         }
-        #season-event-bar .sev-boost { margin-left: auto; opacity: 0.85; font-size: 0.75rem; }
-        body.season-event-on #app-container > #sidebar,
-        body.season-event-on #app-container > #main-content { padding-top: 34px; }
+        #season-event-bar .sev-boost {
+            margin-left: auto; opacity: 0.85; font-size: 0.75rem;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        /* バーの下に、ちょうど同じ高さの余白を空ける */
+        body.season-event-on #sidebar,
+        body.season-event-on #main-content { padding-top: var(--sev-h); }
+        body.season-event-on #mobile-menu-btn { top: calc(var(--sev-h) + 10px); }
         @media (max-width: 700px) {
-            #season-event-bar { font-size: 0.74rem; padding: 6px 12px; gap: 8px; }
+            :root { --sev-h: 30px; }
+            #season-event-bar { font-size: 0.7rem; padding: 0 10px; gap: 8px; }
             #season-event-bar .sev-boost { display: none; }
+            #season-event-bar .sev-text { display: none; }
+            #season-event-bar .sev-time { font-size: 0.86rem; }
         }
 
         .nav-item {
@@ -339,10 +358,16 @@
 
         .home-content {
             position: relative; z-index: 2;
-            height: 100%; width: 100%;
+            /* 高さを 100% で固定すると、画面が低いときに中身がはみ出して
+               切り取られる。min-height にして伸びられるようにする。 */
+            min-height: 100%; height: auto; width: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
             padding: 20px;
         }
+        /* 中身が画面より高くなったらスクロールできるようにする。
+           #main-content は overflow:hidden なので、ここで許可しないと
+           はみ出した部分に一切たどり着けない。 */
+        #screen-home { overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 
         .home-ship-icon {
             font-size: clamp(5rem, 10vw, 8rem);
@@ -536,10 +561,19 @@
         @media (max-width: 700px) {
             .home-content-new {
                 flex-direction: column;
-                padding: 20px 16px;
+                /* flex-wrap: wrap は PC の横並び用。縦並びのまま残すと、
+                   入りきらない要素が「2列目」として画面の右外へ回り込み、
+                   overflow:hidden で切り取られて押せなくなる。
+                   （ホームのスタートボタンが押せなかった原因はこれ） */
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                padding: 20px 16px 40px;
                 gap: 20px;
             }
-            .home-game-cards { flex: none; width: 100%; max-width: 380px; }
+            .home-game-cards {
+                flex: none; width: 100%; max-width: 380px;
+                flex-wrap: nowrap;
+            }
         }
 
         .gacha-layout { display: flex; height: calc(100% - 130px); padding: 0 60px; align-items: center; gap: 50px; flex-direction: row;}
@@ -3711,7 +3745,7 @@ animation:facilitySweep 6s linear infinite;
 
 <div id="app-container">
     <!-- シーズン1終了イベントの告知バー。期間中だけ表示される -->
-    <div id="season-event-bar" style="display:none;" onclick="openSeasonHall()">
+    <div id="season-event-bar" style="display:none;" aria-hidden="true">
         <span class="sev-badge">最後の来航</span>
         <span class="sev-text">シーズン1 終了まで</span>
         <span class="sev-time" id="season-event-remain">--:--:--</span>
