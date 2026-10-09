@@ -87,7 +87,68 @@ module.exports = async (req, res) => {
 
       let target = null;
 
-      if (body.saveData) {
+      // 補填用：いまのセーブを土台に、指定した項目だけを書き換える。
+      // 全体を payload で組み直すと、今回のように superSkills を
+      // 立て忘れて別の事故を起こすので、必要な項目だけ触れるようにする。
+      if (body.action === 'patch') {
+        const curRaw0 = await redisRequest(['get', `save:${playerId}`]);
+        if (!curRaw0.result) return res.status(404).json({ error: 'No current save to patch' });
+        let cur;
+        try { cur = JSON.parse(curRaw0.result); }
+        catch (e) { return res.status(500).json({ error: 'Current save is corrupt' }); }
+
+        const set = body.set || {};
+        const applied = {};
+
+        // 数値項目は許可したものだけ
+        const NUMERIC = ['clickerScore', 'currentLifeScore', 'fragments', 'sakokuShards',
+                         'reincarnationCount', 'superReincarnationCount',
+                         'bTicket', 'pTicket'];
+        for (const k of NUMERIC) {
+          if (set[k] != null) {
+            const n = Number(set[k]);
+            if (!Number.isFinite(n) || n < 0) {
+              return res.status(400).json({ error: `Bad value for ${k}` });
+            }
+            cur[k] = n;
+            applied[k] = n;
+          }
+        }
+        // clickerScore だけ指定された場合は currentLifeScore も揃える。
+        // 片方だけ直すと次の転生でおかしな量のかけらが入る。
+        if (set.clickerScore != null && set.currentLifeScore == null) {
+          cur.currentLifeScore = Number(set.clickerScore);
+          applied.currentLifeScore = cur.currentLifeScore;
+        }
+
+        // 昇天・超昇天アップグレードの個別指定（true のみ受け付ける）
+        for (const group of ['skills', 'superSkills']) {
+          if (set[group] && typeof set[group] === 'object') {
+            cur[group] = Object.assign({}, cur[group]);
+            applied[group] = [];
+            for (const k of Object.keys(set[group])) {
+              if (set[group][k] === true && k in cur[group]) {
+                cur[group][k] = true;
+                applied[group].push(k);
+              }
+            }
+          }
+        }
+
+        // 「If」を持っていて「持ち越し」が無い状態は、次の転生で
+        // 隻数が全部消える組み合わせ。補填でそれを渡さないよう弾く。
+        if (cur.skills && cur.skills.ifSkill &&
+            cur.superSkills && !cur.superSkills.carryOver &&
+            Number(cur.clickerScore) > 1e9 && body.allowCarryOverTrap !== true) {
+          return res.status(409).json({
+            error: 'This would hand the player a destructive super-reincarnation',
+            code: 'CARRYOVER_TRAP',
+            hint: 'set.superSkills.carryOver = true を足すか、承知のうえなら allowCarryOverTrap: true を付ける',
+          });
+        }
+
+        target = cur;
+      } else if (body.saveData) {
         target = body.saveData;
       } else if (body.index != null) {
         const raw = await redisRequest(['lrange', `save_hist:${playerId}`, 0, 49]);
@@ -96,7 +157,7 @@ module.exports = async (req, res) => {
         if (!(idx >= 0) || idx >= items.length) return res.status(404).json({ error: 'No such index' });
         target = JSON.parse(items[idx]);
       } else {
-        return res.status(400).json({ error: 'Need index or saveData' });
+        return res.status(400).json({ error: "Need action:'patch', or index, or saveData" });
       }
 
       // 復元する前に、いま入っているものも履歴に積む（復元の取り消し用）
@@ -126,6 +187,7 @@ module.exports = async (req, res) => {
 
       return res.status(200).json({
         success: true,
+        mode: body.action === 'patch' ? 'patch' : (body.saveData ? 'saveData' : 'index'),
         restored: {
           clickerScore: toWrite.clickerScore,
           reincarnationCount: toWrite.reincarnationCount,
