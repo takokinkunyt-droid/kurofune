@@ -281,6 +281,12 @@
             box-shadow: 0 2px 14px rgba(0,0,0,0.5);
             font-size: 0.82rem; color: #ffe8c8; letter-spacing: 0.03em;
         }
+        #season-event-bar.finale {
+            background: linear-gradient(90deg, #2b0606 0%, #6e1414 45%, #b03018 100%);
+            border-bottom-color: rgba(255, 140, 90, 0.6);
+        }
+        #season-event-bar.finale .sev-badge { background: #ff9a52; }
+        #season-event-bar.finale .sev-time { color: #ffb37a; text-shadow: 0 0 12px rgba(255,120,60,0.7); }
         #season-event-bar .sev-badge {
             font-weight: bold; color: #1a0d00; background: #f0b445;
             padding: 2px 10px; border-radius: 3px; font-size: 0.78rem; flex: none;
@@ -4717,6 +4723,14 @@ animation:facilitySweep 6s linear infinite;
     const SEASON1_EVENT_START = new Date('2026-10-09T21:00:00+09:00').getTime();
     const SEASON1_END         = new Date('2026-10-17T21:00:00+09:00').getTime();
 
+    // 終幕の楽曲。残り時間がこの曲の長さと同じになった瞬間に流し始めるので、
+    // 曲の終わりとシーズンの終わりがぴったり重なる。
+    // 曲を差し替えるときは、ファイル名と長さ（秒）をここだけ直せばよい。
+    const FINALE_TRACK_SRC   = '浦賀黒船退航記.mp3';
+    const FINALE_TRACK_TITLE = '浦賀黒船退航記';
+    const FINALE_TRACK_ARTIST = '歌唱・演奏：サラバペリー';
+    const FINALE_DURATION_SEC = 287;   // 4分47秒
+
     // 期間中のブースト倍率
     const EVENT_KPS_MULT        = 2;    // 全施設のKpS
     const EVENT_GOLD_RATE_MULT  = 3;    // 金船の出現率
@@ -8400,6 +8414,95 @@ animation:facilitySweep 6s linear infinite;
         return 'シーズン1 参加者';
     }
 
+    // ==========================================
+    // 終幕の楽曲
+    //
+    // 残り 4分47秒（曲の長さ）になったら流し始める。
+    // 途中でページを開いた人にも合わせるため、再生位置をずらして
+    // 「曲の終わり＝シーズンの終わり」を必ず一致させる。
+    // ==========================================
+    let finaleAudio = null;
+    let finaleStarted = false;
+
+    function maybeStartFinaleMusic(remainMs) {
+        if (finaleStarted) return;
+        if (remainMs <= 0 || remainMs > FINALE_DURATION_SEC * 1000) return;
+        finaleStarted = true;
+
+        // 曲が終わる瞬間が終幕になるよう、再生位置を合わせる
+        const offsetSec = Math.max(0, FINALE_DURATION_SEC - remainMs / 1000);
+
+        finaleAudio = new Audio(FINALE_TRACK_SRC);
+        finaleAudio.preload = 'auto';
+        finaleAudio.volume = 0;
+        // ファイルがまだ無い・読めない場合は、何も起きなかったことにする
+        finaleAudio.addEventListener('error', () => {
+            console.warn('終幕の楽曲を読み込めませんでした:', FINALE_TRACK_SRC);
+            finaleAudio = null;
+            removeFinalePrompt();
+        }, { once: true });
+
+        finaleAudio.addEventListener('loadedmetadata', () => {
+            try { finaleAudio.currentTime = Math.min(offsetSec, Math.max(0, finaleAudio.duration - 1)); } catch (e) {}
+        }, { once: true });
+
+        fadeOutMusicHallPlayer();
+
+        const p = finaleAudio.play();
+        if (p && typeof p.then === 'function') {
+            p.then(() => { fadeInFinale(); removeFinalePrompt(); })
+             .catch(() => {
+                 // 自動再生がブラウザに止められた場合。本人に押してもらう。
+                 showFinalePrompt();
+             });
+        } else {
+            fadeInFinale();
+        }
+    }
+
+    function fadeInFinale() {
+        if (!finaleAudio) return;
+        const target = 0.85;
+        const step = () => {
+            if (!finaleAudio) return;
+            finaleAudio.volume = Math.min(target, finaleAudio.volume + 0.05);
+            if (finaleAudio.volume < target) setTimeout(step, 120);
+        };
+        step();
+    }
+
+    // 音楽堂で何か流していたら、そっと下げて止める
+    function fadeOutMusicHallPlayer() {
+        const el = document.getElementById('bgm-player');
+        if (!el || el.paused) return;
+        const step = () => {
+            if (el.volume > 0.05) { el.volume = Math.max(0, el.volume - 0.05); setTimeout(step, 120); }
+            else { el.pause(); el.volume = 1; }
+        };
+        step();
+    }
+
+    function showFinalePrompt() {
+        if (document.getElementById('finale-music-prompt')) return;
+        const bar = document.createElement('div');
+        bar.id = 'finale-music-prompt';
+        bar.setAttribute('style',
+            'position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:100020;' +
+            'background:linear-gradient(90deg,#2b1206,#8a4a12); color:#ffe8c8; cursor:pointer;' +
+            'padding:12px 22px; border:1px solid rgba(255,180,90,0.5); border-radius:999px;' +
+            'box-shadow:0 10px 26px rgba(0,0,0,0.45); font-size:0.9rem; letter-spacing:0.04em;');
+        bar.textContent = '♪ 終幕の曲を再生する';
+        bar.onclick = () => {
+            if (!finaleAudio) return removeFinalePrompt();
+            finaleAudio.play().then(() => { fadeInFinale(); removeFinalePrompt(); }).catch(() => {});
+        };
+        document.body.appendChild(bar);
+    }
+    function removeFinalePrompt() {
+        const el = document.getElementById('finale-music-prompt');
+        if (el) el.remove();
+    }
+
     // 告知バーの表示と残り時間の更新。1秒ごとに呼ばれる。
     function updateSeasonEventBar() {
         const bar = document.getElementById('season-event-bar');
@@ -8408,8 +8511,23 @@ animation:facilitySweep 6s linear infinite;
         bar.style.display = active ? 'flex' : 'none';
         document.body.classList.toggle('season-event-on', active);
         if (!active) return;
+        const remain = seasonRemainingMs();
         const el = document.getElementById('season-event-remain');
-        if (el) el.textContent = formatRemaining(seasonRemainingMs());
+        if (el) el.textContent = formatRemaining(remain);
+
+        // 残りが曲の長さを切ったら、終幕の曲を流し始める
+        maybeStartFinaleMusic(remain);
+
+        // 曲が流れている間はバーの見出しも終幕仕様にする
+        if (remain <= FINALE_DURATION_SEC * 1000) {
+            bar.classList.add('finale');
+            const badge = bar.querySelector('.sev-badge');
+            if (badge && badge.textContent !== '終幕') badge.textContent = '終幕';
+            const boost = bar.querySelector('.sev-boost');
+            if (boost && boost.textContent !== 'まもなくシーズン1が終わります') {
+                boost.textContent = 'まもなくシーズン1が終わります';
+            }
+        }
     }
 
     function initClickerLoop() {
