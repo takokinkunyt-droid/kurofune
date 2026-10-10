@@ -4726,10 +4726,15 @@ animation:facilitySweep 6s linear infinite;
     // 終幕の楽曲。残り時間がこの曲の長さと同じになった瞬間に流し始めるので、
     // 曲の終わりとシーズンの終わりがぴったり重なる。
     // 曲を差し替えるときは、ファイル名と長さ（秒）をここだけ直せばよい。
-    const FINALE_TRACK_SRC   = '浦賀黒船退航記.mp3';
+    const FINALE_TRACK_SRC   = '浦賀黒船退航記.wav';
     const FINALE_TRACK_TITLE = '浦賀黒船退航記';
     const FINALE_TRACK_ARTIST = '歌唱・演奏：サラバペリー';
-    const FINALE_DURATION_SEC = 287;   // 4分47秒
+    const FINALE_DURATION_SEC = 287;   // 実測 287.20 秒（4分47秒）
+
+    // 音源は 52.6MB の wav。残り4分47秒になってから読み始めると、
+    // 回線の遅い端末では曲が間に合わない。
+    // 先に時間をかけて読み込ませておく。
+    const FINALE_PRELOAD_LEAD_SEC = 1800;   // 終了30分前から読み込みを始める
 
     // 期間中のブースト倍率
     const EVENT_KPS_MULT        = 2;    // 全施設のKpS
@@ -8423,6 +8428,32 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     let finaleAudio = null;
     let finaleStarted = false;
+    let finalePreloading = false;
+
+    // 曲を先に読み込んでおく。再生はしない。
+    // これをやらないと、52MB の読み込みが終わる前に終幕を迎えてしまう。
+    function preloadFinaleMusic(remainMs) {
+        if (finalePreloading || finaleAudio) return;
+        if (remainMs <= 0 || remainMs > FINALE_PRELOAD_LEAD_SEC * 1000) return;
+        finalePreloading = true;
+
+        finaleAudio = new Audio();
+        finaleAudio.preload = 'auto';
+        finaleAudio.volume = 0;
+        finaleAudio.addEventListener('error', () => {
+            console.warn('終幕の楽曲を読み込めませんでした:', FINALE_TRACK_SRC);
+            finaleAudio = null;
+        }, { once: true });
+        finaleAudio.src = FINALE_TRACK_SRC;
+        finaleAudio.load();
+    }
+
+    // どこまで読めているか（0〜1）。間に合いそうかの確認用。
+    function finaleBufferedRatio() {
+        if (!finaleAudio || !finaleAudio.buffered || !finaleAudio.buffered.length) return 0;
+        const end = finaleAudio.buffered.end(finaleAudio.buffered.length - 1);
+        return Math.min(1, end / FINALE_DURATION_SEC);
+    }
 
     function maybeStartFinaleMusic(remainMs) {
         if (finaleStarted) return;
@@ -8432,19 +8463,27 @@ animation:facilitySweep 6s linear infinite;
         // 曲が終わる瞬間が終幕になるよう、再生位置を合わせる
         const offsetSec = Math.max(0, FINALE_DURATION_SEC - remainMs / 1000);
 
-        finaleAudio = new Audio(FINALE_TRACK_SRC);
-        finaleAudio.preload = 'auto';
-        finaleAudio.volume = 0;
-        // ファイルがまだ無い・読めない場合は、何も起きなかったことにする
-        finaleAudio.addEventListener('error', () => {
-            console.warn('終幕の楽曲を読み込めませんでした:', FINALE_TRACK_SRC);
-            finaleAudio = null;
-            removeFinalePrompt();
-        }, { once: true });
+        // 事前読み込みが済んでいればそれを使う。無ければここで作る。
+        if (!finaleAudio) {
+            finaleAudio = new Audio();
+            finaleAudio.preload = 'auto';
+            finaleAudio.volume = 0;
+            finaleAudio.addEventListener('error', () => {
+                console.warn('終幕の楽曲を読み込めませんでした:', FINALE_TRACK_SRC);
+                finaleAudio = null;
+                removeFinalePrompt();
+            }, { once: true });
+            finaleAudio.src = FINALE_TRACK_SRC;
+        }
 
-        finaleAudio.addEventListener('loadedmetadata', () => {
-            try { finaleAudio.currentTime = Math.min(offsetSec, Math.max(0, finaleAudio.duration - 1)); } catch (e) {}
-        }, { once: true });
+        const seek = () => {
+            try {
+                const d = finaleAudio.duration || FINALE_DURATION_SEC;
+                finaleAudio.currentTime = Math.min(offsetSec, Math.max(0, d - 1));
+            } catch (e) {}
+        };
+        if (finaleAudio.readyState >= 1) seek();
+        else finaleAudio.addEventListener('loadedmetadata', seek, { once: true });
 
         fadeOutMusicHallPlayer();
 
@@ -8515,7 +8554,8 @@ animation:facilitySweep 6s linear infinite;
         const el = document.getElementById('season-event-remain');
         if (el) el.textContent = formatRemaining(remain);
 
-        // 残りが曲の長さを切ったら、終幕の曲を流し始める
+        // 30分前から曲を読み込んでおき、残りが曲の長さを切ったら流し始める
+        preloadFinaleMusic(remain);
         maybeStartFinaleMusic(remain);
 
         // 曲が流れている間はバーの見出しも終幕仕様にする
