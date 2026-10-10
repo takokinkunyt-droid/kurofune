@@ -7267,6 +7267,21 @@ animation:facilitySweep 6s linear infinite;
         return t;
     }
 
+    // 初期状態そのものか？（施設も昇天も転生も何ひとつ無い）
+    function isBlankSave(d) {
+        if (!d) return true;
+        if (d.currentEra === 'jomon') return false;      // 本当の転生は正常
+        const fac = d.facilities || {};
+        const facCount = Object.values(fac).reduce((a, x) => a + (Number(x && x.count) || 0), 0);
+        const sk = Object.values(d.skills || {}).filter(Boolean).length
+                 + Object.values(d.superSkills || {}).filter(Boolean).length;
+        const rc = (Number(d.reincarnationCount) || 0) + (Number(d.superReincarnationCount) || 0);
+        return facCount === 0 && sk === 0 && rc === 0;
+    }
+
+    // 直前にクラウドへあったデータが「中身のあるもの」だったか
+    let lastKnownSaveHadProgress = false;
+
     function syncToCloud(saveData) {
         if (!netlifyEnabled || !playerId) return;
         // 読み込みに失敗した状態では絶対に保存しない。
@@ -7276,23 +7291,24 @@ animation:facilitySweep 6s linear infinite;
             return;
         }
 
-        // 直前に読み込んだデータより極端に後退した保存は拒否する。
-        // 転生・本当の転生のように意図して減る場合は、その操作の中で
-        // lastKnownCloudScore を更新しているので誤検知しない。
-        if (lastKnownCloudScore > 1000 && !allowShrinkSave) {
-            const now = Number(saveData.clickerScore) || 0;
-            if (now < lastKnownCloudScore * 0.01) {
-                // この1回の保存だけ見送る。読み込みは成功しているので
-                // cloudLoadFailed は立てず、以降の保存も普通に試す。
-                // 「破損した」という警告を出すのはやめた。賭けで全額失うなど、
-                // 正当に大きく減る場面があるため、脅かす文面はふさわしくない。
-                console.warn('大きく減った保存を1回見送りました', now, '<', lastKnownCloudScore);
-                updateCloudStatus('同期を待機中…');
-                return;
-            }
+        // 「ゲームが初期状態で起動して、正しいデータを上書きする」事故だけを止める。
+        //
+        // 以前は「直前の1%未満になったら拒否」にしていたが、これは誤爆した。
+        // 高額な施設を買えば隻数は1%未満になるし、かけらは使い切れば0になる。
+        // しかも拒否したときに lastKnownCloudScore を更新しないので、
+        // 一度引っかかると隻数が戻るまで永久に保存されなくなっていた。
+        // ランキングは保存成功後にしか更新しないため、同時に止まっていた。
+        //
+        // 施設0・スキル0・転生0が同時に成立するのは、起動直後か
+        // 本当の転生か、シーズンの切り替えのときだけ。買い物では起きない。
+        if (!allowShrinkSave && lastKnownSaveHadProgress && isBlankSave(saveData)) {
+            console.warn('初期状態での上書きを1回見送りました');
+            updateCloudStatus('同期を待機中…');
+            return;
         }
         lastKnownCloudScore = Number(saveData.clickerScore) || 0;
-        // サーバー側の巻き戻しガードにも、意図した減少かどうかを伝える
+        lastKnownSaveHadProgress = !isBlankSave(saveData);
+        // サーバー側のガードにも、意図した操作かどうかを伝える
         const shrinkIsIntended = allowShrinkSave;
         allowShrinkSave = false;
 
@@ -7381,6 +7397,7 @@ animation:facilitySweep 6s linear infinite;
                 if (data && data.success && data.data) {
                     cloudLoadFailed = false;
                     lastKnownCloudScore = Number(data.data.clickerScore) || 0;
+                    lastKnownSaveHadProgress = !isBlankSave(data.data);
                     updateCloudStatus('オンライン保存済み');
                     return data.data;
                 }
@@ -7639,14 +7656,21 @@ animation:facilitySweep 6s linear infinite;
             try { localSave = JSON.parse(saveStr); } catch (e) { console.error("Save load error", e); }
         }
 
-        // セーブデータの仕様バージョンが古い（または存在しない）場合は破棄し、最初から開始する
+        // セーブデータの仕様バージョンが古い（または存在しない）場合は破棄し、最初から開始する。
+        // シーズンの切り替えはこの仕組みで行うので、切り替え直後の保存は
+        // 必ず「初期状態」になる。意図した操作なので、ガードを通す印を立てておく。
+        // これが無いと、リセット後に全員が一切保存できなくなる。
         if (localSave && localSave.saveVersion !== SAVE_DATA_VERSION) {
             localSave = null;
             localStorage.removeItem('kurofuneSaveData');
+            allowShrinkSave = true;
         }
 
         const finishLoad = (save) => {
-            if (save && save.saveVersion !== SAVE_DATA_VERSION) { save = null; }
+            if (save && save.saveVersion !== SAVE_DATA_VERSION) {
+                save = null;
+                allowShrinkSave = true;   // シーズン切り替え直後の保存を通す
+            }
             if (save) {
                 try { applySaveObject(save); } catch (e) { console.error("Save apply error", e); }
             }

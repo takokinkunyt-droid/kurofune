@@ -63,15 +63,9 @@ module.exports = async (req, res) => {
     }
 
     // ─── 2) 3) ガード ──────────────────────────────────
-    const nextScore = Number(saveData.clickerScore) || 0;
+    // 隻数が減ること自体は正常（買い物・賭け・転生）。割合では判定しない。
+    // 守るのは「初期状態での上書き」だけ。
     if (prev && !allowShrink) {
-      const prevScore = Number(prev.clickerScore) || 0;
-      if (prevScore > 1000 && nextScore < prevScore * 0.01) {
-        await logReject(playerId, 'shrink', { prevScore, nextScore });
-        return res.status(409).json({
-          error: 'Suspicious rollback rejected', code: 'ROLLBACK_REJECTED', prevScore, nextScore,
-        });
-      }
       const gutted = findGutted(prev, saveData);
       if (gutted) {
         await logReject(playerId, 'gutted:' + gutted, {});
@@ -123,25 +117,35 @@ async function checkToken(playerId, saveToken) {
 // 「前は持っていたのに今回のデータでは丸ごと無い」状態を探す。
 // 昇天スキル・転生回数・かけらは、本当の転生（＝縄文時代へ）以外では
 // 0 に戻らない。戻っていたら壊れたデータとみなす。
+// 守りたいのは「ゲームが初期状態で起動して、正しいデータを上書きする」事故。
+// 以前は「値が大きく減ったら拒否」にしていたが、これは誤爆する。
+//   ・かけらを使い切って昇天アップグレードを買う
+//   ・高額な施設を買って隻数が1%未満になる
+// どちらも正常なプレイなのに保存が止まり、ランキングも更新されなくなっていた。
+//
+// そこで「初期状態そのもの」だけを見る。
+// 施設0・スキル0・転生0が同時に成立するのは、起動直後か
+// 本当の転生（縄文行き）か、シーズンの切り替えだけ。
+// 何かを買っただけなら施設もスキルも残るので、絶対に誤爆しない。
 function findGutted(prev, next) {
-  if (next.currentEra === 'jomon') return null;   // 本当の転生は全部消えて正常
-  const hadSkill = countTrue(prev.skills) + countTrue(prev.superSkills);
-  const hasSkill = countTrue(next.skills) + countTrue(next.superSkills);
-  if (hadSkill > 0 && hasSkill === 0) return 'skills';
+  if (next.currentEra === 'jomon') return null;        // 本当の転生は全部消えて正常
 
-  const hadReinc = num(prev.reincarnationCount) + num(prev.superReincarnationCount);
-  const hasReinc = num(next.reincarnationCount) + num(next.superReincarnationCount);
-  if (hadReinc > 0 && hasReinc === 0) return 'reincarnation';
+  const nextIsBlank =
+    countFacilities(next.facilities) === 0 &&
+    countTrue(next.skills) === 0 &&
+    countTrue(next.superSkills) === 0 &&
+    num(next.reincarnationCount) === 0 &&
+    num(next.superReincarnationCount) === 0;
+  if (!nextIsBlank) return null;
 
-  const hadFrag = num(prev.fragments) + num(prev.sakokuShards);
-  const hasFrag = num(next.fragments) + num(next.sakokuShards);
-  if (hadFrag > 10 && hasFrag === 0) return 'fragments';
+  const prevHadSomething =
+    countFacilities(prev.facilities) > 0 ||
+    countTrue(prev.skills) > 0 ||
+    countTrue(prev.superSkills) > 0 ||
+    num(prev.reincarnationCount) > 0 ||
+    num(prev.superReincarnationCount) > 0;
 
-  const hadFac = countFacilities(prev.facilities);
-  const hasFac = countFacilities(next.facilities);
-  if (hadFac > 50 && hasFac === 0 && hasReinc <= hadReinc) return 'facilities';
-
-  return null;
+  return prevHadSomething ? 'blank_overwrite' : null;
 }
 
 async function logReject(playerId, reason, extra) {
