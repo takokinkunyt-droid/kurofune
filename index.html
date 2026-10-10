@@ -4736,6 +4736,12 @@ animation:facilitySweep 6s linear infinite;
     // 先に時間をかけて読み込ませておく。
     const FINALE_PRELOAD_LEAD_SEC = 1800;   // 終了30分前から読み込みを始める
 
+    // 終幕の映像。曲とは別に、その長さぶんだけ手前から全画面で流す。
+    // 長さを変えるときは FINALE_VIDEO_SEC だけ直せばよい。
+    // ファイルが無ければ何も起きない（曲だけになる）。
+    const FINALE_VIDEO_SRC = 'ending_perry.mp4';
+    const FINALE_VIDEO_SEC = 30;   // ← 実際の尺に合わせて変更する
+
     // 期間中のブースト倍率
     const EVENT_KPS_MULT        = 2;    // 全施設のKpS
     const EVENT_GOLD_RATE_MULT  = 3;    // 金船の出現率
@@ -8455,6 +8461,82 @@ animation:facilitySweep 6s linear infinite;
         return Math.min(1, end / FINALE_DURATION_SEC);
     }
 
+    let finaleVideo = null;
+    let finaleVideoStarted = false;
+
+    // 映像も曲と同じ考え方で、残り時間が尺と同じになったら流す。
+    // 途中から来た人は途中から始まるので、終わる瞬間は全員そろう。
+    function maybeStartFinaleVideo(remainMs) {
+        if (finaleVideoStarted) return;
+        if (remainMs <= 0 || remainMs > FINALE_VIDEO_SEC * 1000) return;
+        finaleVideoStarted = true;
+
+        const offsetSec = Math.max(0, FINALE_VIDEO_SEC - remainMs / 1000);
+
+        const wrap = document.createElement('div');
+        wrap.id = 'finale-video-wrap';
+        wrap.setAttribute('style',
+            'position:fixed; inset:0; z-index:100030; background:#000;' +
+            'opacity:0; transition:opacity 1.2s ease;');
+
+        const v = document.createElement('video');
+        v.id = 'finale-video';
+        v.src = FINALE_VIDEO_SRC;
+        v.muted = true;              // 音はゲーム側の曲が鳴っているので必ず消す
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.preload = 'auto';
+        v.setAttribute('style', 'width:100%; height:100%; object-fit:cover; display:block;');
+
+        // 読めなければ何もなかったことにする
+        v.addEventListener('error', () => { wrap.remove(); finaleVideo = null; }, { once: true });
+
+        const seek = () => {
+            try {
+                const d = v.duration || FINALE_VIDEO_SEC;
+                v.currentTime = Math.min(offsetSec, Math.max(0, d - 0.2));
+            } catch (e) {}
+        };
+        if (v.readyState >= 1) seek();
+        else v.addEventListener('loadedmetadata', seek, { once: true });
+
+        wrap.appendChild(v);
+        document.body.appendChild(wrap);
+        finaleVideo = v;
+
+        // 映像は常に表示する。play() の拒否で消してはいけない。
+        // 読み込みや seek と重なると AbortError で一度断られることがあり、
+        // そこで消してしまうと演出が丸ごと出なくなる。
+        const show = () => requestAnimationFrame(() => { wrap.style.opacity = '1'; });
+        const tryPlay = (retry) => {
+            const p = v.play();
+            if (!p || typeof p.then !== 'function') { show(); return; }
+            p.then(show).catch((e) => {
+                console.warn('終幕映像の再生が断られました:', e && e.name);
+                show();                       // 画は出したまま
+                if (!retry) setTimeout(() => tryPlay(true), 400);
+            });
+        };
+        if (v.readyState >= 2) tryPlay(false);
+        else v.addEventListener('canplay', () => tryPlay(false), { once: true });
+    }
+
+    // 終幕。映像を畳んで殿堂へ送る。
+    let finaleEnded = false;
+    function finishSeasonFinale() {
+        if (finaleEnded) return;
+        finaleEnded = true;
+        const wrap = document.getElementById('finale-video-wrap');
+        if (wrap) {
+            wrap.style.opacity = '0';
+            setTimeout(() => wrap.remove(), 1400);
+        }
+        const bar = document.getElementById('season-event-bar');
+        if (bar) bar.style.display = 'none';
+        document.body.classList.remove('season-event-on');
+        setTimeout(() => { try { openSeasonHall(); } catch (e) {} }, 1500);
+    }
+
     function maybeStartFinaleMusic(remainMs) {
         if (finaleStarted) return;
         if (remainMs <= 0 || remainMs > FINALE_DURATION_SEC * 1000) return;
@@ -8549,6 +8631,8 @@ animation:facilitySweep 6s linear infinite;
         const active = isSeasonEventActive();
         bar.style.display = active ? 'flex' : 'none';
         document.body.classList.toggle('season-event-on', active);
+        // 終了した瞬間に殿堂へ送る
+        if (!active && isSeason1Over()) { finishSeasonFinale(); return; }
         if (!active) return;
         const remain = seasonRemainingMs();
         const el = document.getElementById('season-event-remain');
@@ -8557,6 +8641,7 @@ animation:facilitySweep 6s linear infinite;
         // 30分前から曲を読み込んでおき、残りが曲の長さを切ったら流し始める
         preloadFinaleMusic(remain);
         maybeStartFinaleMusic(remain);
+        maybeStartFinaleVideo(remain);
 
         // 曲が流れている間はバーの見出しも終幕仕様にする
         if (remain <= FINALE_DURATION_SEC * 1000) {
