@@ -2828,12 +2828,14 @@
             pointer-events: none;
             z-index: 90;
             filter: drop-shadow(0 0 8px rgba(255, 244, 220, 0.72));
-            animation: particle-fly 0.9s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            animation: particle-fly 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards; will-change: transform, opacity;
         }
 
         @keyframes particle-fly {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(0.5) rotate(var(--rot)); opacity: 0; }
+            0%   { transform: translate(-50%, -50%) translate(0, 0) scale(0.7) rotate(0deg); opacity: 1; }
+            18%  { transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.3), calc(var(--peak) * 0.75)) scale(1.15) rotate(calc(var(--rot) * 0.25)); opacity: 1; }
+            55%  { transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.72), var(--peak)) scale(1) rotate(calc(var(--rot) * 0.6)); opacity: 1; }
+            100% { transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.45) rotate(var(--rot)); opacity: 0; }
         }
 
         #screen-clicker .golden-ship {
@@ -8488,62 +8490,55 @@ animation:facilitySweep 6s linear infinite;
     // 寿命は実時間で決める。同時に出せる数にも上限を設ける。
     // ==========================================
     const PARTICLE_EMOJIS = ['✨','⭐','💥','💰','🌊'];
-    const PARTICLE_LIFE_MS = 620;
-    const PARTICLE_MAX = 60;      // これ以上は作らない（連打の暴走を止める）
+    const PARTICLE_MAX = 60;      // 同時に出せる数の上限（連打の暴走を止める）
     const POP_MAX = 14;           // 「+N」の表示数の上限
-    let activeParticles = [];
     let lastClickUiUpdate = 0;
-    let particleRafId = 0;
 
+    // クリック時に絵文字を弾き飛ばす。
+    //
+    // 動かすのは CSS アニメーション particle-fly。飛ぶ向きと距離は
+    // --tx / --peak / --ty / --rot を1個ずつ変えて与える。
+    //
+    // 以前はここを JS の requestAnimationFrame で動かしていたが、
+    //  ・CSS アニメーションはインラインの transform を上書きするので
+    //    JS で書いた移動が丸ごと無効になっていた（絵文字が飛ばない）
+    //  ・1個ごとに別のループを持ち、毎フレーム left / top を書くため
+    //    数が増えると一気に重くなっていた
+    // CSS に任せれば、毎フレームの JS が 0 になり、合成だけで動く。
     function spawnClickParticles(base, posX, posY) {
-        const room = PARTICLE_MAX - activeParticles.length;
+        const live = base.getElementsByClassName('particle');
+        const room = PARTICLE_MAX - live.length;
         if (room <= 0) return;
         const n = Math.min(5, room);
-        const now = performance.now();
+
         for (let i = 0; i < n; i++) {
             const el = document.createElement('div');
             el.className = 'particle';
             el.textContent = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)];
-            // 位置の基準は最初に一度だけ決める。以後は transform だけで動かす。
             el.style.left = posX + 'px';
-            el.style.top = posY + 'px';
-            el.style.willChange = 'transform';
-            el.style.transform = 'translate(-50%, -50%)';
-            base.appendChild(el);
-            activeParticles.push({
-                el, t0: now,
-                vx: (Math.random() - 0.5) * 900,          // px/秒
-                vy: (Math.random() * -600) - 300,
-                rotSpeed: (Math.random() - 0.5) * 1200,   // 度/秒
-            });
-        }
-        if (!particleRafId) particleRafId = requestAnimationFrame(stepParticles);
-    }
+            el.style.top  = posY + 'px';
 
-    function stepParticles(now) {
-        const gravity = 2800;   // px/秒^2
-        let write = 0;
-        for (let i = 0; i < activeParticles.length; i++) {
-            const p = activeParticles[i];
-            const t = (now - p.t0) / 1000;
-            if (now - p.t0 >= PARTICLE_LIFE_MS) { p.el.remove(); continue; }
-            const x = p.vx * t;
-            const y = p.vy * t + 0.5 * gravity * t * t;
-            const scale = 1 - (now - p.t0) / PARTICLE_LIFE_MS;
-            p.el.style.transform =
-                'translate(-50%, -50%) translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)' +
-                ' scale(' + scale.toFixed(3) + ') rotate(' + (p.rotSpeed * t).toFixed(0) + 'deg)';
-            activeParticles[write++] = p;
+            const dir  = Math.random() < 0.5 ? -1 : 1;
+            const tx   = dir * (60 + Math.random() * 110);   // 左右への飛距離
+            const peak = -(75 + Math.random() * 70);          // 一番高く上がる位置
+            const ty   = 45 + Math.random() * 75;             // 落ちきる位置
+            const rot  = (Math.random() - 0.5) * 2 * (200 + Math.random() * 340);
+
+            el.style.setProperty('--tx', tx.toFixed(0) + 'px');
+            el.style.setProperty('--peak', peak.toFixed(0) + 'px');
+            el.style.setProperty('--ty', ty.toFixed(0) + 'px');
+            el.style.setProperty('--rot', rot.toFixed(0) + 'deg');
+
+            base.appendChild(el);
+            // アニメーションが終わったら消す。念のため時間でも消す。
+            el.addEventListener('animationend', () => el.remove(), { once: true });
+            setTimeout(() => el.remove(), 1200);
         }
-        activeParticles.length = write;
-        particleRafId = activeParticles.length ? requestAnimationFrame(stepParticles) : 0;
     }
 
     // 画面を離れるときに取り残さない
     function clearClickParticles() {
-        activeParticles.forEach(p => p.el.remove());
-        activeParticles.length = 0;
-        if (particleRafId) { cancelAnimationFrame(particleRafId); particleRafId = 0; }
+        document.querySelectorAll('.particle').forEach(p => p.remove());
     }
 
     function clickKurofune(e) {
