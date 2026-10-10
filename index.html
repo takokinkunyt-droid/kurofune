@@ -4740,7 +4740,7 @@ animation:facilitySweep 6s linear infinite;
     // 長さを変えるときは FINALE_VIDEO_SEC だけ直せばよい。
     // ファイルが無ければ何も起きない（曲だけになる）。
     const FINALE_VIDEO_SRC = 'ending_perry.mp4';
-    const FINALE_VIDEO_SEC = 30;   // ← 実際の尺に合わせて変更する
+    const FINALE_VIDEO_SEC = 32;   // 実測 32.0 秒
 
     // 期間中のブースト倍率
     const EVENT_KPS_MULT        = 2;    // 全施設のKpS
@@ -8463,6 +8463,23 @@ animation:facilitySweep 6s linear infinite;
 
     let finaleVideo = null;
     let finaleVideoStarted = false;
+    let finaleVideoEl = null;
+
+    // 映像（約16MB）も先に読み込んでおく。表示はしない。
+    function preloadFinaleVideo(remainMs) {
+        if (finaleVideoEl) return;
+        if (remainMs <= 0 || remainMs > FINALE_PRELOAD_LEAD_SEC * 1000) return;
+        const v = document.createElement('video');
+        v.id = 'finale-video';
+        v.muted = true;                 // 音はゲーム側の曲が鳴っているので必ず消す
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.preload = 'auto';
+        v.setAttribute('style', 'width:100%; height:100%; object-fit:cover; display:block;');
+        v.src = FINALE_VIDEO_SRC;
+        v.load();
+        finaleVideoEl = v;
+    }
 
     // 映像も曲と同じ考え方で、残り時間が尺と同じになったら流す。
     // 途中から来た人は途中から始まるので、終わる瞬間は全員そろう。
@@ -8479,14 +8496,10 @@ animation:facilitySweep 6s linear infinite;
             'position:fixed; inset:0; z-index:100030; background:#000;' +
             'opacity:0; transition:opacity 1.2s ease;');
 
-        const v = document.createElement('video');
-        v.id = 'finale-video';
-        v.src = FINALE_VIDEO_SRC;
-        v.muted = true;              // 音はゲーム側の曲が鳴っているので必ず消す
-        v.playsInline = true;
-        v.setAttribute('playsinline', '');
-        v.preload = 'auto';
-        v.setAttribute('style', 'width:100%; height:100%; object-fit:cover; display:block;');
+        // 事前読み込みが済んでいればそれを使う
+        preloadFinaleVideo(remainMs);
+        const v = finaleVideoEl;
+        if (!v) { finaleVideoStarted = false; return; }
 
         // 読めなければ何もなかったことにする
         v.addEventListener('error', () => { wrap.remove(); finaleVideo = null; }, { once: true });
@@ -8640,6 +8653,7 @@ animation:facilitySweep 6s linear infinite;
 
         // 30分前から曲を読み込んでおき、残りが曲の長さを切ったら流し始める
         preloadFinaleMusic(remain);
+        preloadFinaleVideo(remain);
         maybeStartFinaleMusic(remain);
         maybeStartFinaleVideo(remain);
 
