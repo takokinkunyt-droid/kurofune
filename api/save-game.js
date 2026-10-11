@@ -103,7 +103,14 @@ async function checkToken(playerId, saveToken) {
 
   if (stored.result) {
     if (!valid) return !REQUIRE_TOKEN;      // 古いクライアントは移行中だけ通す
-    return stored.result === saveToken;
+    if (stored.result === saveToken) return true;
+    // 鍵が違う＝別の端末から遊んでいる可能性が高い（学校のPCと家のスマホなど）。
+    // 鍵は端末ごとに作られるので、必須にすると2台目から一切保存できなくなる。
+    // REQUIRE_SAVE_TOKEN=1 のときだけ拒否し、それ以外は記録だけ残して通す。
+    // 中身を壊す上書きは findGutted と履歴・自動修復で別に守っている。
+    if (REQUIRE_TOKEN) return false;
+    await logReject(playerId, 'token_mismatch_allowed', {});
+    return true;
   }
   if (valid) {
     const claim = await redisRequest(['set', key, saveToken, 'NX']);

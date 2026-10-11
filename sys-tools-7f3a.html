@@ -81,7 +81,18 @@
     <label>playerId</label>
     <input id="playerId" class="mono" placeholder="player_xxxxxxxx_xxxxxxxx">
     <button onclick="listHistory()">セーブ履歴を見る</button>
+    <button class="primary" onclick="inspect()">診断する</button>
+    <div id="inspectOut"></div>
     <div id="histOut"></div>
+  </section>
+
+  <!-- 3b. ランキングの修正 -->
+  <section>
+    <h2>3b. ランキングを直す</h2>
+    <div class="note">セーブの隻数とランキングの隻数が食い違うときに使います。どちらもセーブの中身は変えません。</div>
+    <button onclick="resync()">ランキングをセーブに合わせ直す</button>
+    <button class="danger" onclick="unshadow()">BANを解除して合わせ直す</button>
+    <div id="rankFixOut"></div>
   </section>
 
   <!-- 4. 補填 -->
@@ -113,6 +124,14 @@
     <button class="danger" onclick="doRestore()">この世代に戻す</button>
     <div class="note">いま入っているデータも履歴に積まれるので、取り消せます。</div>
     <div id="restoreOut"></div>
+  </section>
+
+  <!-- 7. 全体の記録 -->
+  <section>
+    <h2>7. 最近の拒否・修復記録（全員）</h2>
+    <div class="note">保存が拒否された理由と、読み込み時に自動修復した記録です。ランキングが全体的に止まっているときに見てください。</div>
+    <button onclick="logs()">記録を見る</button>
+    <div id="logsOut"></div>
   </section>
 
   <!-- 6. シーズン -->
@@ -334,6 +353,61 @@ async function season(action) {
       !confirm('シーズン ' + n + ' として全員のセーブを退避します。\n実行しますか？')) return;
   const { status, body } = await post('/archive-season', { secret: secret(), action, season: n });
   show('seasonOut', body, status === 200 ? 'ok' : 'err');
+}
+
+// ---- 診断 ----------------------------------------------------
+async function inspect() {
+  if (!secret()) return show('inspectOut', '先に管理キーを入れてください。');
+  const pid = $('playerId').value.trim();
+  if (!pid) return show('inspectOut', 'playerId を入れてください。');
+  const { status, body } = await api('/restore-save?action=inspect&secret=' + encodeURIComponent(secret()) + '&playerId=' + encodeURIComponent(pid));
+  if (status !== 200) return show('inspectOut', body, 'err');
+  const fmt = n => n == null ? '（なし）' : Number(n).toLocaleString();
+  const t = ms => ms ? new Date(ms).toLocaleString('ja-JP') : '-';
+  let h = '<table>'
+    + '<tr><th>セーブの隻数</th><td class="mono">' + fmt(body.save && body.save.clickerScore) + '</td></tr>'
+    + '<tr><th>ランキングの隻数</th><td class="mono">' + fmt(body.ranking.zscore) + '</td></tr>'
+    + '<tr><th>最終保存</th><td class="mono">' + t(body.save && body.save.lastSaveTime) + '</td></tr>'
+    + '<tr><th>ランキング最終更新</th><td class="mono">' + t(body.ranking.record && body.ranking.record.updatedAt) + '</td></tr>'
+    + '<tr><th>BAN / シャドウBAN</th><td>' + (body.flags.banned ? '<span class="err">BAN中</span>' : 'なし') + ' / '
+    +   (body.flags.shadowBanned ? '<span class="err">シャドウBAN中</span>' : 'なし') + '</td></tr>'
+    + '<tr><th>履歴</th><td class="mono">' + body.history.count + ' 世代</td></tr>'
+    + '</table>';
+  h += '<div class="note" style="margin-top:12px;"><b>所見</b><br>' + (body.findings.length
+       ? body.findings.map(f => '・' + escapeHtml(f)).join('<br>') : '<span class="ok">問題なし</span>') + '</div>';
+  $('inspectOut').innerHTML = h;
+}
+
+async function resync() {
+  if (!secret()) return show('rankFixOut', '先に管理キーを入れてください。');
+  const pid = $('playerId').value.trim();
+  if (!pid) return show('rankFixOut', '上の「3. 対象」で playerId を選んでください。');
+  const { status, body } = await post('/restore-save', { secret: secret(), playerId: pid, action: 'resync' });
+  show('rankFixOut', body, status === 200 ? 'ok' : 'err');
+  inspect();
+}
+
+async function unshadow() {
+  if (!secret()) return show('rankFixOut', '先に管理キーを入れてください。');
+  const pid = $('playerId').value.trim();
+  if (!pid) return show('rankFixOut', '上の「3. 対象」で playerId を選んでください。');
+  if (!confirm(pid + '\n\nBAN と シャドウBAN を解除し、ランキングをセーブに合わせ直します。\n実行しますか？')) return;
+  const { status, body } = await post('/restore-save', { secret: secret(), playerId: pid, action: 'unshadow' });
+  show('rankFixOut', body, status === 200 ? 'ok' : 'err');
+  inspect();
+}
+
+async function logs() {
+  if (!secret()) return show('logsOut', '先に管理キーを入れてください。');
+  const { status, body } = await api('/restore-save?action=rejects&secret=' + encodeURIComponent(secret()));
+  if (status !== 200) return show('logsOut', body, 'err');
+  const label = { token_mismatch: '鍵違いで拒否', token_mismatch_allowed: '別端末（通した）',
+                  'gutted:blank_overwrite': '初期状態での上書きを拒否' };
+  let h = '<table><tr><th>理由</th><th>件数</th></tr>';
+  Object.entries(body.byReason).forEach(([k, v]) => { h += '<tr><td>' + escapeHtml(label[k] || k) + '</td><td class="mono">' + v + '</td></tr>'; });
+  h += '</table>';
+  h += '<div class="note">自動修復：' + body.heals.length + ' 件</div>';
+  $('logsOut').innerHTML = h + '<pre>' + escapeHtml(JSON.stringify(body.rejects.slice(0, 15), null, 2)) + '</pre>';
 }
 
 applyPreset();

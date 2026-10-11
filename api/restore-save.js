@@ -35,6 +35,10 @@ module.exports = async (req, res) => {
       if (action === 'status' || action === 'whois') {
         return await handleKeylessGet(action, q, res, SECRET);
       }
+      if (action === 'inspect' || action === 'rejects') {
+        if (!SECRET || q.secret !== SECRET) return res.status(403).json({ error: 'Forbidden' });
+        return action === 'inspect' ? await inspectPlayer(q.playerId, res) : await recentLogs(res);
+      }
 
       if (!playerId) return res.status(400).json({ error: 'Missing playerId' });
 
@@ -79,6 +83,19 @@ module.exports = async (req, res) => {
 
       const playerId = body.playerId;
       if (!playerId) return res.status(400).json({ error: 'Missing playerId' });
+
+      if (body.action === 'resync') {
+        const r = await resyncRanking(playerId);
+        return res.status(r.ok ? 200 : 404).json(r);
+      }
+      if (body.action === 'unshadow') {
+        await redisPipeline([
+          ['srem', 'shadow_banned_players', playerId],
+          ['srem', 'banned_players', playerId],
+        ]);
+        const r = await resyncRanking(playerId);
+        return res.status(200).json({ success: true, unbanned: true, resync: r });
+      }
 
       let target = null;
 
@@ -254,6 +271,91 @@ async function handleKeylessGet(action, q, res, SECRET) {
     }
 
   return res.status(400).json({ error: 'Unknown action' });
+}
+
+// ---- 診断：1人のセーブとランキングの食い違いを丸ごと見る ----
+async function inspectPlayer(playerId, res) {
+  if (!playerId) return res.status(400).json({ error: 'Missing playerId' });
+  const [saveR, zR, pR, banR, shR, tokR, hlR, histR, rejR, healR] = await redisPipeline([
+    ['get', `save:${playerId}`],
+    ['zscore', 'ranking', playerId],
+    ['get', `player:${playerId}`],
+    ['sismember', 'banned_players', playerId],
+    ['sismember', 'shadow_banned_players', playerId],
+    ['exists', `token:${playerId}`],
+    ['llen', `save_hist:${playerId}`],
+    ['lrange', `save_hist:${playerId}`, 0, 0],
+    ['lrange', 'save_reject_log', 0, 299],
+    ['lrange', 'save_heal_log', 0, 299],
+  ]);
+  let save = null; try { save = saveR.result ? JSON.parse(saveR.result) : null; } catch (e) {}
+  let rank = null; try { rank = pR.result ? JSON.parse(pR.result) : null; } catch (e) {}
+  let newestHist = null; try { newestHist = histR.result && histR.result[0] ? JSON.parse(histR.result[0]) : null; } catch (e) {}
+  const mine = (arr) => (arr || []).map(x => { try { return JSON.parse(x); } catch (e) { return null; } })
+                                    .filter(x => x && x.playerId === playerId).slice(0, 10);
+
+  const saveScore = save ? Math.floor(Number(save.clickerScore) || 0) : null;
+  const zScore = zR.result != null ? Math.floor(Number(zR.result)) : null;
+  const shadow = shR.result === 1, banned = banR.result === 1;
+
+  const findings = [];
+  if (shadow) findings.push('シャドウBAN中：セーブは保存されるが、ランキングの更新は黙って捨てられる');
+  if (banned) findings.push('BAN中：保存そのものが拒否される（403）');
+  if (save && zScore != null && saveScore !== zScore) findings.push('ランキングの隻数とセーブの隻数が違う');
+  if (save && zScore == null) findings.push('ランキングに載っていない');
+  if (!save) findings.push('セーブが存在しない');
+  const tokenMis = mine(rejR.result).filter(x => String(x.reason).startsWith('token_mismatch'));
+  if (tokenMis.length) findings.push('別端末からの保存がある（鍵違い ' + tokenMis.length + ' 件）');
+  if (save && save.lastSaveTime && Date.now() - save.lastSaveTime > 3 * 86400000)
+    findings.push('最終保存が3日以上前');
+
+  return res.status(200).json({
+    success: true, playerId, findings,
+    save: save ? { clickerScore: saveScore, lastSaveTime: save.lastSaveTime,
+                   reincarnationCount: save.reincarnationCount, superReincarnationCount: save.superReincarnationCount,
+                   skillCount: countTrue(save.skills) + countTrue(save.superSkills),
+                   facilityCount: countFacilities(save.facilities), playerName: save.playerName } : null,
+    ranking: { zscore: zScore, record: rank },
+    flags: { banned, shadowBanned: shadow, hasToken: tokR.result === 1 },
+    history: { count: hlR.result || 0,
+               newest: newestHist ? { clickerScore: newestHist.clickerScore, lastSaveTime: newestHist.lastSaveTime } : null },
+    recentRejects: mine(rejR.result),
+    recentHeals: mine(healR.result),
+  });
+}
+
+// ---- 全体の直近の拒否・修復記録 ----
+async function recentLogs(res) {
+  const [rej, heal] = await redisPipeline([
+    ['lrange', 'save_reject_log', 0, 99],
+    ['lrange', 'save_heal_log', 0, 49],
+  ]);
+  const parse = (a) => (a || []).map(x => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean);
+  const rejects = parse(rej.result);
+  const byReason = {};
+  rejects.forEach(r => { byReason[r.reason] = (byReason[r.reason] || 0) + 1; });
+  return res.status(200).json({ success: true, byReason, rejects: rejects.slice(0, 50), heals: parse(heal.result) });
+}
+
+// ---- ランキングを現在のセーブに合わせ直す ----
+async function resyncRanking(playerId) {
+  const r = await redisRequest(['get', `save:${playerId}`]);
+  if (!r.result) return { ok: false, error: 'No save' };
+  let s; try { s = JSON.parse(r.result); } catch (e) { return { ok: false, error: 'Corrupt save' }; }
+  const score = Math.floor(Number(s.clickerScore) || 0);
+  await redisPipeline([
+    ['zadd', 'ranking', score, playerId],
+    ['set', `player:${playerId}`, JSON.stringify({
+      playerId,
+      playerName: String(s.playerName || '名無しの船長').substring(0, 20),
+      clickerScore: score,
+      reincarnationCount: Number(s.reincarnationCount) || 0,
+      fragments: Number(s.fragments) || 0,
+      era: eraLabelOf(s),
+      updatedAt: Date.now(),
+    })],
+  ]);
+  return { ok: true, clickerScore: score };
 }
 
 // セーブの状態からランキングに出す時代名を決める
