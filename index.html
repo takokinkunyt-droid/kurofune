@@ -7214,10 +7214,11 @@ animation:facilitySweep 6s linear infinite;
 
         // 端末に残っている中身のあるセーブを、初期状態で上書きしない。
         // クラウド側だけ守っても、ここが素通りだと端末のデータが消える。
-        if (!seasonResetSave && isBlankSave(saveData)) {
+        if (!seasonResetSave) {
             try {
                 const prevLocal = JSON.parse(localStorage.getItem('kurofuneSaveData') || 'null');
-                if (prevLocal && !isBlankSave(prevLocal)) {
+                if (prevLocal && ((isBlankSave(saveData) && !isBlankSave(prevLocal)) ||
+                                  losesProgress(progressOf(prevLocal), saveData))) {
                     console.warn('端末の正しいセーブを初期状態で上書きしかけました。中止します。');
                     updateCloudStatus('同期を待機中…');
                     return;
@@ -7317,6 +7318,29 @@ animation:facilitySweep 6s linear infinite;
 
     // 直前にクラウドへあったデータが「中身のあるもの」だったか
     let lastKnownSaveHadProgress = false;
+    // 直前のデータで、昇天スキルと転生回数がいくつあったか
+    let lastKnownSkillCount = 0, lastKnownReincCount = 0;
+
+    function progressOf(d) {
+        if (!d) return { skill: 0, reinc: 0 };
+        return {
+            skill: Object.values(d.skills || {}).filter(Boolean).length
+                 + Object.values(d.superSkills || {}).filter(Boolean).length,
+            reinc: (Number(d.reincarnationCount) || 0) + (Number(d.superReincarnationCount) || 0),
+        };
+    }
+    function rememberProgress(d) {
+        const p = progressOf(d);
+        lastKnownSkillCount = p.skill; lastKnownReincCount = p.reinc;
+        lastKnownSaveHadProgress = !isBlankSave(d);
+    }
+    // older から newer へ進むと、通常のプレイでは起きない失い方をするか
+    // （昇天スキルが全部消える／転生回数が0に戻る）。本当の転生（縄文）は除く。
+    function losesProgress(olderP, newer) {
+        if (!newer || newer.currentEra === 'jomon') return false;
+        const n = progressOf(newer);
+        return (olderP.skill > 0 && n.skill === 0) || (olderP.reinc > 0 && n.reinc === 0);
+    }
 
     function syncToCloud(saveData) {
         if (!netlifyEnabled || !playerId) return;
@@ -7337,13 +7361,14 @@ animation:facilitySweep 6s linear infinite;
         //
         // 施設0・スキル0・転生0が同時に成立するのは、起動直後か
         // 本当の転生か、シーズンの切り替えのときだけ。買い物では起きない。
-        if (!seasonResetSave && lastKnownSaveHadProgress && isBlankSave(saveData)) {
-            console.warn('初期状態での上書きを1回見送りました');
+        if (!seasonResetSave && ((lastKnownSaveHadProgress && isBlankSave(saveData)) ||
+                losesProgress({ skill: lastKnownSkillCount, reinc: lastKnownReincCount }, saveData))) {
+            console.warn('壊れた状態（初期状態／スキル全消え／転生0）での上書きを見送りました');
             updateCloudStatus('同期を待機中…');
             return;
         }
         lastKnownCloudScore = Number(saveData.clickerScore) || 0;
-        lastKnownSaveHadProgress = !isBlankSave(saveData);
+        rememberProgress(saveData);
         // サーバー側のガードにも、意図した操作かどうかを伝える
         const shrinkIsIntended = allowShrinkSave;
         allowShrinkSave = false;
@@ -7435,7 +7460,7 @@ animation:facilitySweep 6s linear infinite;
                 if (data && data.success && data.data) {
                     cloudLoadFailed = false;
                     lastKnownCloudScore = Number(data.data.clickerScore) || 0;
-                    lastKnownSaveHadProgress = !isBlankSave(data.data);
+                    rememberProgress(data.data);
                     updateCloudStatus('オンライン保存済み');
                     return data.data;
                 }
@@ -7737,7 +7762,8 @@ animation:facilitySweep 6s linear infinite;
                 // ただし、新しい方が初期状態で、古い方に中身があるなら古い方を採る。
                 // 事故で空のセーブが書かれてしまっても、ここで拾い直せる。
                 const other = (useSave === cloudSave) ? localSave : cloudSave;
-                if (useSave && other && isBlankSave(useSave) && !isBlankSave(other)) {
+                if (useSave && other && ((isBlankSave(useSave) && !isBlankSave(other)) ||
+                                         losesProgress(progressOf(other), useSave))) {
                     console.warn('新しい方のセーブが初期状態だったため、中身のある方を採用しました。');
                     useSave = other;
                 }

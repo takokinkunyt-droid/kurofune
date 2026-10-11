@@ -32,6 +32,22 @@ module.exports = async (req, res) => {
       if (current && isBlank(current)) problem = 'blank';
     }
 
+    // 施設は残っているのに、昇天スキルか転生回数だけが消えている形。
+    // 通常のプレイでは起きないので、履歴に揃っているものがあれば治す。
+    if (!problem && current && current.currentEra !== 'jomon') {
+      const histTop = await redisRequest(['lrange', `save_hist:${playerId}`, 0, 49]);
+      for (const raw of (histTop.result || [])) {
+        let o; try { o = JSON.parse(raw); } catch (e) { continue; }
+        if (!o || o.saveVersion !== current.saveVersion) continue;
+        const cs = countTrue(current.skills) + countTrue(current.superSkills);
+        const os = countTrue(o.skills) + countTrue(o.superSkills);
+        const cr = num(current.reincarnationCount) + num(current.superReincarnationCount);
+        const or_ = num(o.reincarnationCount) + num(o.superReincarnationCount);
+        if ((os > 0 && cs === 0) || (or_ > 0 && cr === 0)) problem = 'gutted';
+        break;   // 直近の1世代とだけ比べる
+      }
+    }
+
     if (!problem) {
       return res.status(200).json({ data: current, success: true });
     }
@@ -42,7 +58,10 @@ module.exports = async (req, res) => {
     let healed = null;
     for (const raw of hist) {
       let o; try { o = JSON.parse(raw); } catch (e) { continue; }
-      if (o && o.facilities && !isBlank(o)) { healed = o; break; }
+      if (!o || !o.facilities || isBlank(o)) continue;
+      if (problem === 'gutted' && (countTrue(o.skills) + countTrue(o.superSkills)) === 0
+          && (num(o.reincarnationCount) + num(o.superReincarnationCount)) === 0) continue;
+      healed = o; break;
     }
 
     if (healed) {

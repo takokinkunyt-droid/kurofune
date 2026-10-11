@@ -136,25 +136,35 @@ async function checkToken(playerId, saveToken) {
 // 施設0・スキル0・転生0が同時に成立するのは、起動直後か
 // 本当の転生（縄文行き）か、シーズンの切り替えだけ。
 // 何かを買っただけなら施設もスキルも残るので、絶対に誤爆しない。
+// 守るのは「中身のあるセーブが、壊れた状態で上書きされる」事故。
+//
+// 止める条件は、通常のプレイでは絶対に起きないものだけにする。
+//   ・初期状態（施設0・スキル0・転生0）での上書き
+//   ・昇天／超昇天スキルが全部消える     … 消えるのは本当の転生かシーズン切り替えだけ
+//   ・転生回数・超転生回数が 0 に戻る     … 同上
+//
+// 以前あった「かけらが0」「隻数が1%未満」は誤爆していた
+// （かけらを使い切る・高額な施設を買う、で普通に起きる）ので入れない。
+//
+// 2026-10-06 の消失、10-09 に記録された player_mtptjbv7 の件は、
+// どちらも「施設は残ってスキルと転生回数だけ消える」形だった。
+// 初期状態の判定だけではこれを止められない。
 function findGutted(prev, next) {
-  if (next.currentEra === 'jomon') return null;        // 本当の転生は全部消えて正常
+  if (next.currentEra === 'jomon') return null;        // 本当の転生は正常
 
-  const nextIsBlank =
-    countFacilities(next.facilities) === 0 &&
-    countTrue(next.skills) === 0 &&
-    countTrue(next.superSkills) === 0 &&
-    num(next.reincarnationCount) === 0 &&
-    num(next.superReincarnationCount) === 0;
-  if (!nextIsBlank) return null;
+  const prevSkill = countTrue(prev.skills) + countTrue(prev.superSkills);
+  const nextSkill = countTrue(next.skills) + countTrue(next.superSkills);
+  if (prevSkill > 0 && nextSkill === 0) return 'skills';
 
-  const prevHadSomething =
-    countFacilities(prev.facilities) > 0 ||
-    countTrue(prev.skills) > 0 ||
-    countTrue(prev.superSkills) > 0 ||
-    num(prev.reincarnationCount) > 0 ||
-    num(prev.superReincarnationCount) > 0;
+  const prevReinc = num(prev.reincarnationCount) + num(prev.superReincarnationCount);
+  const nextReinc = num(next.reincarnationCount) + num(next.superReincarnationCount);
+  if (prevReinc > 0 && nextReinc === 0) return 'reincarnation';
 
-  return prevHadSomething ? 'blank_overwrite' : null;
+  const nextIsBlank = countFacilities(next.facilities) === 0 && nextSkill === 0 && nextReinc === 0;
+  const prevHad = countFacilities(prev.facilities) > 0 || prevSkill > 0 || prevReinc > 0;
+  if (nextIsBlank && prevHad) return 'blank_overwrite';
+
+  return null;
 }
 
 async function logReject(playerId, reason, extra) {
