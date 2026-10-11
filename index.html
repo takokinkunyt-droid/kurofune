@@ -4685,6 +4685,10 @@ animation:facilitySweep 6s linear infinite;
     let lastKnownCloudScore = 0;
     // 転生など、意図的に隻数が減る操作のときだけ true にする
     let allowShrinkSave = false;
+    // シーズン切り替え（SAVE_DATA_VERSION の変更）でのみ立てる。
+    // 「初期状態での上書き」を唯一許可する印なので、
+    // 転生や賭けの allowShrinkSave とは必ず分けておく。
+    let seasonResetSave = false;
 </script>
 
 <script>
@@ -7192,6 +7196,20 @@ animation:facilitySweep 6s linear infinite;
             updateCloudStatus('⚠️ 読込失敗のため保存を停止中（端末のデータを保護しています）');
             return;
         }
+
+        // 端末に残っている中身のあるセーブを、初期状態で上書きしない。
+        // クラウド側だけ守っても、ここが素通りだと端末のデータが消える。
+        if (!seasonResetSave && isBlankSave(saveData)) {
+            try {
+                const prevLocal = JSON.parse(localStorage.getItem('kurofuneSaveData') || 'null');
+                if (prevLocal && !isBlankSave(prevLocal)) {
+                    console.warn('端末の正しいセーブを初期状態で上書きしかけました。中止します。');
+                    updateCloudStatus('同期を待機中…');
+                    return;
+                }
+            } catch (e) {}
+        }
+
         localStorage.setItem('kurofuneSaveData', JSON.stringify(saveData));
 
         // クラウドへの同期は連打防止のためデバウンス（3秒間隔）
@@ -7304,7 +7322,7 @@ animation:facilitySweep 6s linear infinite;
         //
         // 施設0・スキル0・転生0が同時に成立するのは、起動直後か
         // 本当の転生か、シーズンの切り替えのときだけ。買い物では起きない。
-        if (!allowShrinkSave && lastKnownSaveHadProgress && isBlankSave(saveData)) {
+        if (!seasonResetSave && lastKnownSaveHadProgress && isBlankSave(saveData)) {
             console.warn('初期状態での上書きを1回見送りました');
             updateCloudStatus('同期を待機中…');
             return;
@@ -7314,6 +7332,7 @@ animation:facilitySweep 6s linear infinite;
         // サーバー側のガードにも、意図した操作かどうかを伝える
         const shrinkIsIntended = allowShrinkSave;
         allowShrinkSave = false;
+        seasonResetSave = false;   // 1回使ったら必ず下ろす
 
         isCloudSyncing = true;
         updateCloudStatus('同期中…');
@@ -7326,7 +7345,8 @@ animation:facilitySweep 6s linear infinite;
                 playerId,
                 saveData,
                 saveToken: saveToken || getOrCreateSaveToken(),
-                allowShrink: shrinkIsIntended
+                allowShrink: shrinkIsIntended,
+                seasonReset: seasonResetSave
             })
         })
         .then(response => response.json().then(body => ({ status: response.status, body })))
@@ -7666,13 +7686,13 @@ animation:facilitySweep 6s linear infinite;
         if (localSave && localSave.saveVersion !== SAVE_DATA_VERSION) {
             localSave = null;
             localStorage.removeItem('kurofuneSaveData');
-            allowShrinkSave = true;
+            seasonResetSave = true;
         }
 
         const finishLoad = (save) => {
             if (save && save.saveVersion !== SAVE_DATA_VERSION) {
                 save = null;
-                allowShrinkSave = true;   // シーズン切り替え直後の保存を通す
+                seasonResetSave = true;   // シーズン切り替え直後の保存だけを通す
             }
             if (save) {
                 try { applySaveObject(save); } catch (e) { console.error("Save apply error", e); }
@@ -7694,9 +7714,17 @@ animation:facilitySweep 6s linear infinite;
         if (netlifyEnabled) {
             loadFromCloud().then((cloudSave) => {
                 // ローカルとクラウドで新しい方を採用（バージョンが古いものは finishLoad 内で破棄される）
+                // 基本は新しい方を採る。
                 let useSave = localSave;
                 if (cloudSave && (!localSave || (cloudSave.lastSaveTime || 0) > (localSave.lastSaveTime || 0))) {
                     useSave = cloudSave;
+                }
+                // ただし、新しい方が初期状態で、古い方に中身があるなら古い方を採る。
+                // 事故で空のセーブが書かれてしまっても、ここで拾い直せる。
+                const other = (useSave === cloudSave) ? localSave : cloudSave;
+                if (useSave && other && isBlankSave(useSave) && !isBlankSave(other)) {
+                    console.warn('新しい方のセーブが初期状態だったため、中身のある方を採用しました。');
+                    useSave = other;
                 }
                 finishLoad(useSave);
             });

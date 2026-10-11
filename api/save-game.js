@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { playerId, saveData, saveToken, allowShrink } = await parseBody(req);
+    const { playerId, saveData, saveToken, seasonReset } = await parseBody(req);
     if (!playerId || !saveData) return res.status(400).json({ error: 'Missing playerId or saveData' });
     if (typeof playerId !== 'string' || playerId.length > 64) {
       return res.status(400).json({ error: 'Bad playerId' });
@@ -65,7 +65,9 @@ module.exports = async (req, res) => {
     // ─── 2) 3) ガード ──────────────────────────────────
     // 隻数が減ること自体は正常（買い物・賭け・転生）。割合では判定しない。
     // 守るのは「初期状態での上書き」だけ。
-    if (prev && !allowShrink) {
+    // 初期状態での上書きを許すのはシーズン切り替えのときだけ。
+    // 転生や賭けの allowShrink では通さない（それらは初期状態にならない）。
+    if (prev && !seasonReset) {
       const gutted = findGutted(prev, saveData);
       if (gutted) {
         await logReject(playerId, 'gutted:' + gutted, {});
