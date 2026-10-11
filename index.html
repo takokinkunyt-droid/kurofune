@@ -2939,7 +2939,22 @@
         /* ============================================
            モバイル用：タブ切り替え式レイアウト
            ============================================ */
-        :root { --admax-h: 0px; }
+        :root { --admax-h: 0px; --admax-top: 0px; }
+        @media (max-width: 820px) {
+            /* 画面上部に広告が貼り付いたときは、その下からゲームを始める。
+               メニューボタン・サイドバー・告知バーが広告の下敷きになって
+               押せなくなるのを防ぐ（広告が無ければ 0 なので何も変わらない）。 */
+            #app-container {
+                top: var(--admax-top, 0px) !important;
+                height: calc(100vh - var(--admax-top, 0px)) !important;
+                height: calc(100dvh - var(--admax-top, 0px)) !important;
+            }
+            #mobile-menu-btn { top: calc(var(--admax-top, 0px) + 10px) !important; }
+            body.season-event-on #mobile-menu-btn {
+                top: calc(var(--admax-top, 0px) + var(--sev-h) + 10px) !important;
+            }
+            #sidebar, #mobile-sidebar-backdrop { top: var(--admax-top, 0px) !important; }
+        }
         #mobile-tab-bar {
             display: none;
             position: fixed;
@@ -10155,28 +10170,47 @@ animation:facilitySweep 6s linear infinite;
     // 広告が出ない環境（ブロッカー・配信なし）では 0 のままなので、
     // 余白が無駄に空くこともない。
     (function watchAdHeight() {
+        // 広告がどこに貼り付いても、ゲームのボタンを覆わないようにする。
+        // PCでは画面下、スマホでは画面上に出ることがあるので、上下とも測る。
+        // ゲーム自身の要素は測定から外す。
+        const OURS = new Set(['app-container', 'mobile-tab-bar', 'mobile-menu-btn', 'sidebar',
+            'mobile-sidebar-backdrop', 'achievement-toast-container', 'cloud-fail-banner',
+            'finale-video-wrap', 'finale-music-prompt', 'offline-popup']);
+        const isOurs = (el) => {
+            for (let n = el; n && n !== document.body; n = n.parentElement) {
+                if (n.id && (OURS.has(n.id) || n.id.endsWith('-overlay') || n.id.endsWith('-modal'))) return true;
+            }
+            return false;
+        };
         const measure = () => {
-            let h = 0;
-            // 画面下に固定されている要素のうち、ゲーム自身のもの以外を探す
+            let top = 0, bottom = 0;
+            const vh = window.innerHeight;
+            const nodes = [];
             document.querySelectorAll('body > *').forEach(el => {
-                if (el.id === 'app-container' || el.id === 'mobile-tab-bar') return;
-                if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
-                const cs = getComputedStyle(el);
-                if (cs.position !== 'fixed' || cs.display === 'none') return;
-                const r = el.getBoundingClientRect();
-                // 画面の下端に接していて、高さのあるものだけ
-                if (r.height > 20 && r.bottom >= window.innerHeight - 4) {
-                    h = Math.max(h, Math.round(r.height));
-                }
+                if (isOurs(el)) return;
+                nodes.push(el);
+                el.querySelectorAll('div, iframe, ins, a').forEach(c => nodes.push(c));
             });
-            document.documentElement.style.setProperty('--admax-h', h + 'px');
+            nodes.forEach(el => {
+                if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || isOurs(el)) return;
+                const cs = getComputedStyle(el);
+                if (cs.display === 'none' || cs.visibility === 'hidden') return;
+                if (cs.position !== 'fixed' && cs.position !== 'absolute' && el.tagName !== 'IFRAME') return;
+                const r = el.getBoundingClientRect();
+                if (r.height < 20 || r.width < 100) return;
+                if (r.top <= 4 && r.bottom < vh * 0.6) top = Math.max(top, Math.round(r.bottom));
+                if (r.bottom >= vh - 4 && r.top > vh * 0.4) bottom = Math.max(bottom, Math.round(vh - r.top));
+            });
+            const root = document.documentElement.style;
+            root.setProperty('--admax-top', top + 'px');
+            root.setProperty('--admax-h', bottom + 'px');
         };
         measure();
-        setTimeout(measure, 1200);
-        setTimeout(measure, 4000);
+        [800, 2000, 4000, 8000].forEach(t => setTimeout(measure, t));
         window.addEventListener('resize', measure);
         if (window.MutationObserver) {
-            new MutationObserver(measure).observe(document.body, { childList: true, subtree: false });
+            new MutationObserver(() => setTimeout(measure, 300))
+                .observe(document.body, { childList: true, subtree: false });
         }
     })();
 </script>
