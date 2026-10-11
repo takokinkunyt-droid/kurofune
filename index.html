@@ -2939,10 +2939,13 @@
         /* ============================================
            モバイル用：タブ切り替え式レイアウト
            ============================================ */
+        :root { --admax-h: 0px; }
         #mobile-tab-bar {
             display: none;
             position: fixed;
-            left: 0; right: 0; bottom: 0;
+            left: 0; right: 0;
+            /* 画面下に貼り付く広告の分だけ持ち上げる（広告が無ければ0） */
+            bottom: var(--admax-h, 0px);
             z-index: 880;
             height: 64px;
             background: linear-gradient(180deg, #2a1508, #180c05);
@@ -10105,6 +10108,49 @@ animation:facilitySweep 6s linear infinite;
         setInterval(updateSeasonEventBar, 1000);
     });
 
+</script>
+
+<!-- ==========================================================
+     忍者admax（画面下に貼り付く形式 / 300x250 sticky.bottom）
+     document.write を使うため、読み込み中に実行される位置へ
+     静的に置く必要がある。あとから JS で差し込むと
+     ページ全体が上書きされて真っ白になる。
+     ========================================================== -->
+<!-- admax -->
+<script src="https://adm.shinobi.jp/s/3be17414808f98f7b7b8aa2a50d609ac"></script>
+<!-- admax -->
+
+<script>
+    // 広告は画面下に固定されるので、放っておくとスマホの下部タブ
+    // （生産ライン／黒船／商会）を覆ってしまう。
+    // 広告の高さを測って、その分だけUIを押し上げる。
+    // 広告が出ない環境（ブロッカー・配信なし）では 0 のままなので、
+    // 余白が無駄に空くこともない。
+    (function watchAdHeight() {
+        const measure = () => {
+            let h = 0;
+            // 画面下に固定されている要素のうち、ゲーム自身のもの以外を探す
+            document.querySelectorAll('body > *').forEach(el => {
+                if (el.id === 'app-container' || el.id === 'mobile-tab-bar') return;
+                if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+                const cs = getComputedStyle(el);
+                if (cs.position !== 'fixed' || cs.display === 'none') return;
+                const r = el.getBoundingClientRect();
+                // 画面の下端に接していて、高さのあるものだけ
+                if (r.height > 20 && r.bottom >= window.innerHeight - 4) {
+                    h = Math.max(h, Math.round(r.height));
+                }
+            });
+            document.documentElement.style.setProperty('--admax-h', h + 'px');
+        };
+        measure();
+        setTimeout(measure, 1200);
+        setTimeout(measure, 4000);
+        window.addEventListener('resize', measure);
+        if (window.MutationObserver) {
+            new MutationObserver(measure).observe(document.body, { childList: true, subtree: false });
+        }
+    })();
 </script>
 </body>
 </html>
