@@ -2844,6 +2844,108 @@
             100% { transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0.45) rotate(var(--rot)); opacity: 0; }
         }
 
+        /* ============ バースト（長押しして離す） ============ */
+        #clicker-target { touch-action: none; }
+        #clicker-base { position: relative; }
+        .burst-meter {
+            position: absolute; width: 92px; height: 92px;
+            transform: translate(-50%, -100%) scale(0.4); opacity: 0;
+            pointer-events: none; z-index: 140;
+            transition: opacity .12s ease, transform .16s cubic-bezier(.3,1.6,.5,1);
+        }
+        .burst-meter.show { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+        .burst-meter .bm-ring {
+            position: absolute; inset: 0; border-radius: 50%;
+            background: conic-gradient(var(--bm-c, #ffd36b) calc(var(--p, 0) * 360deg), rgba(255,255,255,.14) 0);
+            -webkit-mask: radial-gradient(circle, transparent 56%, #000 58%);
+                    mask: radial-gradient(circle, transparent 56%, #000 58%);
+            filter: drop-shadow(0 0 8px var(--bm-glow, rgba(255,200,90,.6)));
+        }
+        .burst-meter .bm-core {
+            position: absolute; inset: 14px; border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, rgba(70,35,12,.92), rgba(20,10,4,.92));
+            border: 1px solid rgba(255,225,160,.35);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            line-height: 1; color: #fff4d6;
+        }
+        .burst-meter .bm-mult { font-size: 1.35rem; font-weight: 900; text-shadow: 0 2px 0 rgba(0,0,0,.5); }
+        .burst-meter .bm-hint { font-size: .72rem; font-weight: 900; margin-top: 3px; letter-spacing: .08em; min-height: .8em; }
+        .burst-meter.max  { --bm-c: #ff9b2f; --bm-glow: rgba(255,140,40,.85); }
+        .burst-meter.max .bm-hint { color: #ffb347; }
+        .burst-meter.crit { --bm-c: #fff; --bm-glow: rgba(255,255,255,.95); animation: bmCrit .12s linear infinite alternate; }
+        .burst-meter.crit .bm-core { background: radial-gradient(circle, #ff5a2a, #8a1606); }
+        .burst-meter.crit .bm-hint { color: #fff; font-size: .9rem; }
+        .burst-meter.heat { --bm-c: #9a9a9a; --bm-glow: rgba(120,120,120,.5); }
+        .burst-meter.heat .bm-core { background: radial-gradient(circle, #4a4a4a, #1c1c1c); }
+        .burst-meter.heat .bm-hint { color: #bbb; }
+        @keyframes bmCrit { from { transform: translate(-50%, -100%) scale(1.06); } to { transform: translate(-50%, -100%) scale(1.14); } }
+
+        /* 溜めている間、船が震える */
+        #clicker-target.burst-charging { animation: burstCharge .09s linear infinite !important; }
+        #clicker-target.burst-charging.hot { animation-duration: .05s !important; }
+        @keyframes burstCharge {
+            0%   { transform: scale(0.84) translate(-2px, 9px); }
+            50%  { transform: scale(0.84) translate(2px, 11px); }
+            100% { transform: scale(0.84) translate(-1px, 10px); }
+        }
+        #clicker-target.burst-punch { animation: burstPunch .5s cubic-bezier(.2,1.4,.4,1) !important; }
+        @keyframes burstPunch {
+            0%   { transform: scale(.78); }
+            30%  { transform: scale(1.2) rotate(-3deg); }
+            60%  { transform: scale(.96) rotate(1deg); }
+            100% { transform: scale(1); }
+        }
+
+        .burst-ring {
+            position: absolute; width: 90px; height: 90px; border-radius: 50%;
+            border: 5px solid rgba(255, 220, 130, .95);
+            box-shadow: 0 0 22px rgba(255, 200, 90, .8), inset 0 0 14px rgba(255, 230, 160, .6);
+            transform: translate(-50%, -50%) scale(.2); opacity: 0;
+            pointer-events: none; z-index: 95;
+            animation: burstRing .75s cubic-bezier(.1,.8,.3,1) forwards;
+        }
+        .burst-ring.critical { border-color: #fff; box-shadow: 0 0 34px rgba(255, 90, 40, .95), inset 0 0 20px rgba(255,160,90,.8); }
+        @keyframes burstRing {
+            0%   { opacity: 1; transform: translate(-50%, -50%) scale(.2); border-width: 10px; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(var(--s, 3)); border-width: 1px; }
+        }
+        .burst-flash {
+            position: absolute; inset: 0; pointer-events: none; z-index: 94;
+            background: radial-gradient(circle at var(--fx) var(--fy), rgba(255,250,225,.85), rgba(255,210,120,.35) 22%, transparent 55%);
+            animation: burstFlash .45s ease-out forwards; mix-blend-mode: screen;
+        }
+        .burst-flash.critical { background: radial-gradient(circle at var(--fx) var(--fy), #fff, rgba(255,120,60,.6) 28%, rgba(255,60,20,.15) 60%, transparent 80%); }
+        @keyframes burstFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+        .burst-shake { animation: burstShake .4s ease-out; }
+        .burst-shake-hard { animation: burstShakeHard .45s ease-out; }
+        @keyframes burstShake {
+            0%,100% { transform: translate(0,0); } 15% { transform: translate(-6px, 4px); }
+            35% { transform: translate(5px, -4px); } 55% { transform: translate(-3px, 2px); } 75% { transform: translate(2px, -1px); }
+        }
+        @keyframes burstShakeHard {
+            0%,100% { transform: translate(0,0); } 10% { transform: translate(-12px, 8px) rotate(-.6deg); }
+            25% { transform: translate(11px, -9px) rotate(.6deg); } 45% { transform: translate(-7px, 5px); }
+            65% { transform: translate(4px, -3px); } 85% { transform: translate(-2px, 1px); }
+        }
+        #screen-clicker .particle.burst-p { font-size: 2.3rem; animation-duration: 1.15s; z-index: 96; }
+
+        #screen-clicker .click-pop-num.burst-pop {
+            display: flex; flex-direction: column; align-items: center; white-space: nowrap;
+            animation: burstPop 1.5s forwards cubic-bezier(.15,.9,.3,1); z-index: 160;
+        }
+        .burst-pop .bp-label { font-size: 1.1rem; letter-spacing: .12em; color: #ffd36b; }
+        .burst-pop .bp-num { font-size: 3.6rem; line-height: 1.05; }
+        .burst-pop.critical .bp-label { color: #fff; text-shadow: 0 0 12px #ff5a2a, 0 2px 0 #7a1405; font-size: 1.3rem; }
+        .burst-pop.critical .bp-num { font-size: 4.4rem; color: #fff1c9; text-shadow: 0 3px 0 #8a1606, 0 0 26px rgba(255,90,40,.85); }
+        @keyframes burstPop {
+            0%   { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+            12%  { opacity: 1; transform: translate(-50%, -60%) scale(1.35); }
+            24%  { transform: translate(-50%, -62%) scale(1); }
+            70%  { opacity: 1; transform: translate(-50%, -110px) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -170px) scale(.9); }
+        }
+        body.lite-mode #clicker-target.burst-charging { animation: none !important; }
+
         #screen-clicker .golden-ship {
             position: absolute;
             font-size: 4.8rem;
@@ -3959,7 +4061,7 @@ animation:facilitySweep 6s linear infinite;
                     <div class="ship-wrapper">
                         <div id="clicker-sunburst" class="sunburst-bg"></div>
                         <div class="kurofune-click-target" id="clicker-target" onclick="clickKurofune(event)">🚢</div>
-                        <p class="ship-hint">※クリック・Spaceキーで増殖</p>
+                        <p class="ship-hint">※クリック・Spaceキーで増殖／長押しして離すと「バースト」</p>
                     </div>
                 </div>
 
@@ -4879,6 +4981,7 @@ animation:facilitySweep 6s linear infinite;
         flagLover:    { title:"旗が大好き",         icon:"🏴",  desc:"合衆国の国旗を100万枚買う。",       flavor:"チート？？",               unlocked:false, isRare:true  },
         clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船なしで一回のクリックで100隻の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
         kaikokuFinal: { title:"開国",               icon:"🔴",  desc:"日米修好通商条約を締結し、ペリーを帰国させる。", flavor:"さようなら、ペリー", unlocked:false, isRare:false, isFinal:true },
+        criticalBurst:{ title:"会心のバースト",     icon:"💥",  desc:"最大まで溜めた直後に離して、会心のバーストを放つ。", flavor:"狙って撃つ。それが船乗りの流儀。", unlocked:false, isRare:true  },
         lastVoyage:   { title:"最後の来航",         icon:"🌅",  desc:"シーズン1終了イベントの期間中に黒船を生産する。", flavor:"この光景を見た者だけが知っている。", unlocked:false, isRare:true  },
         timeTravel:   { title:"時間移動",           icon:"⌛",  desc:"「本当の転生」を実行し、縄文時代へと遡る。", flavor:"さようなら、黒船クリッカー。", unlocked:false, isRare:false, isFinal:true },
     };
@@ -8770,6 +8873,7 @@ animation:facilitySweep 6s linear infinite;
         unlockAchievement('start');
 
         window.addEventListener('keydown', handleSpaceBarClick);
+        window.addEventListener('keyup', handleSpaceBarUp);
         clickerInterval = setInterval(() => {
             ensureDataIntegrity();
             // 音楽の力 実績判定：黒船クリッカーをプレイ中に音楽が流れていたら解除
@@ -8809,25 +8913,34 @@ animation:facilitySweep 6s linear infinite;
     function stopClickerLoop() {
         clearClickParticles(); 
         if (typeof clickerInterval !== 'undefined' && clickerInterval) { clearInterval(clickerInterval); clickerInterval = null; }
-        window.removeEventListener('keydown', handleSpaceBarClick); 
+        window.removeEventListener('keydown', handleSpaceBarClick);
+        window.removeEventListener('keyup', handleSpaceBarUp);
+        cancelBurst(); 
     }
 
     function handleSpaceBarClick(e) {
-        if (e.code === "Space") {
-            e.preventDefault(); 
-            if (e.repeat) return; 
-            const sc = document.getElementById('screen-clicker');
-            if (sc && sc.classList.contains('active')) {
-                unlockAchievement('space'); 
-                const base = document.getElementById('clicker-base');
-                if(base) {
-                    const rect = base.getBoundingClientRect(); 
-                    const tg = document.getElementById('clicker-target');
-                    if(tg) clickKurofuneDirect(tg, rect.width / 2, rect.height / 2);
-                }
-            }
-        }
+        if (e.code !== "Space") return;
+        // 入力欄でスペースを打っているときは邪魔しない
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+        e.preventDefault();
+        if (e.repeat) return;
+        const sc = document.getElementById('screen-clicker');
+        if (!(sc && sc.classList.contains('active'))) return;
+        unlockAchievement('space');
+        // 長押しかどうかは離すまで分からないので、ここでは溜めを始めるだけ。
+        // 短く離せば普通のクリック、長く押せばバーストになる。
+        startBurstCharge('key');
     }
+
+    function handleSpaceBarUp(e) {
+        if (e.code !== "Space") return;
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+        e.preventDefault();
+        if (burstState && burstState.source === 'key') releaseBurst();
+    }
+
 
     // ==========================================
     // クリック時のパーティクル
@@ -8894,19 +9007,297 @@ animation:facilitySweep 6s linear infinite;
         document.querySelectorAll('.particle').forEach(p => p.remove());
     }
 
+    // ==========================================
+    // バースト（長押しして離すと、溜めた時間に応じてクリックが強くなる）
+    //
+    //   0.3秒未満     普通のクリック
+    //   1秒  ×10 / 2秒 ×30 / 3秒 ×60（最大）
+    //   最大になった直後 0.3 秒以内に離すと「会心」で さらに ×1.5
+    //   4秒を過ぎると過熱して下がっていき、6秒で ×10 まで落ちる
+    //
+    // 同じ時間連打した場合（毎秒8回）より、最大で約2.5倍得になる。
+    // 押しっぱなしではなく「いつ離すか」を狙う遊びにしてある。
+    // 金船フィーバー中は溜められない（777倍と掛け算すると壊れるため）。
+    // ==========================================
+    const BURST_MIN_MS = 300;
+    const BURST_MAX_MS = 3000;
+    const BURST_CRIT_MS = 300;          // 会心になる時間の幅
+    const BURST_HEAT_START_MS = 4000;
+    const BURST_HEAT_END_MS = 6000;
+    const BURST_CURVE = [[300, 1], [1000, 10], [2000, 30], [3000, 60]];
+
+    let burstState = null;          // 溜めている最中の情報
+    let burstSuppressClick = false; // 離した直後の普通クリックを捨てる印
+    let burstRaf = 0;
+
+    function burstAt(ms) {
+        let mult = 1, phase = 'charge';
+        if (ms < BURST_MIN_MS) return { mult: 1, phase: 'tap', critical: false, ratio: 0 };
+        if (ms <= BURST_MAX_MS) {
+            for (let i = 1; i < BURST_CURVE.length; i++) {
+                const [t0, m0] = BURST_CURVE[i - 1], [t1, m1] = BURST_CURVE[i];
+                if (ms <= t1) { mult = m0 + (m1 - m0) * (ms - t0) / (t1 - t0); break; }
+            }
+        } else if (ms <= BURST_HEAT_START_MS) {
+            mult = 60; phase = 'max';
+        } else if (ms <= BURST_HEAT_END_MS) {
+            mult = 60 - 50 * (ms - BURST_HEAT_START_MS) / (BURST_HEAT_END_MS - BURST_HEAT_START_MS);
+            phase = 'heat';
+        } else {
+            mult = 10; phase = 'heat';
+        }
+        const critical = ms >= BURST_MAX_MS && ms <= BURST_MAX_MS + BURST_CRIT_MS;
+        if (critical) phase = 'crit';
+        const ratio = Math.min(1, ms / BURST_MAX_MS);
+        return { mult: critical ? mult * 1.5 : mult, phase, critical, ratio };
+    }
+
+    function burstMeterEl() {
+        let m = document.getElementById('burst-meter');
+        if (!m) {
+            m = document.createElement('div');
+            m.id = 'burst-meter';
+            m.innerHTML = '<div class="bm-ring"></div><div class="bm-core"><span class="bm-mult">×1</span><span class="bm-hint"></span></div>';
+        }
+        const base = document.getElementById('clicker-base');
+        if (base && m.parentElement !== base) base.appendChild(m);
+        return m;
+    }
+
+    // source: 'pointer'（クリック・タッチ）か 'key'（スペースキー）
+    function startBurstCharge(source, ev) {
+        if (burstState) return;
+        const base = document.getElementById('clicker-base');
+        const target = document.getElementById('clicker-target');
+        if (!base || !target) return;
+        const br = base.getBoundingClientRect();
+        const tr = target.getBoundingClientRect();
+
+        let x, y, mx, my;
+        if (source === 'pointer' && ev) {
+            x = ev.clientX - br.left; y = ev.clientY - br.top;
+            mx = x; my = y - 78;                 // 指で隠れないよう、押した点の少し上に出す
+        } else {
+            x = tr.left + tr.width / 2 - br.left; y = tr.top + tr.height / 2 - br.top;
+            mx = x; my = tr.top - br.top - 14;   // スペースキーは黒船の上側
+        }
+        burstState = { source, t0: performance.now(), x, y, mx, my,
+                       frenzy: frenzyTimer > 0, pinged: false };
+
+        if (burstState.frenzy) return;           // フィーバー中は溜めない（普通のクリック扱い）
+
+        const m = burstMeterEl();
+        m.style.left = mx + 'px';
+        m.style.top = Math.max(46, my) + 'px';
+        m.className = 'burst-meter';
+        m.style.setProperty('--p', 0);
+        cancelAnimationFrame(burstRaf);
+        burstRaf = requestAnimationFrame(tickBurstMeter);
+    }
+
+    function tickBurstMeter() {
+        if (!burstState || burstState.frenzy) return;
+        const ms = performance.now() - burstState.t0;
+        const m = document.getElementById('burst-meter');
+        if (m) {
+            const b = burstAt(ms);
+            // 普通のタップでちらつかないよう、0.2秒を過ぎてから出す
+            m.classList.toggle('show', ms >= 200);
+            const tg = document.getElementById('clicker-target');
+            if (tg) { tg.classList.toggle('burst-charging', ms >= 200); tg.classList.toggle('hot', b.phase !== 'charge' && b.phase !== 'tap'); }
+            m.classList.toggle('max', b.phase === 'max');
+            m.classList.toggle('crit', b.phase === 'crit');
+            m.classList.toggle('heat', b.phase === 'heat');
+            m.style.setProperty('--p', b.phase === 'heat' ? Math.max(0.15, b.mult / 60) : b.ratio);
+            m.querySelector('.bm-mult').textContent = '×' + Math.floor(b.mult);
+            m.querySelector('.bm-hint').textContent =
+                b.phase === 'crit' ? '今！' : b.phase === 'heat' ? '過熱' : b.phase === 'max' ? 'MAX' : '';
+        }
+        // 会心の窓に入った瞬間に合図の音を鳴らす
+        if (!burstState.pinged && ms >= BURST_MAX_MS) { burstState.pinged = true; burstSound('ping'); }
+        burstRaf = requestAnimationFrame(tickBurstMeter);
+    }
+
+    function hideBurstMeter() {
+        cancelAnimationFrame(burstRaf); burstRaf = 0;
+        const m = document.getElementById('burst-meter');
+        if (m) m.className = 'burst-meter';
+        const tg = document.getElementById('clicker-target');
+        if (tg) tg.classList.remove('burst-charging', 'hot');
+    }
+
+    function cancelBurst() { burstState = null; hideBurstMeter(); }
+
+    function releaseBurst() {
+        const st = burstState;
+        if (!st) return;
+        burstState = null;
+        hideBurstMeter();
+        const ms = performance.now() - st.t0;
+        const target = document.getElementById('clicker-target');
+        if (!target) return;
+
+        // 短い押し・フィーバー中は普通のクリック
+        if (st.frenzy || ms < BURST_MIN_MS) {
+            // クリック・タッチは、この後に来る click イベントが普通のクリックになる。
+            // スペースキーには click が来ないので、ここで1回押したことにする。
+            if (st.source === 'key') clickKurofuneDirect(target, st.x, st.y);
+            return;
+        }
+
+        const b = burstAt(ms);
+        if (st.source === 'pointer') {
+            burstSuppressClick = true;
+            setTimeout(() => { burstSuppressClick = false; }, 500);
+        }
+        clickKurofuneDirect(target, st.x, st.y, { mult: b.mult, critical: b.critical, ms });
+        if (b.critical) unlockAchievement('criticalBurst');
+    }
+
+    // ---- バーストの演出 --------------------------------------------
+    function playBurstEffect(target, x, y, burst, amount) {
+        const base = document.getElementById('clicker-base');
+        if (!base) return;
+        const power = Math.min(1, burst.mult / 60);       // 0〜1（会心は1以上でも1）
+        burstSound(burst.critical ? 'crit' : 'burst', power);
+
+        // 黒船がぐっと縮んで、跳ね返る
+        target.classList.remove('burst-punch'); void target.offsetWidth;
+        target.classList.add('burst-punch');
+        setTimeout(() => target.classList.remove('burst-punch'), 520);
+
+        if (liteMode) return;   // 軽量化モードでは最低限の演出だけ
+
+        // 衝撃波（会心は3重）
+        const rings = burst.critical ? 3 : 2;
+        for (let i = 0; i < rings; i++) {
+            const r = document.createElement('div');
+            r.className = 'burst-ring' + (burst.critical ? ' critical' : '');
+            r.style.left = x + 'px'; r.style.top = y + 'px';
+            r.style.setProperty('--s', (1.6 + power * 2.4 + i * 0.7).toFixed(2));
+            r.style.animationDelay = (i * 70) + 'ms';
+            base.appendChild(r);
+            setTimeout(() => r.remove(), 900 + i * 70);
+        }
+
+        // 閃光
+        const fl = document.createElement('div');
+        fl.className = 'burst-flash' + (burst.critical ? ' critical' : '');
+        fl.style.setProperty('--fx', x + 'px'); fl.style.setProperty('--fy', y + 'px');
+        base.appendChild(fl);
+        setTimeout(() => fl.remove(), 520);
+
+        // 揺れ
+        base.classList.remove('burst-shake', 'burst-shake-hard'); void base.offsetWidth;
+        base.classList.add(burst.critical ? 'burst-shake-hard' : 'burst-shake');
+        setTimeout(() => base.classList.remove('burst-shake', 'burst-shake-hard'), 460);
+
+        // 絵文字を大きく弾き飛ばす
+        const emojis = burst.critical ? ['💥', '✨', '🔥', '💰', '⭐', '💫'] : ['✨', '💥', '💰', '⭐', '🌊', '💫'];
+        const n = Math.min(32, 12 + Math.floor(burst.mult / 4) + (burst.critical ? 8 : 0));
+        for (let i = 0; i < n; i++) {
+            const el = document.createElement('div');
+            el.className = 'particle burst-p';
+            el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            el.style.left = x + 'px'; el.style.top = y + 'px';
+            const ang = (i / n) * Math.PI * 2 + Math.random() * 0.4;
+            const dist = 110 + Math.random() * 120 + power * 90;
+            const tx = Math.cos(ang) * dist;
+            el.style.setProperty('--tx', tx.toFixed(0) + 'px');
+            el.style.setProperty('--peak', (Math.sin(ang) * dist * 0.7 - 60).toFixed(0) + 'px');
+            el.style.setProperty('--ty', (Math.sin(ang) * dist + 70).toFixed(0) + 'px');
+            el.style.setProperty('--rot', ((Math.random() - 0.5) * 900).toFixed(0) + 'deg');
+            base.appendChild(el);
+            el.addEventListener('animationend', () => el.remove(), { once: true });
+            setTimeout(() => el.remove(), 1400);
+        }
+    }
+
+    // ---- バーストの効果音（その場で合成する。音源ファイルは要らない） ----
+    let burstAudioCtx = null;
+    function burstSound(kind, power) {
+        try {
+            if (!burstAudioCtx) burstAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = burstAudioCtx;
+            if (ctx.state === 'suspended') ctx.resume();
+            const t = ctx.currentTime;
+            const out = ctx.createGain(); out.gain.value = 0.55; out.connect(ctx.destination);
+
+            if (kind === 'ping') {          // 会心の合図：高く澄んだ音
+                const o = ctx.createOscillator(), g = ctx.createGain();
+                o.type = 'triangle'; o.frequency.setValueAtTime(1320, t);
+                g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.01);
+                g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+                o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.25);
+                return;
+            }
+            const p = Math.max(0.3, Math.min(1, power || 0.5));
+            // 低い「ドン」：周波数を急降下させる
+            const o = ctx.createOscillator(), g = ctx.createGain();
+            o.type = 'sine';
+            o.frequency.setValueAtTime(170, t);
+            o.frequency.exponentialRampToValueAtTime(36, t + 0.38);
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.exponentialRampToValueAtTime(0.9 * p, t + 0.008);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+            o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.5);
+
+            // 破裂音：短いノイズ
+            const len = Math.floor(ctx.sampleRate * 0.18);
+            const buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+            for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.2);
+            const nz = ctx.createBufferSource(); nz.buffer = buf;
+            const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900;
+            const ng = ctx.createGain(); ng.gain.value = 0.45 * p;
+            nz.connect(hp); hp.connect(ng); ng.connect(out); nz.start(t);
+
+            if (kind === 'crit') {          // 会心：上に「キィン」と抜ける音を重ねる
+                const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+                o2.type = 'triangle';
+                o2.frequency.setValueAtTime(880, t + 0.02);
+                o2.frequency.exponentialRampToValueAtTime(1760, t + 0.18);
+                g2.gain.setValueAtTime(0.0001, t + 0.02);
+                g2.gain.exponentialRampToValueAtTime(0.28, t + 0.04);
+                g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+                o2.connect(g2); g2.connect(out); o2.start(t + 0.02); o2.stop(t + 0.65);
+            }
+        } catch (e) { /* 音が出せない環境では黙って諦める */ }
+    }
+
+    // クリック・タッチの長押しをつなぐ
+    function initBurstInput() {
+        const t = document.getElementById('clicker-target');
+        if (!t || t.dataset.burstReady) return;
+        t.dataset.burstReady = '1';
+        t.addEventListener('pointerdown', (e) => {
+            if (e.button !== undefined && e.button !== 0) return;
+            try { t.setPointerCapture(e.pointerId); } catch (err) {}
+            startBurstCharge('pointer', e);
+        });
+        t.addEventListener('pointerup', () => { if (burstState && burstState.source === 'pointer') releaseBurst(); });
+        t.addEventListener('pointercancel', () => { if (burstState && burstState.source === 'pointer') cancelBurst(); });
+        // 押したままタブを切り替えたら、溜めは取り消す（離した合図が来なくなるため）
+        window.addEventListener('blur', () => { if (burstState) cancelBurst(); });
+        // 長押しで出るメニュー・文字選択を止める
+        t.addEventListener('contextmenu', (e) => e.preventDefault());
+    }
+
     function clickKurofune(e) {
+        // バーストで離した直後に、ブラウザが普通のクリックも1回出してくる。
+        // それを数えると二重取りになるので捨てる。
+        if (burstSuppressClick) { burstSuppressClick = false; return; }
         const base = document.getElementById('clicker-base');
         if(!base) return;
         const rect = base.getBoundingClientRect();
         clickKurofuneDirect(e.target, e.clientX - rect.left, e.clientY - rect.top);
     }
 
-    function clickKurofuneDirect(target, posX, posY) {
+    function clickKurofuneDirect(target, posX, posY, burst) {
         let now = Date.now();
         if (lastClickTime > 0 && (now - lastClickTime) <= 10) { unlockAchievement('fastClick'); } 
         lastClickTime = now;
 
-        playSE('click'); 
+        if (!burst) playSE('click'); 
         
         // パーティクル生成（軽量化モード時はスキップ）
         const base = document.getElementById('clicker-base');
@@ -8917,12 +9308,24 @@ animation:facilitySweep 6s linear infinite;
         let currentClickPower = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1); let isCrit = false;
         if (skills.modShip && Math.random() < 0.15) { currentClickPower *= 5; isCrit = true; }
         currentClickPower = Math.floor(currentClickPower * (1 + reincarnationCount * 0.1) * frenzyClickMult);
+        // バースト：溜めた時間に応じた倍率（会心なら ×1.5 済み）
+        if (burst) currentClickPower = Math.floor(currentClickPower * burst.mult);
 
         clickerScore += currentClickPower; currentLifeScore += currentClickPower; 
-        target.style.transform = 'scale(0.85)'; setTimeout(() => { target.style.transform = 'scale(1)'; }, 50);
+        if (burst) {
+            playBurstEffect(target, posX, posY, burst, currentClickPower);
+        } else {
+            target.style.transform = 'scale(0.85)'; setTimeout(() => { target.style.transform = 'scale(1)'; }, 50);
+        }
 
         const pop = document.createElement('div'); pop.className = 'click-pop-num';
-        if(isCrit) { pop.textContent = `CRIT! +${currentClickPower}`; pop.style.color = '#f39c12'; pop.style.fontSize = '3rem'; } 
+        if (burst) {
+            pop.className = 'click-pop-num burst-pop' + (burst.critical ? ' critical' : '');
+            pop.innerHTML = '<span class="bp-label">' + (burst.critical ? '会心！ ' : 'BURST ')
+                + '×' + (Math.round(burst.mult * 10) / 10) + '</span>'
+                + '<span class="bp-num">+' + formatNumber(currentClickPower) + '</span>';
+        }
+        else if(isCrit) { pop.textContent = `CRIT! +${currentClickPower}`; pop.style.color = '#f39c12'; pop.style.fontSize = '3rem'; } 
         else { pop.textContent = `+${currentClickPower}`; }
         
         pop.style.left = `${posX}px`; pop.style.top = `${posY}px`;
@@ -8932,7 +9335,7 @@ animation:facilitySweep 6s linear infinite;
             const pops = base.getElementsByClassName('click-pop-num');
             while (pops.length >= POP_MAX) pops[0].remove();
             base.appendChild(pop);
-            setTimeout(() => pop.remove(), 800);
+            setTimeout(() => pop.remove(), burst ? 1500 : 800);
         }
         
         if (clickerScore >= 1000) unlockAchievement('ship1000');
@@ -9796,6 +10199,20 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v3.3",
+            title: "シーズン2先行体験 ― バースト",
+            date: "2026-10-12",
+            content: [
+                "シーズン2の副題が決まりました。「クリックとかけら」です。その最初の要素を、ひと足先に遊べるようにしました。今日から先行体験（デモ）として公開します。",
+                "黒船を長押しして、離してください。これを「バースト」と呼びます。押している間に力が溜まり、離した瞬間に一気に放たれます。溜めるほど1回で得られる隻数が増え、最大でふだんのクリックの60倍になります。",
+                "押した場所にメーターが現れて、いまの倍率を教えてくれます。スペースキーの長押しでも溜められます。その場合、メーターは黒船の上に出ます。",
+                "メーターが満タンになった直後、ほんの一瞬だけ「今！」と出ます。そこで離すと「会心」となり、さらに1.5倍。狙って撃ってみてください。会心を決めると、実績「💥 会心のバースト」が手に入ります。",
+                "ただし、満タンのまま押し続けていると船が過熱して、倍率がどんどん下がっていきます。溜めすぎにはご注意を。また、金船のフィーバー中は溜められず、ふだんのクリックになります。",
+                "短く押したときは、これまでどおりの普通のクリックです。連打の遊び方はそのまま残っています。",
+                "これはまだ先行体験です。倍率や時間はシーズン2の本番までに調整するかもしれません。気づいたことがあれば教えてください。"
+            ]
+        },
+        {
             version: "v3.2",
             title: "黒船、最後の来航 ― シーズン1、終わります",
             date: "2026-10-10",
@@ -10169,6 +10586,7 @@ animation:facilitySweep 6s linear infinite;
             kurofuneTarget.addEventListener('touchend', endHold);
         }
 
+        initBurstInput();
         for(let key in facilities) { facilities[key].count = 0; }
         loadGame();
 
