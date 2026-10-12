@@ -4822,6 +4822,8 @@ animation:facilitySweep 6s linear infinite;
 
     // クリッカー用
     let clickerScore = 0, currentLifeScore = 0, clickPower = 1, clickerInterval = null;    
+    const SUPER_DOCK_BASE_COST = 1000, SUPER_DOCK_COST_GROWTH = 1.6;
+    let superDockLevel = 0, upSuperDockCost = SUPER_DOCK_BASE_COST; // 超近代ドック拡張（最大バースト倍率 +1/Lv）
     let upClickCost = 15, upClickLevel = 1, frenzyTimer = 0, frenzyClickMult = 1, frenzyKpsMult = 1;
     let reincarnationCount = 0, fragments = 0;
     let sakokuShards = 0, superReincarnationCount = 0, buyQuantity = 1;
@@ -5322,6 +5324,7 @@ animation:facilitySweep 6s linear infinite;
         // 進行状況をすべて初期化
         clickerScore = 0; currentLifeScore = 0;
         clickPower = 1; upClickCost = 15; upClickLevel = 1;
+        superDockLevel = 0; upSuperDockCost = SUPER_DOCK_BASE_COST;
         reincarnationCount = 0; fragments = 0;
         sakokuShards = 0; superReincarnationCount = 0;
         wrenchLevel = 0; upWrenchCost = 1000; combatTechPurchased = false;
@@ -7294,6 +7297,7 @@ animation:facilitySweep 6s linear infinite;
         const saveData = {
             saveVersion: SAVE_DATA_VERSION,
             clickerScore, currentLifeScore, clickPower, upClickCost, upClickLevel,
+            superDockLevel, upSuperDockCost,
             reincarnationCount, fragments, skills, achievements,
             facilities, availableFacilityUpgrades,
             wrenchLevel, upWrenchCost, combatTechPurchased,
@@ -7745,6 +7749,7 @@ animation:facilitySweep 6s linear infinite;
     function ensureDataIntegrity() {
         clickerScore = sanitizeNum(clickerScore, 0); currentLifeScore = sanitizeNum(currentLifeScore, clickerScore); 
         clickPower = sanitizeNum(clickPower, 1); upClickCost = sanitizeNum(upClickCost, 15); upClickLevel = sanitizeNum(upClickLevel, 1);
+        superDockLevel = sanitizeNum(superDockLevel, 0); upSuperDockCost = sanitizeNum(upSuperDockCost, SUPER_DOCK_BASE_COST);
         reincarnationCount = sanitizeNum(reincarnationCount, 0); fragments = sanitizeNum(fragments, 0); wrenchLevel = sanitizeNum(wrenchLevel, 0); upWrenchCost = sanitizeNum(upWrenchCost, 1000);
         sakokuShards = sanitizeNum(sakokuShards, 0); superReincarnationCount = sanitizeNum(superReincarnationCount, 0); buyQuantity = sanitizeNum(buyQuantity, 1);
         conscriptionLevel = sanitizeNum(conscriptionLevel, 0); upConscriptionCost = sanitizeNum(upConscriptionCost, 10000000);
@@ -7755,6 +7760,7 @@ animation:facilitySweep 6s linear infinite;
     function applySaveObject(save) {
         clickerScore = sanitizeNum(save.clickerScore, 0); currentLifeScore = sanitizeNum(save.currentLifeScore, clickerScore);
         clickPower = sanitizeNum(save.clickPower, 1); upClickCost = sanitizeNum(save.upClickCost, 15); upClickLevel = sanitizeNum(save.upClickLevel, 1);
+        superDockLevel = sanitizeNum(save.superDockLevel, 0); upSuperDockCost = sanitizeNum(save.upSuperDockCost, SUPER_DOCK_BASE_COST);
         reincarnationCount = sanitizeNum(save.reincarnationCount, 0); fragments = sanitizeNum(save.fragments, 0);
         sakokuShards = sanitizeNum(save.sakokuShards, 0); superReincarnationCount = sanitizeNum(save.superReincarnationCount, 0); buyQuantity = sanitizeNum(save.buyQuantity, 1);
         superSkills = { ...superSkills, ...(save.superSkills || {}) };
@@ -7994,6 +8000,13 @@ animation:facilitySweep 6s linear infinite;
             <div class="shop-info-right"><div class="shop-cost" id="up-click-cost">${formatNumber(upClickCost)} 隻</div><div class="shop-count" id="up-click-level">Lv.${upClickLevel}</div></div>
         `;
         container.appendChild(clickCard);
+
+        let superDockCard = document.createElement('div'); superDockCard.className = 'shop-card special-card'; superDockCard.id = 'up-superdock'; superDockCard.onclick = () => buySuperDock();
+        superDockCard.innerHTML = `
+            <div class="shop-info-left"><span class="shop-icon">🏗️</span><div class="shop-details"><h4>超近代ドック拡張</h4><p>最大バースト倍率を <strong>+1</strong>（いま ×<span id="up-superdock-max">${burstMaxMult()}</span>）</p></div></div>
+            <div class="shop-info-right"><div class="shop-cost" id="up-superdock-cost">${formatNumber(upSuperDockCost)} 隻</div><div class="shop-count" id="up-superdock-level">Lv.${superDockLevel}</div></div>
+        `;
+        container.appendChild(superDockCard);
 
         if (skills.modernization) {
             let wrenchCard = document.createElement('div'); wrenchCard.className = 'shop-card special-card'; wrenchCard.id = 'up-wrench'; wrenchCard.onclick = () => buyWrench();
@@ -8245,6 +8258,15 @@ animation:facilitySweep 6s linear infinite;
             if (clickerScore >= upClickCost) upClickCard.classList.remove('disabled'); else upClickCard.classList.add('disabled');
         }
 
+        const upSuperDockCard = document.getElementById('up-superdock');
+        if (upSuperDockCard) {
+            const c = document.getElementById('up-superdock-cost'), l = document.getElementById('up-superdock-level'), mx = document.getElementById('up-superdock-max');
+            if (c) c.textContent = `${formatNumber(upSuperDockCost)} 隻`;
+            if (l) l.textContent = `Lv.${superDockLevel}`;
+            if (mx) mx.textContent = burstMaxMult();
+            upSuperDockCard.classList.toggle('disabled', clickerScore < upSuperDockCost);
+        }
+
         const upWrenchCard = document.getElementById('up-wrench');
         if (upWrenchCard) {
             const costEl = document.getElementById('up-wrench-cost');
@@ -8331,6 +8353,12 @@ animation:facilitySweep 6s linear infinite;
         return sanitizeNum(kps, 0);
     }
 
+    function buySuperDock() {
+        if (clickerScore < upSuperDockCost) return;
+        playSE('buy'); clickerScore -= upSuperDockCost; superDockLevel++;
+        upSuperDockCost = Math.floor(upSuperDockCost * SUPER_DOCK_COST_GROWTH);
+        updateClickerUI(); flashEffect('shop-area');
+    }
     function buyUpgrade() {
         if (clickerScore >= upClickCost) { playSE('buy'); clickerScore -= upClickCost; clickPower += 1; upClickLevel++; upClickCost = Math.floor(upClickCost * 1.8); updateClickerUI(); unlockAchievement('upgrade'); flashEffect('shop-area'); }
     }
@@ -9025,6 +9053,9 @@ animation:facilitySweep 6s linear infinite;
     const BURST_HEAT_START_MS = 4000;
     const BURST_HEAT_END_MS = 6000;
     const BURST_CURVE = [[300, 1], [1000, 10], [2000, 30], [3000, 60]];
+    const BURST_BASE_MAX = 60;
+    // 超近代ドック拡張のレベルぶん、最大倍率が上がる。途中の溜めも同じ割合で伸ばす。
+    function burstMaxMult() { return BURST_BASE_MAX + (Number(superDockLevel) || 0); }
 
     let burstState = null;          // 溜めている最中の情報
     let burstSuppressClick = false; // 離した直後の普通クリックを捨てる印
@@ -9033,15 +9064,16 @@ animation:facilitySweep 6s linear infinite;
     function burstAt(ms) {
         let mult = 1, phase = 'charge';
         if (ms < BURST_MIN_MS) return { mult: 1, phase: 'tap', critical: false, ratio: 0 };
+        const max = burstMaxMult(), scale = max / BURST_BASE_MAX;
         if (ms <= BURST_MAX_MS) {
             for (let i = 1; i < BURST_CURVE.length; i++) {
                 const [t0, m0] = BURST_CURVE[i - 1], [t1, m1] = BURST_CURVE[i];
-                if (ms <= t1) { mult = m0 + (m1 - m0) * (ms - t0) / (t1 - t0); break; }
+                if (ms <= t1) { mult = Math.max(1, (m0 + (m1 - m0) * (ms - t0) / (t1 - t0)) * scale); break; }
             }
         } else if (ms <= BURST_HEAT_START_MS) {
-            mult = 60; phase = 'max';
+            mult = max; phase = 'max';
         } else if (ms <= BURST_HEAT_END_MS) {
-            mult = 60 - 50 * (ms - BURST_HEAT_START_MS) / (BURST_HEAT_END_MS - BURST_HEAT_START_MS);
+            mult = max - (max - 10) * (ms - BURST_HEAT_START_MS) / (BURST_HEAT_END_MS - BURST_HEAT_START_MS);
             phase = 'heat';
         } else {
             mult = 10; phase = 'heat';
@@ -9108,7 +9140,7 @@ animation:facilitySweep 6s linear infinite;
             m.classList.toggle('max', b.phase === 'max');
             m.classList.toggle('crit', b.phase === 'crit');
             m.classList.toggle('heat', b.phase === 'heat');
-            m.style.setProperty('--p', b.phase === 'heat' ? Math.max(0.15, b.mult / 60) : b.ratio);
+            m.style.setProperty('--p', b.phase === 'heat' ? Math.max(0.15, b.mult / burstMaxMult()) : b.ratio);
             m.querySelector('.bm-mult').textContent = '×' + Math.floor(b.mult);
             m.querySelector('.bm-hint').textContent =
                 b.phase === 'crit' ? '今！' : b.phase === 'heat' ? '過熱' : b.phase === 'max' ? 'MAX' : '';
@@ -9158,7 +9190,7 @@ animation:facilitySweep 6s linear infinite;
     function playBurstEffect(target, x, y, burst, amount) {
         const base = document.getElementById('clicker-base');
         if (!base) return;
-        const power = Math.min(1, burst.mult / 60);       // 0〜1（会心は1以上でも1）
+        const power = Math.min(1, burst.mult / burstMaxMult());       // 0〜1（会心は1以上でも1）
         burstSound(burst.critical ? 'crit' : 'burst', power);
 
         // 黒船がぐっと縮んで、跳ね返る
@@ -9663,6 +9695,7 @@ animation:facilitySweep 6s linear infinite;
         const keepShipCount = isSuperReincarnation && superSkills.carryOver;
         if (!keepShipCount) { clickerScore = 0; }
         currentLifeScore = 0; clickPower = 1; upClickCost = 15; upClickLevel = 1; availableFacilityUpgrades = [];
+        superDockLevel = 0; upSuperDockCost = SUPER_DOCK_BASE_COST;
         wrenchLevel = 0; upWrenchCost = 1000; combatTechPurchased = false;
         conscriptionLevel = 0; upConscriptionCost = 10000000; haihanPurchased = false; sakuradamonPurchased = false;
         frenzyTimer = 0; frenzyClickMult = 1; frenzyKpsMult = 1; 
@@ -10209,6 +10242,7 @@ animation:facilitySweep 6s linear infinite;
                 "メーターが満タンになった直後、ほんの一瞬だけ「今！」と出ます。そこで離すと「会心」となり、さらに1.5倍。狙って撃ってみてください。会心を決めると、実績「💥 会心のバースト」が手に入ります。",
                 "ただし、満タンのまま押し続けていると船が過熱して、倍率がどんどん下がっていきます。溜めすぎにはご注意を。また、金船のフィーバー中は溜められず、ふだんのクリックになります。",
                 "短く押したときは、これまでどおりの普通のクリックです。連打の遊び方はそのまま残っています。",
+                "開国技術に「🏗️ 超近代ドック拡張」を追加しました。1段階上げるごとに、バーストの最大倍率が1ずつ上がります（×60→×61→…）。溜めている途中の倍率も同じ割合で伸びます。近代ドック拡張と同じく、転生すると0に戻ります。",
                 "これはまだ先行体験です。倍率や時間はシーズン2の本番までに調整するかもしれません。気づいたことがあれば教えてください。"
             ]
         },
