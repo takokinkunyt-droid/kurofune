@@ -19,8 +19,12 @@ module.exports = async (req, res) => {
   try {
     const me = (req.query && req.query.me) || null;
 
-    const rankResult = await redisRequest(['zrevrange', 'ranking', 0, 99]);
-    const playerIds = rankResult.result || [];
+    const [rankResult, hiddenResult] = await Promise.all([
+      redisRequest(['zrevrange', 'ranking', 0, 99]),
+      redisRequest(['smembers', 'ranking_hidden_players']),
+    ]);
+    const hiddenSet = new Set(hiddenResult.result || []);
+    const playerIds = (rankResult.result || []).filter(id => !hiddenSet.has(id));
     if (!playerIds.length) return res.status(200).json({ data: [], count: 0, success: true });
 
     const results = await Promise.all(

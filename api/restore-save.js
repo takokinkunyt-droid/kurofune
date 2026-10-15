@@ -88,6 +88,19 @@ module.exports = async (req, res) => {
         const r = await resyncRanking(playerId);
         return res.status(r.ok ? 200 : 404).json(r);
       }
+      // ランキングから外す／戻す（セーブはそのまま）
+      if (body.action === 'hide') {
+        await redisPipeline([
+          ['sadd', 'ranking_hidden_players', playerId],
+          ['zrem', 'ranking', playerId],
+        ]);
+        return res.status(200).json({ success: true, hidden: true });
+      }
+      if (body.action === 'unhide') {
+        await redisRequest(['srem', 'ranking_hidden_players', playerId]);
+        const r = await resyncRanking(playerId);
+        return res.status(200).json({ success: true, hidden: false, resync: r });
+      }
       if (body.action === 'unshadow') {
         await redisPipeline([
           ['srem', 'shadow_banned_players', playerId],
@@ -185,7 +198,10 @@ module.exports = async (req, res) => {
       // ランキングも復元後の値に合わせる
       // ランキングは並び順（zset）と表示用の記録（player:<id>）の2つがある。
       // 片方だけ直すと、順位は正しいのに転生回数やかけらが古い値のまま表示される。
-      commands.push(['zadd', 'ranking', Math.floor(Number(toWrite.clickerScore) || 0), playerId]);
+      const hiddenNow = await redisRequest(['sismember', 'ranking_hidden_players', playerId]);
+      if (hiddenNow.result !== 1) {
+        commands.push(['zadd', 'ranking', Math.floor(Number(toWrite.clickerScore) || 0), playerId]);
+      }
       commands.push(['set', `player:${playerId}`, JSON.stringify({
         playerId,
         playerName: String(toWrite.playerName || '名無しの船長').substring(0, 20),
@@ -276,7 +292,7 @@ async function handleKeylessGet(action, q, res, SECRET) {
 // ---- 診断：1人のセーブとランキングの食い違いを丸ごと見る ----
 async function inspectPlayer(playerId, res) {
   if (!playerId) return res.status(400).json({ error: 'Missing playerId' });
-  const [saveR, zR, pR, banR, shR, tokR, hlR, histR, rejR, healR] = await redisPipeline([
+  const [saveR, zR, pR, banR, shR, tokR, hlR, histR, rejR, healR, hidR] = await redisPipeline([
     ['get', `save:${playerId}`],
     ['zscore', 'ranking', playerId],
     ['get', `player:${playerId}`],
@@ -287,7 +303,9 @@ async function inspectPlayer(playerId, res) {
     ['lrange', `save_hist:${playerId}`, 0, 0],
     ['lrange', 'save_reject_log', 0, 299],
     ['lrange', 'save_heal_log', 0, 299],
+    ['sismember', 'ranking_hidden_players', playerId],
   ]);
+  const hidden = hidR.result === 1;
   let save = null; try { save = saveR.result ? JSON.parse(saveR.result) : null; } catch (e) {}
   let rank = null; try { rank = pR.result ? JSON.parse(pR.result) : null; } catch (e) {}
   let newestHist = null; try { newestHist = histR.result && histR.result[0] ? JSON.parse(histR.result[0]) : null; } catch (e) {}
@@ -302,7 +320,8 @@ async function inspectPlayer(playerId, res) {
   if (shadow) findings.push('シャドウBAN中：セーブは保存されるが、ランキングの更新は黙って捨てられる');
   if (banned) findings.push('BAN中：保存そのものが拒否される（403）');
   if (save && zScore != null && saveScore !== zScore) findings.push('ランキングの隻数とセーブの隻数が違う');
-  if (save && zScore == null) findings.push('ランキングに載っていない');
+  if (hidden) findings.push('ランキング非表示に設定中（セーブは通常どおり）');
+  if (save && zScore == null && !hidden) findings.push('ランキングに載っていない');
   if (!save) findings.push('セーブが存在しない');
   const tokenMis = mine(rejR.result).filter(x => String(x.reason).startsWith('token_mismatch'));
   if (tokenMis.length) findings.push('別端末からの保存がある（鍵違い ' + tokenMis.length + ' 件）');
@@ -316,7 +335,7 @@ async function inspectPlayer(playerId, res) {
                    skillCount: countTrue(save.skills) + countTrue(save.superSkills),
                    facilityCount: countFacilities(save.facilities), playerName: save.playerName } : null,
     ranking: { zscore: zScore, record: rank },
-    flags: { banned, shadowBanned: shadow, hasToken: tokR.result === 1 },
+    flags: { banned, shadowBanned: shadow, rankingHidden: hidden, hasToken: tokR.result === 1 },
     history: { count: hlR.result || 0,
                newest: newestHist ? { clickerScore: newestHist.clickerScore, lastSaveTime: newestHist.lastSaveTime } : null },
     recentRejects: mine(rejR.result),
@@ -343,6 +362,11 @@ async function resyncRanking(playerId) {
   if (!r.result) return { ok: false, error: 'No save' };
   let s; try { s = JSON.parse(r.result); } catch (e) { return { ok: false, error: 'Corrupt save' }; }
   const score = Math.floor(Number(s.clickerScore) || 0);
+  const hid = await redisRequest(['sismember', 'ranking_hidden_players', playerId]);
+  if (hid.result === 1) {
+    await redisRequest(['zrem', 'ranking', playerId]);
+    return { ok: true, clickerScore: score, hidden: true };
+  }
   await redisPipeline([
     ['zadd', 'ranking', score, playerId],
     ['set', `player:${playerId}`, JSON.stringify({

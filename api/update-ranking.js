@@ -14,6 +14,12 @@ module.exports = async (req, res) => {
     if (shadowCheck.result === 1) {
       return res.status(200).json({ success: true });
     }
+    // ランキング非表示（管理者が自分を外す用）。セーブには影響しない。
+    const hidden = await redisRequest(['sismember', 'ranking_hidden_players', playerId]);
+    if (hidden.result === 1) {
+      await redisRequest(['zrem', 'ranking', playerId]);
+      return res.status(200).json({ success: true });
+    }
 
     const playerData = JSON.stringify({
       playerId,

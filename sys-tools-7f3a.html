@@ -92,6 +92,9 @@
     <div class="note">セーブの隻数とランキングの隻数が食い違うときに使います。どちらもセーブの中身は変えません。</div>
     <button onclick="resync()">ランキングをセーブに合わせ直す</button>
     <button class="danger" onclick="unshadow()">BANを解除して合わせ直す</button>
+    <div class="note">管理者・テスト用のアカウントをランキングから外します。セーブはそのまま遊べます。</div>
+    <button onclick="setHidden(true)">ランキングから外す</button>
+    <button onclick="setHidden(false)">ランキングに戻す</button>
     <div id="rankFixOut"></div>
   </section>
 
@@ -371,6 +374,7 @@ async function inspect() {
     + '<tr><th>ランキング最終更新</th><td class="mono">' + t(body.ranking.record && body.ranking.record.updatedAt) + '</td></tr>'
     + '<tr><th>BAN / シャドウBAN</th><td>' + (body.flags.banned ? '<span class="err">BAN中</span>' : 'なし') + ' / '
     +   (body.flags.shadowBanned ? '<span class="err">シャドウBAN中</span>' : 'なし') + '</td></tr>'
+    + '<tr><th>ランキング表示</th><td>' + (body.flags.rankingHidden ? '<span class="err">非表示</span>' : '表示') + '</td></tr>'
     + '<tr><th>履歴</th><td class="mono">' + body.history.count + ' 世代</td></tr>'
     + '</table>';
   h += '<div class="note" style="margin-top:12px;"><b>所見</b><br>' + (body.findings.length
@@ -383,6 +387,16 @@ async function resync() {
   const pid = $('playerId').value.trim();
   if (!pid) return show('rankFixOut', '上の「3. 対象」で playerId を選んでください。');
   const { status, body } = await post('/restore-save', { secret: secret(), playerId: pid, action: 'resync' });
+  show('rankFixOut', body, status === 200 ? 'ok' : 'err');
+  inspect();
+}
+
+async function setHidden(hide) {
+  if (!secret()) return show('rankFixOut', '先に管理キーを入れてください。');
+  const pid = $('playerId').value.trim();
+  if (!pid) return show('rankFixOut', '上の「3. 対象」で playerId を選んでください。');
+  if (!confirm(pid + '\n\n' + (hide ? 'ランキングから外します。' : 'ランキングに戻します。') + '\n実行しますか？')) return;
+  const { status, body } = await post('/restore-save', { secret: secret(), playerId: pid, action: hide ? 'hide' : 'unhide' });
   show('rankFixOut', body, status === 200 ? 'ok' : 'err');
   inspect();
 }
