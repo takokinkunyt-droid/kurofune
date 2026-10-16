@@ -382,6 +382,148 @@
             background: linear-gradient(180deg, #5e0a04 0%, #2a0402 100%) !important;
         }
 
+
+        /* ---------- フィーバー祭：作り込み ---------- */
+        /* 上の帯：朱塗りの桟と、提灯の形のボタン */
+        body.fever-fest .clicker-top-bar {
+            background: linear-gradient(180deg, #a3170b 0%, #6b0c05 100%) !important;
+            border-top: 3px solid #ffd36b; border-bottom: 3px solid #ffd36b;
+            box-shadow: 0 6px 24px rgba(255, 90, 20, 0.45) !important;
+        }
+        body.fever-fest .clicker-top-btn {
+            background: radial-gradient(ellipse at 50% 40%, #ff5b3a 0%, #c8180a 55%, #7a0904 100%) !important;
+            color: #fff3c4 !important; font-weight: 900 !important;
+            border: none !important; border-top: 5px solid #2b1206 !important; border-bottom: 5px solid #2b1206 !important;
+            border-radius: 45% / 50% !important; padding: 10px 22px !important;
+            box-shadow: 0 0 18px rgba(255, 120, 40, 0.85), inset 0 0 0 1px rgba(255, 220, 120, 0.5) !important;
+            text-shadow: 0 1px 2px #000;
+            animation: festLanternBtn 2.2s ease-in-out infinite alternate;
+        }
+        body.fever-fest .clicker-top-btn:nth-child(2) { animation-delay: -1.1s; }
+        @keyframes festLanternBtn { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+        /* 瓦版：電光掲示板 */
+        body.fever-fest .clicker-news {
+            background: #0b0402 !important; border: 2px solid #ffd36b !important; border-radius: 6px !important;
+            box-shadow: inset 0 0 18px rgba(255, 140, 0, 0.35), 0 0 12px rgba(255, 180, 60, 0.5) !important;
+            background-image: radial-gradient(rgba(255, 160, 40, 0.12) 1px, transparent 1.4px) !important;
+            background-size: 4px 4px !important;
+        }
+        body.fever-fest #news-ticker-text {
+            color: #ffb300 !important; font-weight: 900 !important; letter-spacing: 0.12em;
+            font-family: ui-monospace, Menlo, Consolas, 'Noto Sans JP', monospace !important;
+            text-shadow: 0 0 6px #ff8a00, 0 0 14px #ff5a00 !important;
+        }
+
+        /* 黒船の舞台：大きな「祭」の字と、吊り看板の隻数 */
+        body.fever-fest #clicker-base::before {
+            content: '祭'; position: absolute; left: 50%; top: 56%; z-index: 0; pointer-events: none;
+            transform: translate(-50%, -50%);
+            font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: clamp(14rem, 30vh, 26rem); line-height: 1;
+            color: rgba(255, 215, 90, 0.13); text-shadow: 0 0 40px rgba(255, 150, 40, 0.25);
+            animation: festKanji 1.6s ease-in-out infinite alternate;
+        }
+        @keyframes festKanji { from { transform: translate(-50%, -50%) scale(0.97); } to { transform: translate(-50%, -50%) scale(1.04); } }
+        body.fever-fest .clicker-score-board {
+            position: relative;
+            background: linear-gradient(180deg, #e9c27a 0%, #c99449 45%, #a87332 100%) !important;
+            border: 4px solid #3b1b07 !important; border-radius: 6px !important;
+            box-shadow: 0 10px 0 #2b1206, 0 14px 28px rgba(0,0,0,0.55) !important;
+            transform: rotate(-1.2deg);
+        }
+        body.fever-fest .clicker-score-board .kurofune-count-title { color: #5a1306 !important; font-weight: 900; }
+        body.fever-fest .clicker-score-board .kurofune-count {
+            color: #8a1206 !important;
+            text-shadow: 0 2px 0 rgba(255, 240, 200, 0.8) !important;
+        }
+        body.fever-fest .clicker-score-board .kps-display {
+            background: #8a1206 !important; color: #fff3c4 !important; border-color: #ffd36b !important;
+        }
+        body.fever-fest .ship-name-input { background: rgba(43, 18, 6, 0.85) !important; border-color: #ffd36b !important; color: #ffe3a0 !important; }
+        body.fever-fest .ship-hint { color: #ffd36b !important; font-weight: 700; }
+        body.fever-fest .sunburst-bg { opacity: 0.9 !important; animation-duration: 9s !important; filter: hue-rotate(-20deg) saturate(2.2); }
+
+        /* 商会の棚：屋台（紅白の日よけ） */
+        body.fever-fest .shop-card {
+            border-radius: 4px !important;
+            border: 2px solid #3b1b07 !important;
+            border-top: 16px solid transparent !important;
+            border-image: repeating-linear-gradient(90deg, #d0161f 0 20px, #fff7e8 20px 40px) 16 0 0 0 !important;
+            background: linear-gradient(180deg, #5a2a10 0%, #3a1806 100%) !important;
+            box-shadow: 0 6px 0 #1d0a02, 0 10px 18px rgba(0,0,0,0.5) !important;
+        }
+        body.fever-fest .shop-card h4, body.fever-fest .shop-card .shop-details h4 { color: #ffe3a0 !important; }
+        body.fever-fest .shop-card p, body.fever-fest .shop-card .shop-details p { color: #f3d9a8 !important; }
+        body.fever-fest .shop-card .shop-cost { color: #ffd36b !important; }
+        body.fever-fest .shop-card .shop-count { color: rgba(255, 227, 160, 0.35) !important; }
+        body.fever-fest .shop-card.disabled { filter: grayscale(0.6) brightness(0.7); }
+        body.fever-fest .shop-section-title { color: #ffd36b !important; border-color: #d0161f !important; background: rgba(208, 22, 31, 0.18) !important; }
+
+        /* 生産ライン：夜店の通り（電球の飾り） */
+        body.fever-fest .clicker-col-center .clicker-column-header {
+            background: linear-gradient(180deg, #d0161f, #8a0c06) !important;
+        }
+        body.fever-fest .clicker-col-center .clicker-column-header h3 { color: #fff3c4 !important; }
+        body.fever-fest .clicker-col-center .clicker-column-header p { color: #ffd9a0 !important; }
+        body.fever-fest .facility-row {
+            background:
+                radial-gradient(circle, #ffd36b 0 3px, transparent 4px) 0 4px / 26px 12px repeat-x,
+                linear-gradient(180deg, #1c1236 0%, #2a0f2a 100%) !important;
+            border: 2px solid #c8961c !important; color: #fff3d6 !important;
+        }
+        body.fever-fest .facility-row * { color: #fff3d6; }
+
+        /* お品書き：お札 */
+        body.fever-fest .nav-item {
+            margin: 6px 12px !important; border-radius: 3px !important;
+            background: linear-gradient(180deg, #fbf0d0, #ead1a0) !important;
+            color: #8a1206 !important; font-weight: 900 !important;
+            border: 2px solid #8a1206 !important; box-shadow: 0 3px 0 #3b1b07;
+        }
+        body.fever-fest .nav-item * { color: #8a1206 !important; }
+        body.fever-fest .sidebar-header h1 { color: #ffd36b !important; text-shadow: 0 0 14px rgba(255, 150, 40, 0.8); }
+
+        /* スマホの下のタブ */
+        body.fever-fest #mobile-tab-bar { background: linear-gradient(180deg, #a3170b, #5e0a04) !important; border-top: 3px solid #ffd36b !important; }
+        body.fever-fest .mobile-tab-btn { color: #ffd9a0 !important; }
+        body.fever-fest .mobile-tab-btn.active { background: #ffd36b !important; color: #8a1206 !important; }
+
+        /* 紙吹雪 */
+        #fest-confetti { position: fixed; inset: 0; z-index: 55; pointer-events: none; overflow: hidden; }
+        #fest-confetti span {
+            position: absolute; top: -40px; display: block; will-change: transform;
+            animation: festFall linear infinite;
+        }
+        @keyframes festFall {
+            0%   { transform: translate(0, -40px) rotate(0deg); opacity: 0; }
+            8%   { opacity: 1; }
+            100% { transform: translate(var(--dx, 40px), 110vh) rotate(var(--rot, 540deg)); opacity: 0.9; }
+        }
+        body.lite-mode #fest-confetti { display: none; }
+
+        /* 連打の太鼓：コンボ表示と「わっしょい！」 */
+        #fest-combo {
+            position: absolute; right: 14px; top: 46%; z-index: 120; pointer-events: none;
+            text-align: center; font-family: 'Shippori Mincho', serif; font-weight: 800; line-height: 1;
+            color: #fff3c4; text-shadow: 0 0 12px #ff8a1c, 0 3px 0 #6b0d04; opacity: 0;
+            transition: opacity .2s ease;
+        }
+        #fest-combo.on { opacity: 1; }
+        #fest-combo .fc-n { display: block; font-size: 3rem; }
+        #fest-combo .fc-l { display: block; font-size: 0.9rem; color: #ffd36b; margin-top: 4px; }
+        #fest-combo.bump .fc-n { animation: festBump .18s ease-out; }
+        @keyframes festBump { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        .fest-shout {
+            position: absolute; z-index: 130; pointer-events: none; white-space: nowrap;
+            font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 2.2rem;
+            color: #fff1c9; text-shadow: 0 0 12px #ff5a1c, 0 3px 0 #7a1405, 2px 2px 0 #7a1405;
+            transform: translate(-50%, -50%);
+            animation: festShout 0.9s ease-out forwards;
+        }
+        @keyframes festShout {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(-12deg); }
+            20% { opacity: 1; transform: translate(-50%, -80%) scale(1.25) rotate(4deg); }
+            100% { opacity: 0; transform: translate(-50%, -190%) scale(1) rotate(0deg); }
+        }
         /* PC：配置をまるごと入れ替える
            ・お品書き（左のメニュー）を右側へ
            ・黒船を真ん中に大きく、商会の棚を左、生産ラインを右へ */
@@ -8901,6 +9043,7 @@ animation:facilitySweep 6s linear infinite;
         if (bar) bar.style.display = 'none';
         document.body.classList.remove('season-event-on');
         document.body.classList.remove('fever-fest');
+        setFestDecor(false);
         setTimeout(() => { try { openSeasonHall(); } catch (e) {} }, 1500);
     }
 
@@ -9009,6 +9152,70 @@ animation:facilitySweep 6s linear infinite;
     // 公開中のページの版（ETag）を確かめ、変わっていたら保存して読み直す。
     // 終幕の曲・映像の最中だけは邪魔しない。
     // ==========================================
+    // ---- フィーバー祭の飾り（紙吹雪・連打の太鼓・掛け声） ----
+    function setFestDecor(on) {
+        let c = document.getElementById('fest-confetti');
+        if (on && !c) {
+            c = document.createElement('div');
+            c.id = 'fest-confetti';
+            const bits = ['🎊', '🎉', '✨', '🏮', '🎆', '', '', '', '', ''];
+            const colors = ['#ffd36b', '#d0161f', '#ffffff', '#ff8a1c', '#ffe3a0'];
+            for (let i = 0; i < 26; i++) {
+                const sp = document.createElement('span');
+                const b = bits[i % bits.length];
+                if (b) { sp.textContent = b; sp.style.fontSize = (16 + Math.random() * 14) + 'px'; }
+                else {
+                    sp.style.width = '8px'; sp.style.height = '14px';
+                    sp.style.background = colors[i % colors.length]; sp.style.borderRadius = '2px';
+                }
+                sp.style.left = (Math.random() * 100) + 'vw';
+                sp.style.animationDuration = (6 + Math.random() * 7).toFixed(1) + 's';
+                sp.style.animationDelay = (-Math.random() * 12).toFixed(1) + 's';
+                sp.style.setProperty('--dx', ((Math.random() - 0.5) * 200).toFixed(0) + 'px');
+                sp.style.setProperty('--rot', ((Math.random() - 0.5) * 1440).toFixed(0) + 'deg');
+                c.appendChild(sp);
+            }
+            document.body.appendChild(c);
+        } else if (!on && c) { c.remove(); }
+        const combo = document.getElementById('fest-combo');
+        if (!on && combo) combo.remove();
+    }
+
+    let festComboCount = 0, festComboTimer = 0;
+    const FEST_SHOUTS = ['わっしょい！', 'そいやっ！', 'ドドン！', '祭りだ！', 'よっ！'];
+    function festOnClick(base, x, y, burst) {
+        if (!document.body.classList.contains('fever-fest') || !base) return;
+        festComboCount++;
+        clearTimeout(festComboTimer);
+        festComboTimer = setTimeout(() => {
+            festComboCount = 0;
+            const cb = document.getElementById('fest-combo'); if (cb) cb.classList.remove('on');
+        }, 1200);
+        let cb = document.getElementById('fest-combo');
+        if (!cb || cb.parentElement !== base) {
+            if (cb) cb.remove();
+            cb = document.createElement('div'); cb.id = 'fest-combo';
+            cb.innerHTML = '<span class="fc-n">0</span><span class="fc-l">🥁 連打</span>';
+            base.appendChild(cb);
+        }
+        if (festComboCount >= 3) {
+            cb.classList.add('on');
+            cb.querySelector('.fc-n').textContent = festComboCount;
+            cb.classList.remove('bump'); void cb.offsetWidth; cb.classList.add('bump');
+        }
+        if (liteMode) return;
+        // バースト・10連打ごと・ときどき、掛け声が飛ぶ
+        if (burst || festComboCount % 10 === 0 || Math.random() < 0.12) {
+            const el = document.createElement('div');
+            el.className = 'fest-shout';
+            el.textContent = burst ? (burst.critical ? '会心！わっしょい！' : 'ドドーン！') : FEST_SHOUTS[Math.floor(Math.random() * FEST_SHOUTS.length)];
+            el.style.left = (x + (Math.random() - 0.5) * 80) + 'px';
+            el.style.top = (y - 30) + 'px';
+            base.appendChild(el);
+            setTimeout(() => el.remove(), 950);
+        }
+    }
+
     let pageVersionTag = null;
     async function checkForNewVersion() {
         if (location.protocol === 'file:') return;
@@ -9064,6 +9271,7 @@ animation:facilitySweep 6s linear infinite;
         // 最終日はフィーバー祭仕様
         const fest = isFeverFestActive() && remain > FINALE_DURATION_SEC * 1000;
         bar.classList.toggle('fest', fest);
+        if (document.body.classList.contains('fever-fest') !== fest) setFestDecor(fest);
         document.body.classList.toggle('fever-fest', fest);
         if (fest) {
             const badge = bar.querySelector('.sev-badge');
@@ -9536,6 +9744,7 @@ animation:facilitySweep 6s linear infinite;
         if (burst) currentClickPower = Math.floor(currentClickPower * burst.mult);
 
         clickerScore += currentClickPower; currentLifeScore += currentClickPower; 
+        try { festOnClick(base, posX, posY, burst); } catch (e) {}
         if (burst) {
             playBurstEffect(target, posX, posY, burst, currentClickPower);
         } else {
