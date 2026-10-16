@@ -3454,6 +3454,18 @@
                 flex-shrink: 0;
             }
 
+            /* ボタン（設定・実績・昇天・超昇天）が増えると右へはみ出して押せなくなっていた。
+               幅に収まらないぶんは2段目に折り返す。 */
+            .clicker-top-left {
+                flex-shrink: 1;
+                min-width: 0;
+                max-width: 100%;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                gap: 6px;
+            }
+            body.fever-fest .clicker-top-btn { padding: 8px 12px !important; font-size: 0.84rem !important; border-top-width: 3px !important; border-bottom-width: 3px !important; }
+
             .clicker-top-right {
                 margin-left: 0;
                 width: 100%;
