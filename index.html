@@ -315,6 +315,87 @@
             85% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -54%) scale(1); }
         }
+
+        /* =====================================================
+           超黒船フィーバー祭（最終日）だけの、まるごと違う画面
+           body.fever-fest が付いている間だけ効く。外せば元どおり。
+           ===================================================== */
+        body.fever-fest { --gold-color: #ffd36b; }
+        body.fever-fest #main-content {
+            background:
+                radial-gradient(circle at 20% 15%, rgba(255, 190, 60, 0.18), transparent 30%),
+                radial-gradient(circle at 80% 85%, rgba(255, 60, 30, 0.22), transparent 35%),
+                linear-gradient(160deg, #3a0606 0%, #1c0303 55%, #0b0101 100%) !important;
+        }
+        /* 提灯の列 */
+        body.fever-fest #screen-clicker::before {
+            content: '🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮　🏮';
+            position: absolute; left: 0; right: 0; top: 0; z-index: 30; pointer-events: none;
+            height: 30px; overflow: hidden; white-space: nowrap; text-align: center;
+            font-size: 22px; line-height: 30px; letter-spacing: 2px;
+            filter: drop-shadow(0 0 8px rgba(255, 120, 40, 0.9));
+            animation: festLantern 2.4s ease-in-out infinite alternate;
+        }
+        @keyframes festLantern { from { transform: translateY(-2px); } to { transform: translateY(3px); } }
+        body.fever-fest #screen-clicker .clicker-main-layout { padding-top: 34px; }
+        /* 夜空に上がる花火 */
+        body.fever-fest #screen-clicker::after {
+            content: '🎆'; position: absolute; z-index: 5; pointer-events: none;
+            font-size: 120px; left: 46%; top: 30%; opacity: 0;
+            animation: festFirework 3.6s ease-out infinite;
+        }
+        @keyframes festFirework {
+            0%   { opacity: 0; transform: scale(0.2) translate(0, 0); }
+            15%  { opacity: 0.55; transform: scale(1.1); }
+            40%  { opacity: 0; transform: scale(1.5); }
+            50%  { opacity: 0; transform: scale(0.2) translate(-260%, -60%); }
+            65%  { opacity: 0.5; transform: scale(1) translate(-260%, -60%); }
+            90%,100% { opacity: 0; transform: scale(1.4) translate(-260%, -60%); }
+        }
+        body.lite-mode.fever-fest #screen-clicker::after,
+        body.lite-mode.fever-fest #screen-clicker::before { animation: none; }
+
+        /* 柱の色：朱塗りと金 */
+        body.fever-fest #app-container .clicker-col-left {
+            background:
+                radial-gradient(circle at 50% 45%, rgba(255, 210, 90, 0.35), transparent 45%),
+                linear-gradient(180deg, #9c1a0c 0%, #5e0a04 60%, #2a0402 100%) !important;
+            border: 2px solid #ffd36b !important;
+            box-shadow: 0 0 40px rgba(255, 140, 30, 0.45), inset 0 0 60px rgba(0,0,0,0.45) !important;
+        }
+        body.fever-fest #app-container .clicker-col-center {
+            background: linear-gradient(180deg, #fff3cf 0%, #f6d98f 100%) !important;
+            border: 2px solid #c8961c !important;
+        }
+        body.fever-fest #app-container .clicker-col-right {
+            background: linear-gradient(180deg, #3d0805 0%, #1d0302 100%) !important;
+            border: 2px solid #c8961c !important;
+        }
+        body.fever-fest .clicker-column-header h3,
+        body.fever-fest .clicker-shop-header h3 { color: #b0200e !important; }
+        body.fever-fest .clicker-shop-header h3 { color: #ffd36b !important; }
+        body.fever-fest .kurofune-count { color: #fff3c4 !important; text-shadow: 0 0 18px rgba(255, 170, 40, 0.9), 0 3px 0 #6b0d04 !important; }
+        body.fever-fest #clicker-target {
+            filter: drop-shadow(0 0 30px rgba(255, 200, 70, 0.95)) drop-shadow(0 18px 20px rgba(0,0,0,0.6)) !important;
+        }
+        body.fever-fest #sidebar {
+            background: linear-gradient(180deg, #5e0a04 0%, #2a0402 100%) !important;
+        }
+
+        /* PC：配置をまるごと入れ替える
+           ・お品書き（左のメニュー）を右側へ
+           ・黒船を真ん中に大きく、商会の棚を左、生産ラインを右へ */
+        @media (min-width: 821px) {
+            body.fever-fest #app-container { flex-direction: row-reverse; }
+            body.fever-fest #sidebar { border-right: none !important; border-left: 2px solid #ffd36b !important; }
+            body.fever-fest #screen-clicker .clicker-main-layout {
+                grid-template-columns: minmax(260px, 340px) minmax(340px, 1.35fr) minmax(250px, 1fr) !important;
+            }
+            body.fever-fest #screen-clicker #shop-area              { grid-column: 1; grid-row: 1; }
+            body.fever-fest #screen-clicker #clicker-base           { grid-column: 2; grid-row: 1; }
+            body.fever-fest #screen-clicker #clicker-center-area-wrap { grid-column: 3; grid-row: 1; }
+            body.fever-fest #clicker-target { font-size: clamp(10rem, min(17vw, 22vh), 19rem) !important; }
+        }
         #season-event-bar .sev-badge {
             font-weight: bold; color: #1a0d00; background: #f0b445;
             padding: 2px 10px; border-radius: 3px; font-size: 0.78rem; flex: none;
@@ -8819,6 +8900,7 @@ animation:facilitySweep 6s linear infinite;
         const bar = document.getElementById('season-event-bar');
         if (bar) bar.style.display = 'none';
         document.body.classList.remove('season-event-on');
+        document.body.classList.remove('fever-fest');
         setTimeout(() => { try { openSeasonHall(); } catch (e) {} }, 1500);
     }
 
@@ -8921,6 +9003,39 @@ animation:facilitySweep 6s linear infinite;
         setTimeout(() => el.remove(), 4200);
     }
 
+    // ==========================================
+    // 新しい版が公開されたら、自動で切り替える。
+    // 開いたままの画面は古い版のまま動き続けるので、2分ごとに
+    // 公開中のページの版（ETag）を確かめ、変わっていたら保存して読み直す。
+    // 終幕の曲・映像の最中だけは邪魔しない。
+    // ==========================================
+    let pageVersionTag = null;
+    async function checkForNewVersion() {
+        if (location.protocol === 'file:') return;
+        try {
+            const r = await fetch(location.pathname + '?v=' + Date.now(), { method: 'HEAD', cache: 'no-store' });
+            const tag = r.headers.get('etag') || r.headers.get('last-modified');
+            if (!tag) return;
+            if (pageVersionTag === null) { pageVersionTag = tag; return; }
+            if (tag === pageVersionTag) return;
+            const remain = seasonRemainingMs();
+            if (remain > 0 && remain <= (FINALE_DURATION_SEC + 120) * 1000) return;   // 終幕の最中は待つ
+            if (document.getElementById('finale-video-wrap')) return;
+            pageVersionTag = tag;
+            try { saveGame(); } catch (e) {}
+            const note = document.createElement('div');
+            note.textContent = '新しい版が届きました。数秒後に切り替えます…';
+            note.style.cssText = 'position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:9999;'
+                + 'background:rgba(20,8,3,0.94);color:#ffe39c;padding:12px 22px;border-radius:10px;'
+                + 'border:1px solid #ffd36b;font-weight:700;pointer-events:none;';
+            document.body.appendChild(note);
+            setTimeout(() => { try { saveGame(); } catch (e) {} }, 1500);
+            setTimeout(() => location.reload(), 4000);
+        } catch (e) { /* 通信できない時は次の機会に */ }
+    }
+    setTimeout(checkForNewVersion, 5000);
+    setInterval(checkForNewVersion, 120000);
+
     function removeFinalePrompt() {
         const el = document.getElementById('finale-music-prompt');
         if (el) el.remove();
@@ -8949,6 +9064,7 @@ animation:facilitySweep 6s linear infinite;
         // 最終日はフィーバー祭仕様
         const fest = isFeverFestActive() && remain > FINALE_DURATION_SEC * 1000;
         bar.classList.toggle('fest', fest);
+        document.body.classList.toggle('fever-fest', fest);
         if (fest) {
             const badge = bar.querySelector('.sev-badge');
             if (badge && badge.textContent !== '超黒船フィーバー祭') badge.textContent = '超黒船フィーバー祭';
