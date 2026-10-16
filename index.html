@@ -512,6 +512,18 @@
         #fest-combo .fc-l { display: block; font-size: 0.9rem; color: #ffd36b; margin-top: 4px; }
         #fest-combo.bump .fc-n { animation: festBump .18s ease-out; }
         @keyframes festBump { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        .fest-boom {
+            position: absolute; z-index: 125; pointer-events: none; font-size: 5rem; line-height: 1;
+            transform: translate(-50%, -50%) scale(0.1); opacity: 0;
+            animation: festBoom 1s ease-out forwards;
+        }
+        @keyframes festBoom {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.1); }
+            25% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.9); }
+        }
+        .burst-meter.chain { --bm-c: #ff5bd0; --bm-glow: rgba(255, 90, 210, 0.9); }
+        .burst-meter.chain .bm-hint { color: #ffb3ec; }
         .fest-shout {
             position: absolute; z-index: 130; pointer-events: none; white-space: nowrap;
             font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 2.2rem;
@@ -9185,6 +9197,7 @@ animation:facilitySweep 6s linear infinite;
     }
 
     let festComboCount = 0, festComboTimer = 0;
+    function festComboBonus() { return 1 + Math.min(1, Math.floor(festComboCount / 10) * 0.1); }
     const FEST_SHOUTS = ['わっしょい！', 'そいやっ！', 'ドドン！', '祭りだ！', 'よっ！'];
     function festOnClick(base, x, y, burst) {
         if (!document.body.classList.contains('fever-fest') || !base) return;
@@ -9204,6 +9217,8 @@ animation:facilitySweep 6s linear infinite;
         if (festComboCount >= 3) {
             cb.classList.add('on');
             cb.querySelector('.fc-n').textContent = festComboCount;
+            const bonus = festComboBonus();
+            cb.querySelector('.fc-l').textContent = '🥁 連打' + (bonus > 1 ? ' ×' + bonus.toFixed(1) : '');
             cb.classList.remove('bump'); void cb.offsetWidth; cb.classList.add('bump');
         }
         if (liteMode) return;
@@ -9211,7 +9226,23 @@ animation:facilitySweep 6s linear infinite;
         if (burst || festComboCount % 10 === 0 || Math.random() < 0.12) {
             const el = document.createElement('div');
             el.className = 'fest-shout';
-            el.textContent = burst ? (burst.critical ? '会心！わっしょい！' : 'ドドーン！') : FEST_SHOUTS[Math.floor(Math.random() * FEST_SHOUTS.length)];
+            el.textContent = burst
+                ? (burst.critical ? '会心！わっしょい！' : burst.chain ? burst.chain + '連鎖！' : 'ドドーン！')
+                : FEST_SHOUTS[Math.floor(Math.random() * FEST_SHOUTS.length)];
+            if (burst) {
+                // 打ち上げ花火：バーストのたびに、黒船の周りで大輪が開く
+                const n = burst.critical ? 5 : 3;
+                for (let i = 0; i < n; i++) {
+                    const fw = document.createElement('div');
+                    fw.className = 'fest-boom';
+                    fw.textContent = i % 2 ? '🎇' : '🎆';
+                    fw.style.left = (x + (Math.random() - 0.5) * 260) + 'px';
+                    fw.style.top = (y - 40 - Math.random() * 160) + 'px';
+                    fw.style.animationDelay = (i * 90) + 'ms';
+                    base.appendChild(fw);
+                    setTimeout(() => fw.remove(), 1100 + i * 90);
+                }
+            }
             el.style.left = (x + (Math.random() - 0.5) * 80) + 'px';
             el.style.top = (y - 30) + 'px';
             base.appendChild(el);
@@ -9468,6 +9499,20 @@ animation:facilitySweep 6s linear infinite;
     let burstSuppressClick = false; // 離した直後の普通クリックを捨てる印
     let burstRaf = 0;
 
+    // ---- フィーバー祭のバースト：溜めが3倍速、連鎖ならさらに速い ----
+    const FEST_BURST_SPEED = 3;        // 祭り中は1秒で満タン
+    const FEST_CHAIN_SPEED = 5;        // 連鎖中は0.6秒で満タン
+    const FEST_CHAIN_WINDOW_MS = 1500; // バーストのあと、この時間内に押し始めると連鎖
+    const FEST_TAP_MS = 180;           // これより短い押しは普通のクリック
+    let lastBurstEndAt = 0, burstChain = 0;
+    function burstSpeed(st) {
+        if (!isFeverFestActive()) return 1;
+        return st && st.chain ? FEST_CHAIN_SPEED : FEST_BURST_SPEED;
+    }
+    function burstTapMs() { return isFeverFestActive() ? FEST_TAP_MS : BURST_MIN_MS; }
+    // 実際に押していた時間を、溜まり具合の時間に直す
+    function burstEffMs(rawMs, st) { return rawMs * burstSpeed(st); }
+
     function burstAt(ms) {
         let mult = 1, phase = 'charge';
         if (ms < BURST_MIN_MS) return { mult: 1, phase: 'tap', critical: false, ratio: 0 };
@@ -9485,7 +9530,9 @@ animation:facilitySweep 6s linear infinite;
         } else {
             mult = 10; phase = 'heat';
         }
-        const critical = ms >= BURST_MAX_MS && ms <= BURST_MAX_MS + BURST_CRIT_MS;
+        // 祭り中は溜めが速いぶん、会心の窓も同じだけ広げる（実時間で0.3秒前後を保つ）
+        const critWin = BURST_CRIT_MS * (isFeverFestActive() ? FEST_BURST_SPEED : 1);
+        const critical = ms >= BURST_MAX_MS && ms <= BURST_MAX_MS + critWin;
         if (critical) phase = 'crit';
         const ratio = Math.min(1, ms / BURST_MAX_MS);
         return { mult: critical ? mult * 1.5 : mult, phase, critical, ratio };
@@ -9520,8 +9567,13 @@ animation:facilitySweep 6s linear infinite;
             x = tr.left + tr.width / 2 - br.left; y = tr.top + tr.height / 2 - br.top;
             mx = x; my = tr.top - br.top - 14;   // スペースキーは黒船の上側
         }
-        burstState = { source, t0: performance.now(), x, y, mx, my,
-                       frenzy: frenzyTimer > 0, pinged: false };
+        const fest = isFeverFestActive();
+        const nowT = performance.now();
+        burstState = { source, t0: nowT, x, y, mx, my,
+                       // 祭り中は黄金時代（7倍）でも溜められる。777倍の間だけは普通のクリック。
+                       frenzy: frenzyTimer > 0 && (!fest || frenzyClickMult >= 777),
+                       chain: fest && (nowT - lastBurstEndAt) < FEST_CHAIN_WINDOW_MS,
+                       pinged: false };
 
         if (burstState.frenzy) return;           // フィーバー中は溜めない（普通のクリック扱い）
 
@@ -9536,21 +9588,24 @@ animation:facilitySweep 6s linear infinite;
 
     function tickBurstMeter() {
         if (!burstState || burstState.frenzy) return;
-        const ms = performance.now() - burstState.t0;
+        const raw = performance.now() - burstState.t0;
+        const ms = burstEffMs(raw, burstState);
         const m = document.getElementById('burst-meter');
         if (m) {
             const b = burstAt(ms);
             // 普通のタップでちらつかないよう、0.2秒を過ぎてから出す
-            m.classList.toggle('show', ms >= 200);
+            m.classList.toggle('show', raw >= Math.min(200, burstTapMs()));
+            m.classList.toggle('chain', !!burstState.chain);
             const tg = document.getElementById('clicker-target');
-            if (tg) { tg.classList.toggle('burst-charging', ms >= 200); tg.classList.toggle('hot', b.phase !== 'charge' && b.phase !== 'tap'); }
+            if (tg) { tg.classList.toggle('burst-charging', raw >= Math.min(200, burstTapMs())); tg.classList.toggle('hot', b.phase !== 'charge' && b.phase !== 'tap'); }
             m.classList.toggle('max', b.phase === 'max');
             m.classList.toggle('crit', b.phase === 'crit');
             m.classList.toggle('heat', b.phase === 'heat');
             m.style.setProperty('--p', b.phase === 'heat' ? Math.max(0.15, b.mult / burstMaxMult()) : b.ratio);
             m.querySelector('.bm-mult').textContent = '×' + Math.floor(b.mult);
             m.querySelector('.bm-hint').textContent =
-                b.phase === 'crit' ? '今！' : b.phase === 'heat' ? '過熱' : b.phase === 'max' ? 'MAX' : '';
+                b.phase === 'crit' ? '今！' : b.phase === 'heat' ? '過熱' : b.phase === 'max' ? 'MAX'
+                : (burstState.chain ? '連鎖' + (burstChain + 1) : '');
         }
         // 会心の窓に入った瞬間に合図の音を鳴らす
         if (!burstState.pinged && ms >= BURST_MAX_MS) { burstState.pinged = true; burstSound('ping'); }
@@ -9572,12 +9627,13 @@ animation:facilitySweep 6s linear infinite;
         if (!st) return;
         burstState = null;
         hideBurstMeter();
-        const ms = performance.now() - st.t0;
+        const raw = performance.now() - st.t0;
+        const ms = burstEffMs(raw, st);
         const target = document.getElementById('clicker-target');
         if (!target) return;
 
         // 短い押し・フィーバー中は普通のクリック
-        if (st.frenzy || ms < BURST_MIN_MS) {
+        if (st.frenzy || raw < burstTapMs() || ms < BURST_MIN_MS) {
             // クリック・タッチは、この後に来る click イベントが普通のクリックになる。
             // スペースキーには click が来ないので、ここで1回押したことにする。
             if (st.source === 'key') clickKurofuneDirect(target, st.x, st.y);
@@ -9589,7 +9645,11 @@ animation:facilitySweep 6s linear infinite;
             burstSuppressClick = true;
             setTimeout(() => { burstSuppressClick = false; }, 500);
         }
-        clickKurofuneDirect(target, st.x, st.y, { mult: b.mult, critical: b.critical, ms });
+        // 祭りの連鎖：続けて撃つほど倍率が上がる（1連鎖ごとに +20%、最大 +100%）
+        burstChain = st.chain ? Math.min(burstChain + 1, 99) : 0;
+        const chainBonus = isFeverFestActive() ? 1 + Math.min(1, burstChain * 0.2) : 1;
+        lastBurstEndAt = performance.now();
+        clickKurofuneDirect(target, st.x, st.y, { mult: b.mult * chainBonus, critical: b.critical, ms, chain: burstChain });
         if (b.critical) unlockAchievement('criticalBurst');
     }
 
@@ -9749,6 +9809,8 @@ animation:facilitySweep 6s linear infinite;
         currentClickPower = Math.floor(currentClickPower * (1 + reincarnationCount * 0.1) * frenzyClickMult * eventClickMult());
         // バースト：溜めた時間に応じた倍率（会心なら ×1.5 済み）
         if (burst) currentClickPower = Math.floor(currentClickPower * burst.mult);
+        // 祭りの連打ボーナス：10連打ごとに +10%（最大 +100%）
+        if (isFeverFestActive()) currentClickPower = Math.floor(currentClickPower * festComboBonus());
 
         clickerScore += currentClickPower; currentLifeScore += currentClickPower; 
         try { festOnClick(base, posX, posY, burst); } catch (e) {}
@@ -10639,6 +10701,18 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v3.4.1",
+            title: "祭りのバースト",
+            date: "2026-10-16",
+            content: [
+                "フィーバー祭の間、バーストの溜めが3倍速になりました。約1秒で満タンです。会心の「今！」も、そのぶん少し長めに出ます。",
+                "バーストを撃ってから1.5秒以内に次を押し始めると「連鎖」になります。連鎖中は溜めがさらに速くなり、メーターが桃色に光ります。続けるほど倍率が上がり、1連鎖ごとに+20%、最大で2倍です。",
+                "バーストのたびに、黒船の周りで打ち上げ花火が開きます。",
+                "連打にもボーナスが付きました。10連打ごとにクリックが+10%、最大で2倍です。連打の数字の下に今の倍率が出ます。",
+                "祭りの間は、金船の「黄金時代」の最中でもバーストが撃てます（777倍のときだけは普通のクリックです）。"
+            ]
+        },
         {
             version: "v3.4",
             title: "最後の24時間 ― 超黒船フィーバー祭",
