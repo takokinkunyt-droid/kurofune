@@ -287,6 +287,34 @@
         }
         #season-event-bar.finale .sev-badge { background: #ff9a52; }
         #season-event-bar.finale .sev-time { color: #ffb37a; text-shadow: 0 0 12px rgba(255,120,60,0.7); }
+        #season-event-bar.fest {
+            background: linear-gradient(90deg, #5a0a0a, #b0200e, #e8a417, #b0200e, #5a0a0a);
+            background-size: 300% 100%;
+            animation: festBar 6s linear infinite;
+            border-bottom-color: rgba(255, 220, 120, 0.8);
+        }
+        #season-event-bar.fest .sev-badge { background: #fff1b8; color: #8a1206; }
+        #season-event-bar.fest .sev-time { color: #fff6d0; text-shadow: 0 0 12px rgba(255,220,80,0.9); }
+        @keyframes festBar { from { background-position: 0% 0; } to { background-position: 300% 0; } }
+        body.lite-mode #season-event-bar.fest { animation: none; }
+        #fever-fest-announce {
+            position: fixed; left: 50%; top: 30%; z-index: 9000; pointer-events: none;
+            transform: translate(-50%, -50%); text-align: center; white-space: nowrap;
+            padding: 22px 44px; border-radius: 14px;
+            background: radial-gradient(ellipse at center, rgba(120,14,6,0.95), rgba(40,4,2,0.95));
+            border: 2px solid #ffd36b; box-shadow: 0 0 60px rgba(255,170,40,0.7);
+            animation: ffaIn 4.2s ease forwards;
+        }
+        #fever-fest-announce .ffa-sub { font-size: 0.95rem; color: #ffd9a0; letter-spacing: 0.2em; }
+        #fever-fest-announce .ffa-title { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: clamp(1.8rem, 7vw, 3.4rem); color: #fff3c4; text-shadow: 0 0 18px #ff8a1c, 0 3px 0 #6b0d04; }
+        #fever-fest-announce .ffa-boost { margin-top: 6px; font-size: clamp(0.85rem, 3.4vw, 1.15rem); font-weight: 900; color: #ffd36b; }
+        @keyframes ffaIn {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+            10% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+            16% { transform: translate(-50%, -50%) scale(1); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -54%) scale(1); }
+        }
         #season-event-bar .sev-badge {
             font-weight: bold; color: #1a0d00; background: #f0b445;
             padding: 2px 10px; border-radius: 3px; font-size: 0.78rem; flex: none;
@@ -4873,6 +4901,22 @@ animation:facilitySweep 6s linear infinite;
     const EVENT_GOLD_RATE_MULT  = 3;    // 金船の出現率
     const EVENT_TICKET_DISCOUNT = 0.5;  // チケット交換に必要な隻数
 
+    // ==========================================
+    // 最終日「超黒船フィーバー祭」（シーズン1の最後の24時間）
+    // 期間中は上の倍率に代わって、こちらの倍率が使われる。
+    // ==========================================
+    const FEVER_FEST_START = new Date('2026-10-16T21:00:00+09:00').getTime();
+    const FEST_KPS_MULT       = 5;    // 全施設のKpS（通常イベントの×2に代わる）
+    const FEST_CLICK_MULT     = 5;    // クリック（バーストにも掛かる）
+    const FEST_GOLD_RATE_MULT = 10;   // 金船の出現率（通常イベントの×3に代わる）
+    function isFeverFestActive() {
+        const now = Date.now();
+        return now >= FEVER_FEST_START && now < SEASON1_END;
+    }
+    function eventKpsMult()  { return isFeverFestActive() ? FEST_KPS_MULT : (isSeasonEventActive() ? EVENT_KPS_MULT : 1); }
+    function eventGoldMult() { return isFeverFestActive() ? FEST_GOLD_RATE_MULT : (isSeasonEventActive() ? EVENT_GOLD_RATE_MULT : 1); }
+    function eventClickMult(){ return isFeverFestActive() ? FEST_CLICK_MULT : 1; }
+
     function isSeasonEventActive() {
         const now = Date.now();
         return now >= SEASON1_EVENT_START && now < SEASON1_END;
@@ -4984,6 +5028,7 @@ animation:facilitySweep 6s linear infinite;
         clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船なしで一回のクリックで100隻の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
         kaikokuFinal: { title:"開国",               icon:"🔴",  desc:"日米修好通商条約を締結し、ペリーを帰国させる。", flavor:"さようなら、ペリー", unlocked:false, isRare:false, isFinal:true },
         criticalBurst:{ title:"会心のバースト",     icon:"💥",  desc:"最大まで溜めた直後に離して、会心のバーストを放つ。", flavor:"狙って撃つ。それが船乗りの流儀。", unlocked:false, isRare:true  },
+        feverFestival: { title:"超黒船フィーバー祭", icon:"🎆",  desc:"シーズン1最終日の「超黒船フィーバー祭」に参加する。", flavor:"浦賀の夜空に、最後の花火が上がった。", unlocked:false, isRare:true  },
         lastVoyage:   { title:"最後の来航",         icon:"🌅",  desc:"シーズン1終了イベントの期間中に黒船を生産する。", flavor:"この光景を見た者だけが知っている。", unlocked:false, isRare:true  },
         timeTravel:   { title:"時間移動",           icon:"⌛",  desc:"「本当の転生」を実行し、縄文時代へと遡る。", flavor:"さようなら、黒船クリッカー。", unlocked:false, isRare:false, isFinal:true },
     };
@@ -8349,7 +8394,7 @@ animation:facilitySweep 6s linear infinite;
         let achievementMult = skills.achievementBoost ? (1 + getUnlockedAchievementCount() * 0.1) : 1;
         // スキン効果：「ペリー」装備中は全施設の生産効率が2倍
         let skinKpsMult = (currentSkin === 'perrySkin') ? 2 : 1;
-        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1) * achievementMult * skinKpsMult * (isSeasonEventActive() ? EVENT_KPS_MULT : 1); 
+        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1) * achievementMult * skinKpsMult * eventKpsMult(); 
         return sanitizeNum(kps, 0);
     }
 
@@ -8859,6 +8904,23 @@ animation:facilitySweep 6s linear infinite;
         };
         document.body.appendChild(bar);
     }
+    // フィーバー祭の開幕を、遊んでいる画面で1回だけ大きく知らせる
+    let feverFestAnnounced = false;
+    function maybeAnnounceFeverFest() {
+        if (feverFestAnnounced) return;
+        const sc = document.getElementById('screen-clicker');
+        if (!(sc && sc.classList.contains('active'))) return;
+        feverFestAnnounced = true;
+        const el = document.createElement('div');
+        el.id = 'fever-fest-announce';
+        el.innerHTML = '<div class="ffa-sub">シーズン1 最後の24時間</div>'
+            + '<div class="ffa-title">超黒船フィーバー祭</div>'
+            + '<div class="ffa-boost">KpS ×' + FEST_KPS_MULT + '　クリック ×' + FEST_CLICK_MULT + '　金船 ' + FEST_GOLD_RATE_MULT + '倍</div>';
+        document.body.appendChild(el);
+        try { playSE('achieveFinal'); } catch (e) {}
+        setTimeout(() => el.remove(), 4200);
+    }
+
     function removeFinalePrompt() {
         const el = document.getElementById('finale-music-prompt');
         if (el) el.remove();
@@ -8884,8 +8946,21 @@ animation:facilitySweep 6s linear infinite;
         maybeStartFinaleMusic(remain);
         maybeStartFinaleVideo(remain);
 
+        // 最終日はフィーバー祭仕様
+        const fest = isFeverFestActive() && remain > FINALE_DURATION_SEC * 1000;
+        bar.classList.toggle('fest', fest);
+        if (fest) {
+            const badge = bar.querySelector('.sev-badge');
+            if (badge && badge.textContent !== '超黒船フィーバー祭') badge.textContent = '超黒船フィーバー祭';
+            const boost = bar.querySelector('.sev-boost');
+            const t = 'KpS×' + FEST_KPS_MULT + ' ／ クリック×' + FEST_CLICK_MULT + ' ／ 金船' + FEST_GOLD_RATE_MULT + '倍 ／ チケット半額';
+            if (boost && boost.textContent !== t) boost.textContent = t;
+            maybeAnnounceFeverFest();
+        }
+
         // 曲が流れている間はバーの見出しも終幕仕様にする
         if (remain <= FINALE_DURATION_SEC * 1000) {
+            bar.classList.remove('fest');
             bar.classList.add('finale');
             const badge = bar.querySelector('.sev-badge');
             if (badge && badge.textContent !== '終幕') badge.textContent = '終幕';
@@ -8918,7 +8993,7 @@ animation:facilitySweep 6s linear infinite;
                     if(bs) bs.textContent = ''; 
                 }
             }
-            if (Math.random() < 0.0003 * (isSeasonEventActive() ? EVENT_GOLD_RATE_MULT : 1)) spawnGoldenShip();
+            if (Math.random() < 0.0003 * eventGoldMult()) spawnGoldenShip();
             let currentKps = getKPS(); if (!isNaN(currentKps)) { let added = currentKps / 10; clickerScore += added; currentLifeScore += added; }
             if (clickerScore >= 1000) unlockAchievement('ship1000');
             if (clickerScore >= 10000) unlockAchievement('ship10000');
@@ -8933,6 +9008,7 @@ animation:facilitySweep 6s linear infinite;
             if (clickPower >= 100) unlockAchievement('clickLover');
             // シーズン1終了イベント：期間中に遊んでいれば解除
             if (isSeasonEventActive()) unlockAchievement('lastVoyage');
+            if (isFeverFestActive()) unlockAchievement('feverFestival');
             updateClickerUI(); 
             if (Math.random() < 0.1) saveGame(); 
         }, 100);
@@ -9339,7 +9415,7 @@ animation:facilitySweep 6s linear infinite;
 
         let currentClickPower = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1); let isCrit = false;
         if (skills.modShip && Math.random() < 0.15) { currentClickPower *= 5; isCrit = true; }
-        currentClickPower = Math.floor(currentClickPower * (1 + reincarnationCount * 0.1) * frenzyClickMult);
+        currentClickPower = Math.floor(currentClickPower * (1 + reincarnationCount * 0.1) * frenzyClickMult * eventClickMult());
         // バースト：溜めた時間に応じた倍率（会心なら ×1.5 済み）
         if (burst) currentClickPower = Math.floor(currentClickPower * burst.mult);
 
@@ -10231,6 +10307,18 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v3.4",
+            title: "最後の24時間 ― 超黒船フィーバー祭",
+            date: "2026-10-16",
+            content: [
+                "シーズン1も残すところあと1日です。最後の24時間、10月16日（金）21時00分から10月17日（土）21時00分まで、「超黒船フィーバー祭」を開催します。",
+                "期間中は、すべての施設の生産量が5倍になります（これまでの2倍から引き上げ）。クリックで得られる隻数も5倍です。バーストにもそのまま掛かるので、満タンで撃つと大変なことになります。",
+                "金船の現れる頻度は、ふだんの10倍になります。チケット交換の半額も続いています。",
+                "期間限定の実績「🎆 超黒船フィーバー祭」を用意しました。祭りの間に遊んでいれば手に入ります。",
+                "祭りが終わる瞬間が、シーズン1の終わりです。残り4分47秒になったら「浦賀黒船退航記」が流れます。最後はぜひ画面の前で。"
+            ]
+        },
         {
             version: "v3.3",
             title: "シーズン2先行体験 ― バースト",
