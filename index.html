@@ -3323,6 +3323,27 @@
             }
             #sidebar, #mobile-sidebar-backdrop { top: var(--admax-top, 0px) !important; }
         }
+        /* スマホで縦が足りないとき（画面下に広告が出ている時など）は、
+           黒船が見えることを最優先に、上の飾りと看板を詰める */
+        @media (max-width: 820px) {
+            body.fever-fest #screen-clicker .clicker-main-layout { padding-top: 6px !important; }
+            body.fever-fest .clicker-score-board { transform: none; box-shadow: 0 4px 0 #2b1206 !important; }
+        }
+        @media (max-width: 820px) and (max-height: 760px) {
+            .clicker-top-bar { padding-top: 6px !important; padding-bottom: 6px !important; gap: 4px !important; }
+            .clicker-top-bar .reinc-top-hint { font-size: 0.68rem !important; line-height: 1.25; }
+            .clicker-col-left .ship-name-input { display: none !important; }
+            .clicker-col-left .clicker-title-ribbon { display: none !important; }
+            .clicker-col-left .clicker-score-board { padding: 6px 10px !important; margin: 0 !important; }
+            .clicker-col-left .kurofune-count-title { display: none !important; }
+            .clicker-col-left .kurofune-count { font-size: 1.7rem !important; line-height: 1.15 !important; }
+            .clicker-col-left .kps-display { font-size: 0.78rem !important; padding: 3px 10px !important; margin-top: 2px !important; }
+            .clicker-col-left .kurofune-click-target { font-size: clamp(4.2rem, 17vh, 9rem) !important; margin: 0 !important; }
+            .clicker-col-left .ship-wrapper { min-height: 0 !important; padding: 0 !important; flex: 1 1 auto; }
+            .clicker-col-left #clicker-buff-status:empty { display: none; }
+            .clicker-col-left .ship-hint { display: none !important; }
+            .clicker-col-left { padding-top: 6px !important; padding-bottom: 6px !important; justify-content: flex-start !important; }
+        }
         #mobile-tab-bar {
             display: none;
             position: fixed;
@@ -3411,8 +3432,10 @@
             /* タブバーはクリッカー画面表示中のみ出す（JSが body にクラスを付ける） */
             body.clicker-active #mobile-tab-bar { display: flex; }
 
+            /* 下のタブ（66px）に加えて、画面下の広告の高さぶんも空ける。
+               これが無いと、広告でタブが押し上げられたぶん黒船がタブの下に隠れていた。 */
             #screen-clicker {
-                padding-bottom: 66px !important;
+                padding-bottom: calc(66px + var(--admax-h, 0px)) !important;
                 box-sizing: border-box;
                 height: 100%;
                 overflow: hidden;
