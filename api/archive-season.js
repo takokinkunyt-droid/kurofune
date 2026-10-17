@@ -140,6 +140,20 @@ module.exports = async (req, res) => {
         return res.status(200).json({ success: true, meta, top: hall.slice(0, 10) });
       }
 
+      // 新しいシーズンのランキングを0から始める。
+      // 書き写しが済んでいることを確かめてから、今のランキングを
+      // season:<n>:ranking に移す（消さずに取っておく）。
+      if (action === 'start-next') {
+        const metaRaw = await redisRequest(['get', `season:${season}:meta`]);
+        if (!metaRaw.result) return res.status(409).json({ error: 'Archive first', season });
+        const exists = await redisRequest(['exists', 'ranking']);
+        if (exists.result !== 1) return res.status(200).json({ success: true, alreadyEmpty: true });
+        const done = await redisRequest(['exists', `season:${season}:ranking`]);
+        if (done.result === 1) return res.status(409).json({ error: 'Already moved for this season', season });
+        await redisRequest(['rename', 'ranking', `season:${season}:ranking`]);
+        return res.status(200).json({ success: true, movedTo: `season:${season}:ranking` });
+      }
+
       if (action === 'verify') {
         const metaRaw = await redisRequest(['get', `season:${season}:meta`]);
         if (!metaRaw.result) return res.status(404).json({ error: 'Not archived yet', season });
