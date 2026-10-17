@@ -550,6 +550,20 @@
             body.fever-fest #screen-clicker #clicker-center-area-wrap { grid-column: 3; grid-row: 1; }
             body.fever-fest #clicker-target { font-size: clamp(10rem, min(17vw, 22vh), 19rem) !important; }
         }
+        #clicker-closed-notice {
+            position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center;
+            background: rgba(10, 4, 2, 0.72); padding: 16px;
+        }
+        #clicker-closed-notice .ccn-box {
+            max-width: 460px; width: 100%; text-align: center; padding: 28px 24px; border-radius: 14px;
+            background: linear-gradient(180deg, #fbf3dd, #f0dfb4); color: #3a1d0a;
+            border: 2px solid #b8860b; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        #clicker-closed-notice .ccn-icon { font-size: 2.6rem; }
+        #clicker-closed-notice .ccn-title { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 1.3rem; margin: 6px 0 12px; }
+        #clicker-closed-notice .ccn-text { font-size: 0.92rem; line-height: 1.8; margin-bottom: 10px; }
+        #clicker-closed-notice .ccn-text.small { font-size: 0.8rem; color: #6b4a22; }
+        #clicker-closed-notice .ccn-btns { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
         #season-event-bar .sev-badge {
             font-weight: bold; color: #1a0d00; background: #f0b445;
             padding: 2px 10px; border-radius: 3px; font-size: 0.78rem; flex: none;
@@ -5546,7 +5560,33 @@ animation:facilitySweep 6s linear infinite;
     }
     
     // グローバルスコープに関数を割り当て（HTMLのonclick用）
+    // 黒船クリッカーの一時休止（シーズン2の中身が決まるまで）。true にすれば再開。
+    // 休止中は、クリッカー本体・昇天・超昇天・賭博室（隻数を使うもの）に入れない。
+    // セーブには一切触れない。
+    const CLICKER_OPEN = false;
+    const CLICKER_CLOSED_SCREENS = ['screen-clicker', 'screen-ascension', 'screen-super-ascension', 'screen-gambling'];
+    function showClickerClosedNotice() {
+        if (document.getElementById('clicker-closed-notice')) return;
+        const el = document.createElement('div');
+        el.id = 'clicker-closed-notice';
+        el.innerHTML = '<div class="ccn-box">'
+            + '<div class="ccn-icon">⚓</div>'
+            + '<div class="ccn-title">黒船クリッカーは、ただいま休港中です</div>'
+            + '<div class="ccn-text">シーズン1、おつかれさまでした。<br>シーズン2「クリックとかけら」の準備が整うまで、しばらくお休みします。<br>再開はアップデートログでお知らせします。</div>'
+            + '<div class="ccn-text small">シーズン1の最終順位は「🏛 殿堂」で見られます。解除した実績と船の意匠は、そのまま残っています。</div>'
+            + '<div class="ccn-btns"><button class="btn-primary" id="ccn-hall">殿堂を見る</button><button class="btn-primary" id="ccn-close">閉じる</button></div>'
+            + '</div>';
+        document.body.appendChild(el);
+        el.querySelector('#ccn-close').onclick = () => el.remove();
+        el.querySelector('#ccn-hall').onclick = () => { el.remove(); try { openSeasonHall(); } catch (e) { switchScreen('screen-hall'); } };
+    }
+
     function switchScreen(screenId, navElement) {
+        if (!CLICKER_OPEN && CLICKER_CLOSED_SCREENS.includes(screenId)) {
+            showClickerClosedNotice();
+            if (!document.querySelector('.screen.active')) screenId = 'screen-home';
+            else return;
+        }
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         if (navElement) navElement.classList.add('active');
 
@@ -11145,6 +11185,16 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.0.1",
+            title: "黒船クリッカー、しばし休港",
+            date: "2026-10-17",
+            content: [
+                "シーズン2「クリックとかけら」の中身をしっかり作り込むため、黒船クリッカーをしばらくお休みします。",
+                "お休みの間も、殿堂でシーズン1の最終順位を見られます。解除した実績と船の意匠は、そのまま残っています。",
+                "再開の日時は、決まり次第このアップデートログでお知らせします。少しだけ待っていてください。"
+            ]
+        },
         {
             version: "v4.0",
             title: "シーズン2「クリックとかけら」開幕",
