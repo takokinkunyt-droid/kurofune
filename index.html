@@ -7907,7 +7907,11 @@ animation:facilitySweep 6s linear infinite;
         // サーバー側のガードにも、意図した操作かどうかを伝える
         const shrinkIsIntended = allowShrinkSave;
         allowShrinkSave = false;
-        seasonResetSave = false;   // 1回使ったら必ず下ろす
+        // シーズン切り替えの印は、送る前に控えておく。
+        // （以前はここで先に下ろしてしまい、サーバーに false が届いていた。
+        //   そのままだと切り替え後の保存が全員ぶん拒否される）
+        // 下ろすのは、サーバーが受け取ったことを確かめてから。
+        const resetIntended = seasonResetSave;
 
         isCloudSyncing = true;
         updateCloudStatus('同期中…');
@@ -7921,7 +7925,7 @@ animation:facilitySweep 6s linear infinite;
                 saveData,
                 saveToken: saveToken || getOrCreateSaveToken(),
                 allowShrink: shrinkIsIntended,
-                seasonReset: seasonResetSave
+                seasonReset: resetIntended
             })
         })
         .then(response => response.json().then(body => ({ status: response.status, body })))
@@ -7944,6 +7948,7 @@ animation:facilitySweep 6s linear infinite;
                 throw new Error(data.code || 'REJECTED');
             }
             if (data.success) {
+                if (resetIntended) seasonResetSave = false;   // 受け取られたので、ここで下ろす
                 // ランキング用データも同時更新
                 return fetch(getNetlifyFunctionUrl('update-ranking'), {
                     method: 'POST',
