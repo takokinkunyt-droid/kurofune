@@ -8671,6 +8671,9 @@ animation:facilitySweep 6s linear infinite;
         return baseShards + getSuperExtraShards();
     }
 
+    // 転生の一時停止（シーズン2の転生の内容が決まるまで）。true にすれば元に戻る。
+    const REINCARNATION_ENABLED = false;
+
     function updateClickerUI() {
         const reincBtn = document.getElementById('reincarnation-btn'), reincHint = document.getElementById('reincarnation-hint');
         const reincLabel = document.getElementById('reincarnation-btn-label');
@@ -8679,7 +8682,16 @@ animation:facilitySweep 6s linear infinite;
         if (reincBtn) reincBtn.classList.toggle('super-mode', !!skills.ifSkill);
         if (reincLabel) reincLabel.textContent = skills.ifSkill ? '超転生' : '輪廻転生';
 
-        if (pending > 0) {
+        if (!REINCARNATION_ENABLED) {
+            if (reincBtn) reincBtn.style.display = 'none';
+            if (reincHint) {
+                reincHint.style.display = 'block';
+                if (reincHint.dataset.paused !== '1') {
+                    reincHint.dataset.paused = '1';
+                    reincHint.innerHTML = '※ 転生はシーズン2に向けて準備中です';
+                }
+            }
+        } else if (pending > 0) {
             if (reincBtn) reincBtn.style.display = 'flex'; 
             if (reincHint) {
                 reincHint.style.display = 'block';
@@ -10421,6 +10433,7 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function triggerReincarnation() {
+        if (!REINCARNATION_ENABLED) return;
         if(calcPendingFragments() <= 0) return;
         if(!confirmDestructiveReincarnation()) return;
         const overlay = document.getElementById('reincarnation-overlay');
@@ -10563,6 +10576,7 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function doReincarnation() {
+        if (!REINCARNATION_ENABLED) return;
         allowShrinkSave = true; // 転生では隻数が減るのが正常
         lastKnownCloudScore = 0;
         // かけらの計算は reincarnationCount を増やす「前」に行う。
