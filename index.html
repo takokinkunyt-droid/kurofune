@@ -8242,6 +8242,24 @@ animation:facilitySweep 6s linear infinite;
         }
     }
 
+    // シーズンが変わっても引き継ぐもの：解除した実績と、手に入れた船の意匠（と今使っている意匠）
+    let seasonCarry = null;
+    function collectSeasonCarry(old) {
+        if (!old || typeof old !== 'object') return;
+        if (!seasonCarry) seasonCarry = { achievements: {}, ownedSkins: {}, currentSkin: null };
+        if (old.achievements) for (const k in old.achievements) {
+            if (old.achievements[k] && old.achievements[k].unlocked) seasonCarry.achievements[k] = true;
+        }
+        if (old.ownedSkins) for (const k in old.ownedSkins) { if (old.ownedSkins[k]) seasonCarry.ownedSkins[k] = true; }
+        if (old.currentSkin && !seasonCarry.currentSkin) seasonCarry.currentSkin = old.currentSkin;
+    }
+    function applySeasonCarry() {
+        if (!seasonCarry) return;
+        for (const k in seasonCarry.achievements) { if (achievements[k]) achievements[k].unlocked = true; }
+        ownedSkins = { ...ownedSkins, ...seasonCarry.ownedSkins };
+        if (seasonCarry.currentSkin && ownedSkins[seasonCarry.currentSkin]) currentSkin = seasonCarry.currentSkin;
+    }
+
     function loadGame() {
         // プレイヤーID・名前の初期化
         playerId = getOrCreatePlayerId();
@@ -8261,6 +8279,7 @@ animation:facilitySweep 6s linear infinite;
         // 必ず「初期状態」になる。意図した操作なので、ガードを通す印を立てておく。
         // これが無いと、リセット後に全員が一切保存できなくなる。
         if (localSave && localSave.saveVersion !== SAVE_DATA_VERSION) {
+            collectSeasonCarry(localSave);
             localSave = null;
             localStorage.removeItem('kurofuneSaveData');
             seasonResetSave = true;
@@ -8268,11 +8287,14 @@ animation:facilitySweep 6s linear infinite;
 
         const finishLoad = (save) => {
             if (save && save.saveVersion !== SAVE_DATA_VERSION) {
+                collectSeasonCarry(save);
                 save = null;
                 seasonResetSave = true;   // シーズン切り替え直後の保存だけを通す
             }
             if (save) {
                 try { applySaveObject(save); } catch (e) { console.error("Save apply error", e); }
+            } else if (seasonCarry) {
+                try { applySeasonCarry(); } catch (e) { console.error("Season carry error", e); }
             }
             ensureDataIntegrity();
             loadSettings();
