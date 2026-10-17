@@ -5295,9 +5295,18 @@ animation:facilitySweep 6s linear infinite;
         const now = Date.now();
         return now >= FEVER_FEST_START && now < SEASON1_END;
     }
-    function eventKpsMult()  { return isFeverFestActive() ? FEST_KPS_MULT : (isSeasonEventActive() ? EVENT_KPS_MULT : 1); }
-    function eventGoldMult() { return isFeverFestActive() ? FEST_GOLD_RATE_MULT : (isSeasonEventActive() ? EVENT_GOLD_RATE_MULT : 1); }
-    function eventClickMult(){ return isFeverFestActive() ? FEST_CLICK_MULT : 1; }
+    // ---- 最後の大波（終了直前）：ランキング1位の人以外だけ、超強化 ----
+    const FINAL_WAVE_START = new Date('2026-10-17T20:55:00+09:00').getTime();
+    const FINAL_CLICK_MULT = 300, FINAL_KPS_MULT = 100, FINAL_GOLD_MULT = 30;
+    function isFinalWaveActive() { const n = Date.now(); return n >= FINAL_WAVE_START && n < SEASON1_END; }
+    // 今この瞬間に自分が1位か（順位は約15秒ごとに取り直し、隻数はその場で比べる）
+    function amIRankOne() {
+        try { const info = currentRankInfo(); return !!(info && info.rank === 1); } catch (e) { return false; }
+    }
+    function finalWaveOn() { return isFinalWaveActive() && !amIRankOne(); }
+    function eventKpsMult()  { if (finalWaveOn()) return FINAL_KPS_MULT;  return isFeverFestActive() ? FEST_KPS_MULT : (isSeasonEventActive() ? EVENT_KPS_MULT : 1); }
+    function eventGoldMult() { if (finalWaveOn()) return FINAL_GOLD_MULT; return isFeverFestActive() ? FEST_GOLD_RATE_MULT : (isSeasonEventActive() ? EVENT_GOLD_RATE_MULT : 1); }
+    function eventClickMult(){ if (finalWaveOn()) return FINAL_CLICK_MULT; return isFeverFestActive() ? FEST_CLICK_MULT : 1; }
 
     function isSeasonEventActive() {
         const now = Date.now();
@@ -9590,7 +9599,7 @@ animation:facilitySweep 6s linear infinite;
     async function refreshRankChase() {
         if (document.hidden) return;
         if (!document.getElementById('screen-clicker')?.classList.contains('active')) return;
-        if (Date.now() - rankFetchAt < 50000) return;
+        if (Date.now() - rankFetchAt < (isFinalWaveActive() ? 12000 : 50000)) return;
         rankFetchAt = Date.now();
         try {
             const r = await fetch(getNetlifyFunctionUrl('get-ranking') + '?me=' + encodeURIComponent(playerId || ''));
@@ -9653,7 +9662,7 @@ animation:facilitySweep 6s linear infinite;
         layout.appendChild(el);
         setTimeout(() => el.remove(), 2600);
     }
-    setInterval(refreshRankChase, 10000);
+    setInterval(refreshRankChase, 4000);
 
     let pageVersionTag = null;
     async function checkForNewVersion() {
@@ -9728,9 +9737,10 @@ animation:facilitySweep 6s linear infinite;
             const badge = bar.querySelector('.sev-badge');
             if (badge && badge.textContent !== '終幕') badge.textContent = '終幕';
             const boost = bar.querySelector('.sev-boost');
-            if (boost && boost.textContent !== 'まもなくシーズン1が終わります') {
-                boost.textContent = 'まもなくシーズン1が終わります';
-            }
+            const t = isFinalWaveActive()
+                ? (amIRankOne() ? '最後の大波：あなたは1位のため対象外' : '最後の大波：クリック×300 ／ KpS×100 ／ 金船30倍（1位以外）')
+                : 'まもなくシーズン1が終わります';
+            if (boost && boost.textContent !== t) boost.textContent = t;
         }
     }
 
