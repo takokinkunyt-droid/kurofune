@@ -3446,6 +3446,127 @@
             85% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -60%); }
         }
+
+        /* =====================================================
+           シーズン2のスマホ画面（body.s2ui、?preview のときだけ）
+           ===================================================== */
+        #s2-sky { display: none; }
+        #s2-drawer { display: none; }
+        @media (max-width: 820px) {
+            body.s2ui #s2-sky { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+            body.s2ui #s2-sky .sky { position: absolute; inset: 0; transition: opacity 2s linear; }
+            body.s2ui #s2-sky .sea { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; }
+            body.s2ui #s2-sky .sky-body { position: absolute; border-radius: 50%; }
+
+            /* 朝：桃色から水色、白く光る海、朝霧 */
+            body.s2ui .sky-morning { background: linear-gradient(180deg, #f6c4b8 0%, #f8dcc8 30%, #cfe6f2 62%, #bfe0ee 66%); }
+            body.s2ui .sky-morning .sea { background: linear-gradient(180deg, #a9d4e6 0%, #6fb0cf 45%, #3f86ad 100%); }
+            body.s2ui .sky-morning .sky-body { width: 70px; height: 70px; left: 14%; bottom: 33%; background: radial-gradient(circle, #fff6dc 0%, #ffd9a0 55%, rgba(255,217,160,0) 72%); }
+            body.s2ui .sky-morning .sky-deco { position: absolute; left: 0; right: 0; bottom: 30%; height: 14%; background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.55), rgba(255,255,255,0)); }
+            /* 昼：青空と入道雲、濃い青の海 */
+            body.s2ui .sky-day { background: linear-gradient(180deg, #2f86d6 0%, #5aa9e6 35%, #a9d8f5 63%, #c9e8fb 66%); }
+            body.s2ui .sky-day .sea { background: linear-gradient(180deg, #2a7fc0 0%, #17639f 40%, #0b4475 100%); }
+            body.s2ui .sky-day .sky-body { width: 64px; height: 64px; right: 12%; top: 16%; background: radial-gradient(circle, #ffffff 0%, #fff7c2 45%, rgba(255,247,194,0) 70%); }
+            body.s2ui .sky-day .sky-deco { position: absolute; left: 6%; bottom: 33%; width: 46%; height: 18%;
+                background:
+                    radial-gradient(ellipse 38% 60% at 30% 70%, #ffffff 0 60%, transparent 62%),
+                    radial-gradient(ellipse 30% 75% at 55% 55%, #ffffff 0 60%, transparent 62%),
+                    radial-gradient(ellipse 26% 50% at 78% 75%, #f2f8ff 0 60%, transparent 62%); opacity: 0.95; }
+            /* 夕方：橙から紫、金色に光る海 */
+            body.s2ui .sky-evening { background: linear-gradient(180deg, #2b1c4f 0%, #7a3a78 28%, #e0654a 52%, #f7a64a 64%, #ffcf7a 66%); }
+            body.s2ui .sky-evening .sea { background: linear-gradient(180deg, #e08a4a 0%, #8a4a5a 30%, #3a2848 70%, #1e1a33 100%); }
+            body.s2ui .sky-evening .sky-body { width: 90px; height: 90px; left: 50%; margin-left: -45px; bottom: 30%; background: radial-gradient(circle, #fff1b0 0%, #ffb24a 45%, rgba(255,140,60,0) 72%); }
+            body.s2ui .sky-evening .sky-deco { position: absolute; left: 30%; right: 30%; bottom: 4%; height: 30%;
+                background: repeating-linear-gradient(180deg, rgba(255,210,120,0.55) 0 3px, transparent 3px 12px);
+                -webkit-mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); }
+            /* 夜：藍色の夜空と月、灯り */
+            body.s2ui .sky-night { background:
+                    radial-gradient(1.5px 1.5px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 30% 8%, #fff, transparent),
+                    radial-gradient(1.5px 1.5px at 48% 22%, #dfe8ff, transparent), radial-gradient(1px 1px at 66% 12%, #fff, transparent),
+                    radial-gradient(1.5px 1.5px at 84% 26%, #fff, transparent), radial-gradient(1px 1px at 92% 6%, #fff, transparent),
+                    radial-gradient(1px 1px at 22% 40%, #cfd8ff, transparent), radial-gradient(1px 1px at 74% 44%, #fff, transparent),
+                    linear-gradient(180deg, #030817 0%, #0b1838 45%, #1b2d5c 64%, #23376a 66%); }
+            body.s2ui .sky-night .sea { background: linear-gradient(180deg, #102347 0%, #08142c 45%, #030813 100%); }
+            body.s2ui .sky-night .sky-body { width: 54px; height: 54px; right: 16%; top: 12%; background: radial-gradient(circle at 40% 40%, #fffbe6 0%, #f3e7b8 55%, rgba(243,231,184,0) 72%); box-shadow: 0 0 40px rgba(255, 246, 200, 0.35); }
+            body.s2ui .sky-night .sky-deco { position: absolute; left: 0; right: 0; bottom: 33.5%; height: 8px;
+                background: radial-gradient(circle, #ffcf6b 0 2px, transparent 3px) 0 0 / 22px 8px repeat-x; filter: drop-shadow(0 0 4px #ffb24a); opacity: 0.9; }
+
+            /* 波（どの時間帯にも重ねる）。動きは transform だけなので軽い */
+            body.s2ui #s2-sky .s2-waves { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; z-index: 3; overflow: hidden; }
+            body.s2ui #s2-sky .s2-waves .w { position: absolute; left: 0; width: 200%; height: 22px;
+                background: radial-gradient(ellipse 18px 6px at 18px 11px, rgba(255,255,255,0.35) 0 60%, transparent 62%) 0 0 / 46px 22px repeat-x;
+                animation: s2wave 9s linear infinite; will-change: transform; }
+            body.s2ui #s2-sky .s2-waves .w1 { top: 6%; }
+            body.s2ui #s2-sky .s2-waves .w2 { top: 30%; opacity: 0.6; animation-duration: 14s; animation-direction: reverse; }
+            @keyframes s2wave { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+            body.lite-mode.s2ui #s2-sky .s2-waves .w { animation: none; }
+
+            /* 古い背景・タブ・飾りを片付ける */
+            body.s2ui #screen-clicker { background: none !important; }
+            body.s2ui #screen-clicker::before, body.s2ui #screen-clicker::after,
+            body.s2ui .clicker-scene-bg, body.s2ui #mobile-tab-bar,
+            body.s2ui .clicker-news, body.s2ui .clicker-title-ribbon, body.s2ui .ship-name-input,
+            body.s2ui .ship-hint, body.s2ui #clicker-sunburst,
+            body.s2ui .clicker-col-center, body.s2ui .clicker-col-right { display: none !important; }
+            body.s2ui #screen-clicker { padding-bottom: calc(58px + var(--admax-h, 0px)) !important; }
+            body.s2ui .clicker-top-bar { background: transparent !important; border: none !important; box-shadow: none !important; position: relative; z-index: 5; }
+            body.s2ui .clicker-top-bar::before, body.s2ui .clicker-top-bar::after { display: none !important; }
+            body.s2ui .clicker-top-btn { background: rgba(10, 20, 40, 0.45) !important; border: 1px solid rgba(255,255,255,0.45) !important; color: #fff !important; backdrop-filter: none !important; }
+            body.s2ui .reinc-top-hint { color: #fff !important; text-shadow: 0 1px 3px rgba(0,0,0,0.7); }
+
+            /* 黒船の舞台：画面いっぱい、柱の枠は消す */
+            body.s2ui .clicker-main-layout .clicker-col-left {
+                display: flex !important; position: absolute; inset: 0; background: none !important; border: none !important;
+                box-shadow: none !important; border-radius: 0 !important; padding: 4px 12px 0 !important; overflow: hidden !important;
+                justify-content: flex-start !important; z-index: 2; contain: none;
+            }
+            body.s2ui .clicker-score-board {
+                background: none !important; border: none !important; box-shadow: none !important; transform: none !important; padding: 0 !important;
+                text-align: center;
+            }
+            body.s2ui .kurofune-count-title { display: none !important; }
+            body.s2ui .kurofune-count { color: #fff !important; font-size: 2.6rem !important; text-shadow: 0 2px 0 rgba(0,0,0,0.35), 0 0 18px rgba(0,0,0,0.35) !important; }
+            body.s2ui .kps-display { background: rgba(10, 20, 40, 0.45) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.35) !important; display: inline-block; }
+            body.s2ui #s2-perclick { margin-top: 6px; display: inline-block; margin-left: 6px; font-size: 0.8rem; font-weight: 800; padding: 3px 12px; border-radius: 14px;
+                background: rgba(255, 211, 107, 0.92); color: #3a1d0a; }
+            /* 黒船は水平線に浮かべる */
+            body.s2ui .ship-wrapper { position: absolute !important; left: 0; right: 0; bottom: 22%; min-height: 0 !important; padding: 0 !important; }
+            body.s2ui .ship-wrapper::before, body.s2ui .ship-wrapper::after { display: none !important; }
+            body.s2ui .clicker-col-left .kurofune-click-target { font-size: clamp(7rem, 30vw, 11rem) !important; margin: 0 !important; }
+            body.s2ui #rank-chip { bottom: auto; top: 118px; left: 50%; transform: translateX(-50%); }
+
+            /* 下から引き出す棚 */
+            body.s2ui #s2-drawer {
+                display: flex; flex-direction: column; position: fixed; left: 0; right: 0; z-index: 870;
+                bottom: var(--admax-h, 0px); height: 58px;
+                background: linear-gradient(180deg, #fbf3dd, #efe0b8); color: #3a1d0a;
+                border-top: 2px solid #b8860b; border-radius: 16px 16px 0 0;
+                box-shadow: 0 -8px 24px rgba(0,0,0,0.35);
+                transition: height .28s cubic-bezier(.2,.9,.3,1);
+            }
+            body.s2ui:not(.clicker-active) #s2-drawer { display: none; }
+            body.s2ui #s2-drawer.open { height: min(56vh, 520px); }
+            body.s2ui #s2-drawer .s2-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 7px 10px; flex-shrink: 0; }
+            body.s2ui #s2-drawer .s2-tabs button {
+                height: 44px; border-radius: 10px; border: 1px solid #c9a35a; background: #fff8e6; color: #5a3415;
+                font-weight: 900; font-size: 0.95rem; font-family: 'Noto Sans JP', sans-serif; cursor: pointer;
+            }
+            body.s2ui #s2-drawer .s2-tabs button.on { background: #8a1a10; color: #fff3d6; border-color: #8a1a10; }
+            body.s2ui #s2-drawer .s2-panels { flex: 1; min-height: 0; overflow: hidden; }
+            body.s2ui #s2-drawer .s2-panel { display: none; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 12px 16px; box-sizing: border-box; }
+            body.s2ui #s2-drawer .s2-panel.on { display: block; }
+            body.s2ui #s2-drawer .s2-bulk { display: flex; justify-content: flex-end; margin: 2px 0 8px; }
+            body.s2ui #s2-drawer #bulk-buy-selector { display: flex !important; }
+            body.s2ui #s2-drawer .facility-row, body.s2ui #s2-drawer .facility-row * { color: inherit; }
+            body.s2ui .clicker-col-left::before, body.s2ui .clicker-col-left::after { display: none !important; }
+            /* 棚を開いている間は、黒船を棚の上まで持ち上げて小さくする（見ながら買える） */
+            body.s2ui.s2-drawer-open .ship-wrapper { bottom: calc(min(56vh, 520px) - 58px + 6px); transition: bottom .28s cubic-bezier(.2,.9,.3,1); }
+            body.s2ui.s2-drawer-open .clicker-col-left .kurofune-click-target { font-size: clamp(4.5rem, 18vw, 6.5rem) !important; }
+            body.s2ui .ship-wrapper { transition: bottom .28s cubic-bezier(.2,.9,.3,1); }
+            body.s2ui #achievement-toast-container { top: calc(70px + var(--admax-top, 0px)); bottom: auto; }
+            body.s2ui #s2-drawer .bulk-buy-btn { background: #fff8e6 !important; color: #5a3415 !important; border: 1px solid #c9a35a !important; min-width: 44px; height: 30px; border-radius: 15px; font-weight: 800; }
+            body.s2ui #s2-drawer .bulk-buy-btn.active, body.s2ui #s2-drawer .bulk-buy-btn.selected { background: #8a1a10 !important; color: #fff3d6 !important; border-color: #8a1a10 !important; }
+        }
         /* スマホで縦が足りないとき（画面下に広告が出ている時など）は、
            黒船が見えることを最優先に、上の飾りと看板を詰める */
         @media (max-width: 820px) {
@@ -5563,7 +5684,9 @@ animation:facilitySweep 6s linear infinite;
     // 黒船クリッカーの一時休止（シーズン2の中身が決まるまで）。true にすれば再開。
     // 休止中は、クリッカー本体・昇天・超昇天・賭博室（隻数を使うもの）に入れない。
     // セーブには一切触れない。
-    const CLICKER_OPEN = false;
+    // ?preview を付けて開いたときだけ、シーズン2の新しい画面を試せる（休港中でも入れる）
+    const PREVIEW_MODE = /[?&]preview(=|&|$)/.test(location.search);
+    const CLICKER_OPEN = PREVIEW_MODE;
     const CLICKER_CLOSED_SCREENS = ['screen-clicker', 'screen-ascension', 'screen-super-ascension', 'screen-gambling'];
     function showClickerClosedNotice() {
         if (document.getElementById('clicker-closed-notice')) return;
@@ -9292,7 +9415,11 @@ animation:facilitySweep 6s linear infinite;
         document.body.classList.remove('season-event-on');
         document.body.classList.remove('fever-fest');
         setFestDecor(false);
-        setTimeout(() => { try { openSeasonHall(); } catch (e) {} }, 1500);
+        // 殿堂へ自動で送るのは、終幕に立ち会った人（または終了直後に開いた人）だけ。
+        // 以前は終了後に開くたび毎回殿堂へ飛ばされていた。
+        if (finaleStarted || Date.now() - SEASON1_END < 10 * 60 * 1000) {
+            setTimeout(() => { try { openSeasonHall(); } catch (e) {} }, 1500);
+        }
     }
 
     function maybeStartFinaleMusic(remainMs) {
@@ -9715,6 +9842,129 @@ animation:facilitySweep 6s linear infinite;
         setTimeout(() => el.remove(), 2600);
     }
     setInterval(refreshRankChase, 4000);
+
+
+    // ==========================================
+    // シーズン2のスマホ画面（プレビュー中）
+    //  ・ホームを通らず、開いたら黒船の画面
+    //  ・空と海が、朝・昼・夕方・夜で移り変わる（端末の時計）
+    //  ・施設・強化・生産ラインは下から引き出す棚にまとめ、黒船を見ながら買える
+    // ==========================================
+    const TOD_ORDER = ['night', 'morning', 'day', 'evening'];
+    const TOD_START = { morning: 5, day: 10, evening: 16, night: 19 };   // 時（この時刻から30分かけて移る）
+    const TOD_LABEL = { auto: '時計に合わせる', morning: '朝', day: '昼', evening: '夕方', night: '夜' };
+    const TOD_ICON  = { auto: '🕒', morning: '🌅', day: '☀️', evening: '🌇', night: '🌙' };
+    function todFixed() { try { return localStorage.getItem('kurofuneTod') || 'auto'; } catch (e) { return 'auto'; } }
+    // いまの時間帯と、前の時間帯からの移り具合（0〜1）
+    function todNow() {
+        const fx = todFixed();
+        if (fx !== 'auto' && TOD_START[fx] != null) return { cur: fx, prev: fx, k: 1 };
+        const d = new Date(); const h = d.getHours() + d.getMinutes() / 60;
+        let cur = 'night';
+        if (h >= 5 && h < 10) cur = 'morning'; else if (h >= 10 && h < 16) cur = 'day';
+        else if (h >= 16 && h < 19) cur = 'evening';
+        const start = TOD_START[cur];
+        let since = h - start; if (since < 0) since += 24;
+        const prev = TOD_ORDER[(TOD_ORDER.indexOf(cur) + 3) % 4];
+        return { cur, prev, k: Math.min(1, since / 0.5) };
+    }
+    function applyTod() {
+        const t = todNow();
+        document.body.dataset.tod = t.cur;
+        document.querySelectorAll('#s2-sky .sky').forEach(el => {
+            const ph = el.dataset.ph;
+            el.style.opacity = ph === t.cur ? 1 : (ph === t.prev && t.k < 1 ? (1 - t.k).toFixed(3) : 0);
+            el.style.zIndex = ph === t.cur ? 1 : 2;   // 前の空を上に重ねて、だんだん透かす
+        });
+        const b = document.getElementById('s2-tod-btn');
+        if (b) { const fx = todFixed(); b.textContent = TOD_ICON[fx === 'auto' ? t.cur : fx]; b.title = '空：' + TOD_LABEL[fx]; }
+    }
+    function cycleTod() {
+        const order = ['auto', 'morning', 'day', 'evening', 'night'];
+        const next = order[(order.indexOf(todFixed()) + 1) % order.length];
+        try { localStorage.setItem('kurofuneTod', next); } catch (e) {}
+        applyTod();
+        showGSPopup('空：' + TOD_LABEL[next]);
+    }
+
+    function initS2Ui() {
+        // いまはスマホの画面だけ作り替える（PCは後で）
+        if (!window.matchMedia('(max-width: 820px)').matches) { switchScreen('screen-clicker', null); return; }
+        document.body.classList.add('s2ui');
+        const sc = document.getElementById('screen-clicker');
+        const base = document.getElementById('clicker-base');
+        if (!sc || !base) return;
+
+        // 空と海
+        if (!document.getElementById('s2-sky')) {
+            const sky = document.createElement('div');
+            sky.id = 's2-sky';
+            sky.innerHTML = TOD_ORDER.map(ph => '<div class="sky sky-' + ph + '" data-ph="' + ph + '">'
+                    + '<div class="sky-body"></div><div class="sky-deco"></div><div class="sea"></div></div>').join('')
+                + '<div class="s2-waves"><div class="w w1"></div><div class="w w2"></div></div>';
+            sc.insertBefore(sky, sc.firstChild);
+        }
+
+        // 1クリックの値
+        const board = base.querySelector('.clicker-score-board');
+        if (board && !document.getElementById('s2-perclick')) {
+            const pc = document.createElement('div'); pc.id = 's2-perclick';
+            board.appendChild(pc);
+        }
+
+        // 空の切り替えボタン（上の帯）
+        const topLeft = document.querySelector('#screen-clicker .clicker-top-left');
+        if (topLeft && !document.getElementById('s2-tod-btn')) {
+            const b = document.createElement('button');
+            b.id = 's2-tod-btn'; b.className = 'clicker-top-btn'; b.setAttribute('aria-label', '空の時間帯を変える');
+            b.onclick = cycleTod;
+            topLeft.insertBefore(b, topLeft.firstChild);
+        }
+
+        // 下から引き出す棚
+        if (!document.getElementById('s2-drawer')) {
+            const dr = document.createElement('div');
+            dr.id = 's2-drawer';
+            dr.innerHTML = '<div class="s2-tabs">'
+                + '<button data-tab="fac">⚓ 施設</button><button data-tab="up">🛠 強化</button><button data-tab="line">🏭 生産</button>'
+                + '</div><div class="s2-panels">'
+                + '<div class="s2-panel" data-panel="fac"></div><div class="s2-panel" data-panel="up"></div><div class="s2-panel" data-panel="line"></div>'
+                + '</div>';
+            document.body.appendChild(dr);
+            const P = (k) => dr.querySelector('[data-panel="' + k + '"]');
+            const bulk = document.getElementById('bulk-buy-selector');
+            if (bulk) { const row = document.createElement('div'); row.className = 's2-bulk'; row.appendChild(bulk); P('fac').appendChild(row); }
+            const fac = document.getElementById('facilities-container'); if (fac) P('fac').appendChild(fac);
+            const up = document.getElementById('upgrades-container'); if (up) P('up').appendChild(up);
+            const line = document.getElementById('clicker-center-area'); if (line) P('line').appendChild(line);
+            dr.querySelectorAll('.s2-tabs button').forEach(btn => btn.onclick = () => {
+                const tab = btn.dataset.tab;
+                const open = dr.classList.contains('open') && dr.dataset.tab === tab;
+                dr.classList.toggle('open', !open);
+                document.body.classList.toggle('s2-drawer-open', !open);
+                dr.dataset.tab = tab;
+                dr.querySelectorAll('.s2-tabs button').forEach(b => b.classList.toggle('on', !open && b.dataset.tab === tab));
+                dr.querySelectorAll('.s2-panel').forEach(pn => pn.classList.toggle('on', pn.dataset.panel === tab));
+            });
+        }
+
+        applyTod();
+        setInterval(applyTod, 30000);
+        setInterval(updateS2PerClick, 500);
+
+        // ホームは通らない
+        switchScreen('screen-clicker', null);
+    }
+
+    // 「1クリック ＝ ◯隻」（今の倍率をすべて掛けた値）
+    function updateS2PerClick() {
+        const el = document.getElementById('s2-perclick');
+        if (!el) return;
+        let v = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1);
+        v = Math.floor(v * (1 + reincarnationCount * 0.1) * frenzyClickMult * eventClickMult());
+        const t = '1クリック ＝ ' + formatNumber(v) + ' 隻';
+        if (el.textContent !== t) el.textContent = t;
+    }
 
     let pageVersionTag = null;
     async function checkForNewVersion() {
@@ -11637,6 +11887,7 @@ animation:facilitySweep 6s linear infinite;
         initBurstInput();
         for(let key in facilities) { facilities[key].count = 0; }
         loadGame();
+        if (PREVIEW_MODE) { try { initS2Ui(); } catch (e) { console.error('S2 UI', e); } }
 
         // 告知バーはどの画面にいても動かす
         updateSeasonEventBar();
@@ -11666,6 +11917,7 @@ animation:facilitySweep 6s linear infinite;
         // PCでは画面下、スマホでは画面上に出ることがあるので、上下とも測る。
         // ゲーム自身の要素は測定から外す。
         const OURS = new Set(['app-container', 'mobile-tab-bar', 'mobile-menu-btn', 'sidebar',
+            's2-drawer', 'fest-confetti', 'fever-fest-announce', 'clicker-closed-notice', 'burst-meter',
             'mobile-sidebar-backdrop', 'achievement-toast-container', 'cloud-fail-banner',
             'finale-video-wrap', 'finale-music-prompt', 'offline-popup']);
         const isOurs = (el) => {
