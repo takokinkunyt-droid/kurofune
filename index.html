@@ -3452,7 +3452,7 @@
            ===================================================== */
         #s2-sky { display: none; }
         #s2-drawer { display: none; }
-        @media (max-width: 820px) {
+        @media all {
             body.s2ui #s2-sky { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
             body.s2ui #s2-sky .sky { position: absolute; inset: 0; transition: opacity 2s linear; }
             body.s2ui #s2-sky .sea { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; }
@@ -3487,7 +3487,7 @@
                     radial-gradient(1px 1px at 22% 40%, #cfd8ff, transparent), radial-gradient(1px 1px at 74% 44%, #fff, transparent),
                     linear-gradient(180deg, #030817 0%, #0b1838 45%, #1b2d5c 64%, #23376a 66%); }
             body.s2ui .sky-night .sea { background: linear-gradient(180deg, #102347 0%, #08142c 45%, #030813 100%); }
-            body.s2ui .sky-night .sky-body { width: 54px; height: 54px; right: 16%; top: 12%; background: radial-gradient(circle at 40% 40%, #fffbe6 0%, #f3e7b8 55%, rgba(243,231,184,0) 72%); box-shadow: 0 0 40px rgba(255, 246, 200, 0.35); }
+            body.s2ui .sky-night .sky-body { width: 60px; height: 60px; right: 14%; top: 22%; background: radial-gradient(circle at 40% 40%, #fffbe6 0%, #f3e7b8 55%, rgba(243,231,184,0) 72%); box-shadow: 0 0 40px rgba(255, 246, 200, 0.35); }
             body.s2ui .sky-night .sky-deco { position: absolute; left: 0; right: 0; bottom: 33.5%; height: 8px;
                 background: radial-gradient(circle, #ffcf6b 0 2px, transparent 3px) 0 0 / 22px 8px repeat-x; filter: drop-shadow(0 0 4px #ffb24a); opacity: 0.9; }
 
@@ -3558,6 +3558,8 @@
             body.s2ui #s2-drawer .s2-bulk { display: flex; justify-content: flex-end; margin: 2px 0 8px; }
             body.s2ui #s2-drawer #bulk-buy-selector { display: flex !important; }
             body.s2ui #s2-drawer .facility-row, body.s2ui #s2-drawer .facility-row * { color: inherit; }
+            body.s2ui .nav-item[onclick*="screen-home"] { display: none !important; }   /* ホームは廃止 */
+            body.s2ui #clicker-base { position: absolute !important; inset: 0 !important; height: auto !important; width: auto !important; max-height: none !important; }
             body.s2ui .clicker-col-left::before, body.s2ui .clicker-col-left::after { display: none !important; }
             /* 棚を開いている間は、黒船を棚の上まで持ち上げて小さくする（見ながら買える） */
             body.s2ui.s2-drawer-open .ship-wrapper { bottom: calc(min(56vh, 520px) - 58px + 6px); transition: bottom .28s cubic-bezier(.2,.9,.3,1); }
@@ -3566,6 +3568,49 @@
             body.s2ui #achievement-toast-container { top: calc(70px + var(--admax-top, 0px)); bottom: auto; }
             body.s2ui #s2-drawer .bulk-buy-btn { background: #fff8e6 !important; color: #5a3415 !important; border: 1px solid #c9a35a !important; min-width: 44px; height: 30px; border-radius: 15px; font-weight: 800; }
             body.s2ui #s2-drawer .bulk-buy-btn.active, body.s2ui #s2-drawer .bulk-buy-btn.selected { background: #8a1a10 !important; color: #fff3d6 !important; border-color: #8a1a10 !important; }
+        }
+
+        /* ---------- シーズン2：PC（901px〜） ----------
+           空と海を画面いっぱいに、黒船は中央に大きく。
+           右に商会の棚を常に開いておき、上のタブで「施設／強化／生産」を切り替える。
+           お品書き（メニュー）は左上のボタンから引き出す。 */
+        @media (min-width: 901px) {
+            body.s2ui #screen-clicker { padding-bottom: 0 !important; padding-right: 400px; box-sizing: border-box; }
+            body.s2ui .clicker-main-layout { display: block !important; position: relative; padding: 0 !important; flex: 1; min-height: 0; }
+            body.s2ui .clicker-top-bar { padding-left: 70px !important; }
+            body.s2ui .kurofune-count { font-size: 3.6rem !important; }
+            body.s2ui .clicker-col-left .kurofune-click-target { font-size: clamp(9rem, min(17vw, 30vh), 16rem) !important; }
+            body.s2ui .ship-wrapper { bottom: 21% !important; }
+            body.s2ui.s2-drawer-open .ship-wrapper { bottom: 21% !important; }
+            body.s2ui.s2-drawer-open .clicker-col-left .kurofune-click-target { font-size: clamp(9rem, min(17vw, 30vh), 16rem) !important; }
+            body.s2ui #rank-chip { top: 150px; }
+
+            /* 右の棚 */
+            body.s2ui #s2-drawer, body.s2ui #s2-drawer.open {
+                top: 0; bottom: 0; right: 0; left: auto; width: 400px; height: auto !important;
+                border-radius: 0; border-top: none; border-left: 3px solid #b8860b;
+                box-shadow: -10px 0 30px rgba(0,0,0,0.35);
+            }
+            body.s2ui #s2-drawer .s2-tabs { padding: 12px 12px 8px; }
+            body.s2ui #s2-drawer .s2-panel { padding: 4px 14px 20px; }
+
+            /* お品書きは引き出し式 */
+            body.s2ui #sidebar {
+                position: fixed; top: 0; left: 0; bottom: 0; width: 260px !important;
+                transform: translateX(-100%); transition: transform .28s ease; z-index: 900;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+            }
+            body.s2ui #sidebar.mobile-open { transform: translateX(0); }
+            body.s2ui #sidebar.collapsed { width: 260px !important; }
+            body.s2ui #mobile-menu-btn {
+                display: flex; position: fixed; top: 14px; left: 14px; z-index: 901;
+                width: 46px; height: 46px; align-items: center; justify-content: center;
+                border: 1px solid rgba(255,255,255,0.6); border-radius: 10px;
+                background: rgba(10, 20, 40, 0.5); color: #fff; font-size: 1.35rem; cursor: pointer;
+            }
+            body.s2ui #mobile-sidebar-backdrop { position: fixed; inset: 0; z-index: 899; background: rgba(0,0,0,0.45); display: none; }
+            body.s2ui #mobile-sidebar-backdrop.show { display: block; }
+            body.s2ui #main-content { width: 100%; }
         }
         /* スマホで縦が足りないとき（画面下に広告が出ている時など）は、
            黒船が見えることを最優先に、上の飾りと看板を詰める */
@@ -9888,8 +9933,6 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function initS2Ui() {
-        // いまはスマホの画面だけ作り替える（PCは後で）
-        if (!window.matchMedia('(max-width: 820px)').matches) { switchScreen('screen-clicker', null); return; }
         document.body.classList.add('s2ui');
         const sc = document.getElementById('screen-clicker');
         const base = document.getElementById('clicker-base');
@@ -9939,7 +9982,9 @@ animation:facilitySweep 6s linear infinite;
             const line = document.getElementById('clicker-center-area'); if (line) P('line').appendChild(line);
             dr.querySelectorAll('.s2-tabs button').forEach(btn => btn.onclick = () => {
                 const tab = btn.dataset.tab;
-                const open = dr.classList.contains('open') && dr.dataset.tab === tab;
+                // PC では棚は閉じない（タブの切り替えだけ）
+                const isPc = window.matchMedia('(min-width: 901px)').matches;
+                const open = !isPc && dr.classList.contains('open') && dr.dataset.tab === tab;
                 dr.classList.toggle('open', !open);
                 document.body.classList.toggle('s2-drawer-open', !open);
                 dr.dataset.tab = tab;
@@ -9948,6 +9993,11 @@ animation:facilitySweep 6s linear infinite;
             });
         }
 
+        // PC は最初から「施設」を開いておく
+        if (window.matchMedia('(min-width: 901px)').matches) {
+            const first = document.querySelector('#s2-drawer .s2-tabs button[data-tab="fac"]');
+            if (first) first.click();
+        }
         applyTod();
         setInterval(applyTod, 30000);
         setInterval(updateS2PerClick, 500);
