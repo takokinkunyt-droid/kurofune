@@ -143,6 +143,16 @@ module.exports = async (req, res) => {
       // 新しいシーズンのランキングを0から始める。
       // 書き写しが済んでいることを確かめてから、今のランキングを
       // season:<n>:ranking に移す（消さずに取っておく）。
+      // ランキングを空にする（シーズンの書き写しとは関係なく使える）。
+      // 消さずに ranking_backup:<時刻> へ移すので、間違えても戻せる。
+      if (action === 'reset-ranking') {
+        const exists = await redisRequest(['exists', 'ranking']);
+        if (exists.result !== 1) return res.status(200).json({ success: true, alreadyEmpty: true });
+        const backup = `ranking_backup:${Date.now()}`;
+        await redisRequest(['rename', 'ranking', backup]);
+        return res.status(200).json({ success: true, movedTo: backup });
+      }
+
       if (action === 'start-next') {
         const metaRaw = await redisRequest(['get', `season:${season}:meta`]);
         if (!metaRaw.result) return res.status(409).json({ error: 'Archive first', season });

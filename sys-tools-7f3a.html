@@ -147,6 +147,7 @@
     <button onclick="season('archive')">全員を退避する</button>
     <button onclick="season('verify')">退避できたか検算する</button>
     <button class="danger" onclick="season('start-next')">次のシーズンのランキングを0から始める</button>
+    <button class="danger" onclick="season('reset-ranking')">ランキングを空にする（控えを取ってから）</button>
     <div class="note">
       一斉リセットの前に必ず退避してください。検算で <span class="mono">safeToReset: true</span>
       が出るまでリセットしないこと。
@@ -355,6 +356,8 @@ async function season(action) {
   if (!secret()) return show('seasonOut', '先に管理キーを入れてください。');
   if (action === 'archive' &&
       !confirm('シーズン ' + n + ' として全員のセーブを退避します。\n実行しますか？')) return;
+  if (action === 'reset-ranking' &&
+      !confirm('ランキングを空にします。\n今のランキングは ranking_backup:<時刻> に控えとして残します。\n実行しますか？')) return;
   if (action === 'start-next' &&
       !confirm('シーズン ' + n + ' のランキングを保管庫へ移し、ランキングを空にします。\n（検算で safeToReset: true を確認しましたか？）\n実行しますか？')) return;
   const { status, body } = await post('/archive-season', { secret: secret(), action, season: n });
