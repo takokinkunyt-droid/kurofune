@@ -4625,6 +4625,7 @@ animation:facilitySweep 6s linear infinite;
     <div id="sidebar" style="display: none;">
         <div class="sidebar-header"><div class="date" id="date-display"></div><h1 class="serif-font">黒船クリッカー<br><span>1853</span></h1></div>
         <div class="nav-menu">
+            <div class="nav-item" id="nav-clicker" onclick="switchScreen('screen-clicker', this)"><span class="nav-icon">🚢</span><span class="nav-text">黒船クリッカー</span></div>
             <div class="nav-item" onclick="switchScreen('screen-home', null)"><span class="nav-icon">⛩️</span><span class="nav-text">ホームに戻る</span></div>
             <div class="nav-item" onclick="switchScreen('screen-music', this)"><span class="nav-icon">🎵</span><span class="nav-text">音（音楽室）</span></div>
             <div class="nav-item" onclick="openShipGachaScreen(this)"><span class="nav-icon">🎁</span><span class="nav-text">貢ぎ物の蔵（ガチャ）</span></div>
@@ -5056,7 +5057,7 @@ animation:facilitySweep 6s linear infinite;
                 <div class="gacha-collection-grid" id="skin-collection-grid"></div>
 
                 <div style="margin-top:32px; text-align:center;">
-                    <button class="btn-primary" onclick="switchScreen('screen-home',null)">← ホームに戻る</button>
+                    <button class="btn-primary" onclick="switchScreen('screen-home',null)">← 黒船に戻る</button>
                 </div>
             </div>
         </div>
@@ -5198,7 +5199,7 @@ animation:facilitySweep 6s linear infinite;
                 </div>
 
                 <div style="margin-top:32px; text-align:center;">
-                    <button class="btn-primary" onclick="switchScreen('screen-home',null)">← ホームに戻る</button>
+                    <button class="btn-primary" onclick="switchScreen('screen-home',null)">← 黒船に戻る</button>
                 </div>
             </div>
         </div>
@@ -5877,6 +5878,8 @@ animation:facilitySweep 6s linear infinite;
     function switchScreen(screenId, navElement) {
         // シーズン2：昇天・超昇天の画面は、新しいスキルの木に置き換える
         if (S2_ON && (screenId === 'screen-ascension' || screenId === 'screen-super-ascension')) { openTree(); return; }
+        // ホームは廃止した。各画面の「ホームに戻る」は黒船の画面へ
+        if (S2_ON && screenId === 'screen-home') screenId = 'screen-clicker';
         if (!CLICKER_OPEN && CLICKER_CLOSED_SCREENS.includes(screenId)) {
             showClickerClosedNotice();
             if (!document.querySelector('.screen.active')) screenId = 'screen-home';
