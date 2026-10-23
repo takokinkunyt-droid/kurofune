@@ -3612,6 +3612,96 @@
             body.s2ui #mobile-sidebar-backdrop.show { display: block; }
             body.s2ui #main-content { width: 100%; }
         }
+        /* ===== シーズン2：スキルの木 ===== */
+        #screen-tree { position: relative; height: 100%; overflow: hidden; padding: 0 !important;
+            background:
+                radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.7), transparent), radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,.6), transparent),
+                radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,255,255,.5), transparent), radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,.6), transparent),
+                radial-gradient(circle at 50% 45%, #1c2350 0%, #0d1130 55%, #05061a 100%);
+            color: #f3e8cc; touch-action: none; user-select: none; -webkit-user-select: none; }
+        #screen-tree .tree-head { position: absolute; left: 0; right: 0; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; background: linear-gradient(180deg, rgba(5,6,26,.92), rgba(5,6,26,0)); }
+        #screen-tree .tree-back { height: 40px; padding: 0 14px; border-radius: 20px; border: 1px solid rgba(255, 220, 150, .6);
+            background: rgba(255, 220, 150, .12); color: #ffe3a0; font-weight: 800; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+        #screen-tree .tree-title { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 1.2rem; color: #ffe3a0; }
+        #screen-tree .tree-stats { margin-left: auto; display: flex; gap: 12px; font-size: .9rem; }
+        #screen-tree .tree-frag b { color: #9fe6ff; font-size: 1.15rem; }
+        #screen-tree .tree-reinc b { color: #ffd36b; }
+        #screen-tree .tree-map { position: absolute; inset: 0; overflow: hidden; cursor: grab; }
+        #screen-tree .tree-map:active { cursor: grabbing; }
+        #screen-tree .tree-world { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 0 0; will-change: transform; }
+        #screen-tree .tree-lines { position: absolute; left: -2000px; top: -2000px; overflow: visible; pointer-events: none; }
+        #screen-tree .tree-lines line { stroke-width: 3; stroke-linecap: round; }
+        #screen-tree .tree-lines line.off { stroke: rgba(160, 170, 220, .22); stroke-dasharray: 2 7; }
+        #screen-tree .tree-lines line.half { stroke: rgba(255, 211, 107, .45); }
+        #screen-tree .tree-lines line.on { stroke: #ffd36b; filter: drop-shadow(0 0 4px rgba(255, 211, 107, .8)); }
+        #screen-tree .tnode { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; padding: 0;
+            border-radius: 14px; border: 2px solid rgba(170, 180, 230, .45); background: rgba(25, 30, 70, .92);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+        #screen-tree .tnode .tn-ic { font-size: 2rem; line-height: 1; }
+        #screen-tree .tnode .tn-name { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 5px; white-space: nowrap;
+            font-size: .72rem; font-weight: 700; color: rgba(243, 232, 204, .85); text-shadow: 0 1px 3px #000; pointer-events: none; }
+        #screen-tree .tnode .tn-lv { position: absolute; right: -6px; bottom: -6px; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 10px;
+            background: #ffd36b; color: #3a1d0a; font-size: .7rem; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+        #screen-tree .tnode .tn-lock { position: absolute; right: -6px; top: -8px; font-size: .9rem; }
+        #screen-tree .tnode.root { width: 78px; height: 78px; margin: -39px 0 0 -39px; border-radius: 50%; }
+        #screen-tree .tnode.root .tn-ic { font-size: 2.4rem; }
+        #screen-tree .tnode.forge { border-radius: 50%; }
+        #screen-tree .tnode.owned { border-color: #ffd36b; background: radial-gradient(circle at 40% 35%, #5a3a10, #2a1806);
+            box-shadow: 0 0 14px rgba(255, 211, 107, .55); }
+        #screen-tree .tnode.buyable { border-color: #9fe6ff; animation: tnGlow 1.4s ease-in-out infinite alternate; }
+        #screen-tree .tnode.owned.buyable { border-color: #ffd36b; }
+        @keyframes tnGlow { from { box-shadow: 0 0 6px rgba(159, 230, 255, .4); } to { box-shadow: 0 0 22px rgba(159, 230, 255, .95); } }
+        #screen-tree .tnode.poor { opacity: .7; }
+        #screen-tree .tnode.locked { filter: grayscale(1) brightness(.7); }
+        #screen-tree .tnode.sel { outline: 3px solid #fff; outline-offset: 3px; }
+        #screen-tree .tnode.appear { animation: tnAppear .6s cubic-bezier(.2,1.5,.4,1); }
+        @keyframes tnAppear { from { opacity: 0; transform: scale(.2); } to { opacity: 1; transform: scale(1); } }
+        #screen-tree .tnode.bought { animation: tnBought .5s ease-out; }
+        @keyframes tnBought { 0% { transform: scale(1.35); box-shadow: 0 0 40px #ffd36b; } 100% { transform: scale(1); } }
+        body.lite-mode #screen-tree .tnode.buyable { animation: none; box-shadow: 0 0 10px rgba(159, 230, 255, .7); }
+        #screen-tree .tree-hint { position: absolute; left: 50%; bottom: calc(14px + var(--admax-h, 0px)); transform: translateX(-50%); z-index: 4;
+            font-size: .75rem; color: rgba(243, 232, 204, .55); pointer-events: none; white-space: nowrap; }
+        #screen-tree .tree-info { position: absolute; left: 50%; bottom: calc(12px + var(--admax-h, 0px)); z-index: 6; width: min(520px, calc(100% - 24px));
+            transform: translate(-50%, 140%); transition: transform .25s cubic-bezier(.2,.9,.3,1);
+            background: linear-gradient(180deg, #fbf3dd, #efe0b8); color: #3a1d0a; border: 2px solid #b8860b; border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.5); padding: 14px; box-sizing: border-box; }
+        #screen-tree .tree-info.show { transform: translate(-50%, 0); }
+        #screen-tree .ti-row { display: flex; gap: 12px; align-items: flex-start; }
+        #screen-tree .ti-ic { font-size: 2.4rem; line-height: 1; }
+        #screen-tree .ti-main { flex: 1; min-width: 0; }
+        #screen-tree .ti-name { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 1.15rem; }
+        #screen-tree .ti-lv { margin-left: 8px; font-family: 'Noto Sans JP', sans-serif; font-size: .8rem; color: #8a5a12; }
+        #screen-tree .ti-desc { font-size: .88rem; line-height: 1.6; margin-top: 4px; }
+        #screen-tree .ti-note { font-size: .8rem; color: #9a2a1c; margin-top: 6px; line-height: 1.5; }
+        #screen-tree .ti-close { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,.08); cursor: pointer; font-size: 1rem; }
+        #screen-tree .ti-buy { margin-top: 12px; width: 100%; height: 48px; border-radius: 12px; border: none; cursor: pointer;
+            background: #8a1a10; color: #fff3d6; font-weight: 900; font-size: 1rem; font-family: 'Noto Sans JP', sans-serif; }
+        #screen-tree .ti-buy:disabled { background: #c9b48a; color: #6b5a3a; cursor: default; }
+        body.s2ui #screen-tree .tree-head { padding-left: 74px; }
+        @media (max-width: 600px) {
+            #screen-tree .tree-head { flex-wrap: wrap; padding: 10px 12px 10px 64px; gap: 8px; }
+            #screen-tree .tree-title { font-size: 1rem; }
+            #screen-tree .tree-stats { font-size: .8rem; }
+        }
+
+        /* ===== 転生する前の「もらえるもの」 ===== */
+        #reinc-preview { position: fixed; inset: 0; z-index: 100001; display: flex; align-items: center; justify-content: center;
+            background: rgba(5, 6, 26, .7); padding: 16px; }
+        #reinc-preview .rp-box { width: min(440px, 100%); background: linear-gradient(180deg, #fbf3dd, #efe0b8); color: #3a1d0a;
+            border: 2px solid #b8860b; border-radius: 18px; padding: 22px 20px; box-shadow: 0 20px 60px rgba(0,0,0,.55); text-align: center; }
+        #reinc-preview .rp-title { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 1.35rem; }
+        #reinc-preview .rp-gain { margin: 12px 0 10px; display: flex; flex-direction: column; gap: 2px; }
+        #reinc-preview .rp-big { font-size: 1.6rem; font-weight: 900; color: #1d5c8a; }
+        #reinc-preview .rp-sub { font-size: .82rem; color: #6b4a22; }
+        #reinc-preview .rp-list { list-style: none; padding: 0; margin: 8px 0; text-align: left; font-size: .92rem; line-height: 1.9; }
+        #reinc-preview .rp-ahead { font-size: .82rem; color: #6b4a22; margin: 4px 0 8px; }
+        #reinc-preview .rp-keep { font-size: .85rem; font-weight: 800; color: #2f6b2f; margin: 6px 0; }
+        #reinc-preview .rp-lose { font-size: .78rem; color: #8a6a3c; margin-bottom: 14px; }
+        #reinc-preview .rp-btns { display: flex; gap: 10px; }
+        #reinc-preview .rp-btns button { flex: 1; height: 48px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+        #reinc-preview .rp-no { background: #fff8e6; color: #5a3415; border: 1px solid #c9a35a; }
+        #reinc-preview .rp-yes { background: #8a1a10; color: #fff3d6; border: none; }
         /* スマホで縦が足りないとき（画面下に広告が出ている時など）は、
            黒船が見えることを最優先に、上の飾りと看板を詰める */
         @media (max-width: 820px) {
@@ -5732,7 +5822,7 @@ animation:facilitySweep 6s linear infinite;
     // ?preview を付けて開いたときだけ、シーズン2の新しい画面を試せる（休港中でも入れる）
     const PREVIEW_MODE = /[?&]preview(=|&|$)/.test(location.search);
     const CLICKER_OPEN = PREVIEW_MODE;
-    const CLICKER_CLOSED_SCREENS = ['screen-clicker', 'screen-ascension', 'screen-super-ascension', 'screen-gambling'];
+    const CLICKER_CLOSED_SCREENS = ['screen-clicker', 'screen-ascension', 'screen-super-ascension', 'screen-gambling', 'screen-tree'];
     function showClickerClosedNotice() {
         if (document.getElementById('clicker-closed-notice')) return;
         const el = document.createElement('div');
@@ -5750,6 +5840,8 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function switchScreen(screenId, navElement) {
+        // シーズン2：昇天・超昇天の画面は、新しいスキルの木に置き換える
+        if (PREVIEW_MODE && (screenId === 'screen-ascension' || screenId === 'screen-super-ascension')) { openTree(); return; }
         if (!CLICKER_OPEN && CLICKER_CLOSED_SCREENS.includes(screenId)) {
             showClickerClosedNotice();
             if (!document.querySelector('.screen.active')) screenId = 'screen-home';
@@ -5969,6 +6061,7 @@ animation:facilitySweep 6s linear infinite;
         // 進行状況をすべて初期化
         clickerScore = 0; currentLifeScore = 0;
         clickPower = 1; upClickCost = 15; upClickLevel = 1;
+        s2tree = {}; pastLivesEarned = 0; fragmentsEarnedTotal = 0; steamLevel = 0;
         superDockLevel = 0; upSuperDockCost = SUPER_DOCK_BASE_COST;
         reincarnationCount = 0; fragments = 0;
         sakokuShards = 0; superReincarnationCount = 0;
@@ -7943,6 +8036,7 @@ animation:facilitySweep 6s linear infinite;
             saveVersion: SAVE_DATA_VERSION,
             clickerScore, currentLifeScore, clickPower, upClickCost, upClickLevel,
             superDockLevel, upSuperDockCost,
+            s2tree, pastLivesEarned, fragmentsEarnedTotal, steamLevel,
             reincarnationCount, fragments, skills, achievements,
             facilities, availableFacilityUpgrades,
             wrenchLevel, upWrenchCost, combatTechPurchased,
@@ -8063,7 +8157,8 @@ animation:facilitySweep 6s linear infinite;
         const fac = d.facilities || {};
         const facCount = Object.values(fac).reduce((a, x) => a + (Number(x && x.count) || 0), 0);
         const sk = Object.values(d.skills || {}).filter(Boolean).length
-                 + Object.values(d.superSkills || {}).filter(Boolean).length;
+                 + Object.values(d.superSkills || {}).filter(Boolean).length
+                 + Object.values(d.s2tree || {}).filter(Boolean).length;
         const rc = (Number(d.reincarnationCount) || 0) + (Number(d.superReincarnationCount) || 0);
         return facCount === 0 && sk === 0 && rc === 0;
     }
@@ -8077,7 +8172,8 @@ animation:facilitySweep 6s linear infinite;
         if (!d) return { skill: 0, reinc: 0 };
         return {
             skill: Object.values(d.skills || {}).filter(Boolean).length
-                 + Object.values(d.superSkills || {}).filter(Boolean).length,
+                 + Object.values(d.superSkills || {}).filter(Boolean).length
+                 + Object.values(d.s2tree || {}).filter(Boolean).length,
             reinc: (Number(d.reincarnationCount) || 0) + (Number(d.superReincarnationCount) || 0),
         };
     }
@@ -8173,7 +8269,8 @@ animation:facilitySweep 6s linear infinite;
                     body: JSON.stringify({
                         playerId,
                         playerName: saveData.playerName || '名無しの船長',
-                        clickerScore: saveData.clickerScore || 0,
+                        // シーズン2：ランキングは「シーズン中に稼いだ合計」。転生しても減らない
+                        clickerScore: Math.floor((Number(saveData.pastLivesEarned) || 0) + (Number(saveData.currentLifeScore) || 0)) || 0,
                         reincarnationCount: saveData.reincarnationCount || 0,
                         fragments: saveData.fragments || 0,
                         era: getEraLabel()
@@ -8400,6 +8497,7 @@ animation:facilitySweep 6s linear infinite;
         clickerScore = sanitizeNum(clickerScore, 0); currentLifeScore = sanitizeNum(currentLifeScore, clickerScore); 
         clickPower = sanitizeNum(clickPower, 1); upClickCost = sanitizeNum(upClickCost, 15); upClickLevel = sanitizeNum(upClickLevel, 1);
         superDockLevel = sanitizeNum(superDockLevel, 0); upSuperDockCost = sanitizeNum(upSuperDockCost, SUPER_DOCK_BASE_COST);
+        steamLevel = sanitizeNum(steamLevel, 0); pastLivesEarned = sanitizeNum(pastLivesEarned, 0); fragmentsEarnedTotal = sanitizeNum(fragmentsEarnedTotal, 0);
         reincarnationCount = sanitizeNum(reincarnationCount, 0); fragments = sanitizeNum(fragments, 0); wrenchLevel = sanitizeNum(wrenchLevel, 0); upWrenchCost = sanitizeNum(upWrenchCost, 1000);
         sakokuShards = sanitizeNum(sakokuShards, 0); superReincarnationCount = sanitizeNum(superReincarnationCount, 0); buyQuantity = sanitizeNum(buyQuantity, 1);
         conscriptionLevel = sanitizeNum(conscriptionLevel, 0); upConscriptionCost = sanitizeNum(upConscriptionCost, 10000000);
@@ -8411,6 +8509,12 @@ animation:facilitySweep 6s linear infinite;
         clickerScore = sanitizeNum(save.clickerScore, 0); currentLifeScore = sanitizeNum(save.currentLifeScore, clickerScore);
         clickPower = sanitizeNum(save.clickPower, 1); upClickCost = sanitizeNum(save.upClickCost, 15); upClickLevel = sanitizeNum(save.upClickLevel, 1);
         superDockLevel = sanitizeNum(save.superDockLevel, 0); upSuperDockCost = sanitizeNum(save.upSuperDockCost, SUPER_DOCK_BASE_COST);
+        s2tree = {};
+        if (save.s2tree && typeof save.s2tree === 'object') {
+            for (const k in save.s2tree) { if (S2_TREE[k]) s2tree[k] = Math.max(0, Math.floor(Number(save.s2tree[k]) || 0)); }
+        }
+        pastLivesEarned = sanitizeNum(save.pastLivesEarned, 0); fragmentsEarnedTotal = sanitizeNum(save.fragmentsEarnedTotal, 0);
+        steamLevel = sanitizeNum(save.steamLevel, 0);
         reincarnationCount = sanitizeNum(save.reincarnationCount, 0); fragments = sanitizeNum(save.fragments, 0);
         sakokuShards = sanitizeNum(save.sakokuShards, 0); superReincarnationCount = sanitizeNum(save.superReincarnationCount, 0); buyQuantity = sanitizeNum(save.buyQuantity, 1);
         superSkills = { ...superSkills, ...(save.superSkills || {}) };
@@ -8439,6 +8543,7 @@ animation:facilitySweep 6s linear infinite;
         if (skills.senpan) { facilities.iiNaosuke.locked = false; }
         if (superSkills.meijiRestoration) { facilities.meijiBuilding.locked = false; facilities.tokyoStation.locked = false; facilities.railway.locked = false; }
         if (superSkills.timeControl) { facilities.timeMachine.locked = false; }
+        s2ApplyUnlocks();
 
         if (save.achievements) { for (let key in save.achievements) { if (achievements[key]) achievements[key].unlocked = save.achievements[key].unlocked; } }
 
@@ -8448,7 +8553,7 @@ animation:facilitySweep 6s linear infinite;
         if (save.treaties) treaties = { ...treaties, ...save.treaties };
         if (save.playerName) playerName = save.playerName;
 
-        if (skills.rebellion && save.lastSaveTime) {
+        if ((skills.rebellion || s2has('rusuban')) && save.lastSaveTime) {
             const elapsedSec = (Date.now() - save.lastSaveTime) / 1000;
             if (elapsedSec > 60 && !isNaN(elapsedSec)) {
                 const offlineEarned = elapsedSec * getKPS();
@@ -8680,7 +8785,16 @@ animation:facilitySweep 6s linear infinite;
         `;
         container.appendChild(superDockCard);
 
-        if (skills.modernization) {
+        if (s2has('jouki')) {
+            const stCard = document.createElement('div'); stCard.className = 'shop-card special-card'; stCard.id = 'up-steam'; stCard.onclick = () => buySteam();
+            stCard.innerHTML = `
+                <div class="shop-info-left"><span class="shop-icon">⚙️</span><div class="shop-details"><h4>蒸気機関の改良</h4><p>クリックに毎秒の生産の <strong>+0.5%</strong> を上乗せ（いま <span id="up-steam-pct">${(s2ClickKpsPct(false) * 100).toFixed(1)}</span>%）</p></div></div>
+                <div class="shop-info-right"><div class="shop-cost" id="up-steam-cost">${formatNumber(steamCost())} 隻</div><div class="shop-count" id="up-steam-level">Lv.${steamLevel}</div></div>
+            `;
+            container.appendChild(stCard);
+        }
+
+        if (skills.modernization || s2has('kindaika')) {
             let wrenchCard = document.createElement('div'); wrenchCard.className = 'shop-card special-card'; wrenchCard.id = 'up-wrench'; wrenchCard.onclick = () => buyWrench();
             wrenchCard.innerHTML = `
                 <div class="shop-info-left"><span class="shop-icon">🔧</span><div class="shop-details"><h4>レンチ</h4><p>全体の生産効率を <strong>+1%</strong> する</p></div></div>
@@ -8880,12 +8994,12 @@ animation:facilitySweep 6s linear infinite;
     }
 
     // 転生の一時停止（シーズン2の転生の内容が決まるまで）。true にすれば元に戻る。
-    const REINCARNATION_ENABLED = false;
+    const REINCARNATION_ENABLED = PREVIEW_MODE;   // シーズン2の仕組みは ?preview の中だけ
 
     function updateClickerUI() {
         const reincBtn = document.getElementById('reincarnation-btn'), reincHint = document.getElementById('reincarnation-hint');
         const reincLabel = document.getElementById('reincarnation-btn-label');
-        let pending = calcPendingFragments();
+        let pending = s2PendingFragments();
 
         if (reincBtn) reincBtn.classList.toggle('super-mode', !!skills.ifSkill);
         if (reincLabel) reincLabel.textContent = skills.ifSkill ? '超転生' : '輪廻転生';
@@ -8903,8 +9017,7 @@ animation:facilitySweep 6s linear infinite;
             if (reincBtn) reincBtn.style.display = 'flex'; 
             if (reincHint) {
                 reincHint.style.display = 'block';
-                let nextReq = getNextFragmentReq(); let remaining = Math.ceil(nextReq - currentLifeScore);
-                reincHint.innerHTML = `次のかけら追加(+${getReincarnationLevel() + 1})まであと\n${remaining.toLocaleString()} 隻稼ぐ`;
+                reincHint.innerHTML = `次のかけら（+${pending + 1}）まで あと ${formatNumber(s2NextFragmentRemaining())} 隻`;
             }
             const btnDetail = document.getElementById('reincarnation-btn-detail');
             if (btnDetail) {
@@ -8919,8 +9032,7 @@ animation:facilitySweep 6s linear infinite;
             if (reincBtn) reincBtn.style.display = 'none'; 
             if (reincHint) {
                 reincHint.style.display = 'block'; 
-                let base = getBaseReincarnationCost(); let remaining = Math.ceil(base - currentLifeScore);
-                reincHint.innerHTML = `※ 今世で ${Math.ceil(base).toLocaleString()} 隻 稼ぐと…？<br>（あと ${remaining.toLocaleString()} 隻）`;
+                reincHint.innerHTML = `※ 開国のかけら 1個まで あと ${formatNumber(s2NextFragmentRemaining())} 隻`;
             }
         }
 
@@ -8949,6 +9061,15 @@ animation:facilitySweep 6s linear infinite;
             if (l) l.textContent = `Lv.${superDockLevel}`;
             if (mx) mx.textContent = burstMaxMult();
             upSuperDockCard.classList.toggle('disabled', clickerScore < upSuperDockCost);
+        }
+
+        const upSteamCard = document.getElementById('up-steam');
+        if (upSteamCard) {
+            const c = document.getElementById('up-steam-cost'), l = document.getElementById('up-steam-level'), pc = document.getElementById('up-steam-pct');
+            if (c) c.textContent = `${formatNumber(steamCost())} 隻`;
+            if (l) l.textContent = `Lv.${steamLevel}`;
+            if (pc) pc.textContent = (s2ClickKpsPct(false) * 100).toFixed(1);
+            upSteamCard.classList.toggle('disabled', clickerScore < steamCost());
         }
 
         const upWrenchCard = document.getElementById('up-wrench');
@@ -9033,7 +9154,7 @@ animation:facilitySweep 6s linear infinite;
         let achievementMult = skills.achievementBoost ? (1 + getUnlockedAchievementCount() * 0.1) : 1;
         // スキン効果：「ペリー」装備中は全施設の生産効率が2倍
         let skinKpsMult = (currentSkin === 'perrySkin') ? 2 : 1;
-        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1) * achievementMult * skinKpsMult * eventKpsMult(); 
+        let kps = sum * (1 + reincarnationCount * 0.1) * (1 + (wrenchLevel || 0) * 0.01) * (frenzyKpsMult || 1) * (treaties.nichibeiWashin ? 1.5 : 1) * (haihanPurchased ? 2 : 1) * (sakuradamonPurchased ? 2 : 1) * achievementMult * skinKpsMult * eventKpsMult() * (s2has('kaikoku') ? 1.5 : 1); 
         return sanitizeNum(kps, 0);
     }
 
@@ -9844,7 +9965,7 @@ animation:facilitySweep 6s linear infinite;
         const o = rankChase.others;
         let rank = 1, above = null;
         for (let i = 0; i < o.length; i++) {
-            if (o[i].score > clickerScore) { rank = i + 2; above = o[i]; } else break;
+            if (o[i].score > seasonEarned()) { rank = i + 2; above = o[i]; } else break;
         }
         return { rank, above };
     }
@@ -9868,7 +9989,7 @@ animation:facilitySweep 6s linear infinite;
             base.appendChild(chip);
         }
         if (!chip) return;
-        const gap = info.above ? Math.max(0, Math.ceil(info.above.score - clickerScore)) : 0;
+        const gap = info.above ? Math.max(0, Math.ceil(info.above.score - seasonEarned())) : 0;
         chip.innerHTML = '<span class="rc-rank">' + info.rank + '位</span>'
             + (info.above
                 ? '<span class="rc-gap">次の ' + escapeHtml(String(info.above.name).slice(0, 10)) + ' まで あと ' + formatNumber(gap) + ' 隻</span>'
@@ -10002,6 +10123,16 @@ animation:facilitySweep 6s linear infinite;
         setInterval(applyTod, 30000);
         setInterval(updateS2PerClick, 500);
 
+        // スキルの木への入口（旧「昇天ゾーン」ボタンを使い回す）
+        ensureTreeScreen();
+        const ascBtn = document.getElementById('btn-to-ascension');
+        if (ascBtn) {
+            ascBtn.innerHTML = '⛩️ スキルの木';
+            ascBtn.onclick = () => openTree();
+            if (reincarnationCount > 0 || fragments > 0) ascBtn.style.display = 'block';
+        }
+        const sAscBtn = document.getElementById('btn-to-super-ascension'); if (sAscBtn) sAscBtn.style.display = 'none';
+
         // ホームは通らない
         switchScreen('screen-clicker', null);
     }
@@ -10010,10 +10141,438 @@ animation:facilitySweep 6s linear infinite;
     function updateS2PerClick() {
         const el = document.getElementById('s2-perclick');
         if (!el) return;
-        let v = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1);
-        v = Math.floor(v * (1 + reincarnationCount * 0.1) * frenzyClickMult * eventClickMult());
+        const v = Math.floor(s2ClickValue(false));
         const t = '1クリック ＝ ' + formatNumber(v) + ' 隻';
         if (el.textContent !== t) el.textContent = t;
+    }
+
+    // =====================================================================
+    // シーズン2「クリックとかけら」の仕組み
+    //   ・スキルの木（前提を買うと次が現れる。何度でも上げられる「鍛冶」も混ざる）
+    //   ・かけらは「シーズン中に稼いだ合計」の立方根で決まる（インフレしない）
+    //   ・クリックは「毎秒の生産（KpS）の何％」が上乗せされる
+    //   ・金船は木で開き、ほぼ一定の間隔で現れる。効果は KpS 基準でそろえる
+    // =====================================================================
+    const S2_FRAG_DIV = 1e6;          // 100万隻で1個、10億隻で10個、1兆隻で100個
+    const S2_UNIT = 104;              // 木の地図の1マス（px）
+
+    // id: [絵文字, 名前, 説明, 値段, 前提, 必要な転生回数, x, y, 鍛冶の上限（0なら買い切り）, 鍛冶の値段の伸び]
+    const S2_TREE = {
+        shoten:     ['⛩️', '昇天',         'スキルの木が開く。ここから四方へ枝が伸びていく。', 1, [], 0, 0, 0],
+        // 💥 バースト
+        tamedachi:  ['💥', '溜め撃ち',     '黒船を長押しして離す「バースト」が使えるようになる。', 1, ['shoten'], 0, -1.5, -1.2],
+        mikiri:     ['🎯', '見切り',       '会心になる時間が 0.3秒 → 0.5秒 に広がる。', 3, ['tamedachi'], 0, -2.6, -2.0],
+        rensa:      ['⛓️', '連鎖',         'バーストのあと1.5秒以内に溜め始めると「連鎖」。溜めが速くなり、続けるほど倍率が上がる（1連鎖ごと+20%、最大2倍）。', 8, ['mikiri'], 0, -3.6, -2.9],
+        chokaishin: ['🌟', '超会心',       '会心のうち20回に1回くらいが「超会心」になり、さらに×10。', 25, ['rensa'], 3, -4.6, -3.7],
+        houshin:    ['⚒️', '砲身鍛え',     '【鍛冶】バーストの最大倍率 +5（1段ごと）。', 2, ['tamedachi'], 0, -1.1, -2.7, 50, 1.5],
+        sokusha:    ['⏩', '速射',         '【鍛冶】バーストの溜まる速さ +10%（1段ごと・10段まで）。', 3, ['mikiri'], 0, -3.9, -1.3, 10, 1.5],
+        // 💰 金船
+        kinsen:     ['💰', '金船',         '約6分ごとに金船が現れる。押すと「備蓄」（毎秒の生産の10分ぶん。ただし持っている隻数の10%まで）。', 2, ['shoten'], 0, 1.6, -1.3],
+        kura:       ['🏯', '蔵の拡張',     '【鍛冶】備蓄が 毎秒の生産の+2分ぶん、上限も+1%（1段ごと）。', 2, ['kinsen'], 0, 1.2, -2.7, 30, 1.5],
+        mihari:     ['🔭', '見張り番',     '金船の現れる間隔が 約6分 → 約5分 になる。', 4, ['kinsen'], 0, 2.5, -2.5],
+        ougon:      ['⚓', '黄金時代',     '金船から「黄金時代」（77秒間 生産とクリックが7倍）が出るようになる。', 6, ['kinsen'], 0, 3.0, -1.2],
+        nagashio:   ['🌞', '黄金の長潮',   '【鍛冶】黄金時代が +10秒（1段ごと）。', 3, ['ougon'], 0, 4.3, -0.8, 30, 1.5],
+        kuji:       ['🎰', '金船くじ',     '金船から「777倍」（5秒間 クリック777倍）が出るようになる。', 15, ['ougon', 'mihari'], 0, 3.7, -2.6],
+        ooatari:    ['7️⃣', '大当たり',     '777倍が 5秒 → 8秒 になる。', 40, ['kuji'], 0, 4.9, -3.3],
+        futago:     ['🛳️', '双子の金船',   'ときどき、金船が2隻同時に現れる。', 80, ['mihari'], 7, 2.7, -3.9],
+        // ⚙️ 蒸気（クリック）
+        jouki:      ['⚙️', '蒸気機関',     '商会の「強化」に「蒸気機関の改良」が並ぶ（クリックに上乗せされる毎秒の生産の割合を上げる）。', 2, ['shoten'], 0, 1.7, 0.9],
+        boiler:     ['🔥', '高圧ボイラー', '【鍛冶】クリックに上乗せされる毎秒の生産 +0.2%（1段ごと）。', 3, ['jouki'], 0, 2.9, 0.5, 50, 1.5],
+        kikanshi:   ['🧑‍🔧', '機関士',     '連打ボーナス：10連打ごとにクリック +5%（最大 +50%）。', 10, ['jouki'], 0, 2.6, 1.9],
+        suifu:      ['🌊', '水夫',         '水夫が雇えるようになり、黒船の下に海水が満ちる。', 12, ['jouki'], 5, 3.4, 2.9],
+        shio:       ['🐚', '潮の満ち引き', '【鍛冶】海水の効き +10%（1段ごと）。', 5, ['suifu'], 0, 4.6, 3.4, 30, 1.5],
+        // 🏭 施設
+        kyoten:     ['🏭', '新たな拠点',   '新しい施設「舶来の笛」「かすていら」「火縄銃の買収」が解放される。', 3, ['shoten'], 0, -1.6, 1.0],
+        kindaika:   ['🔧', '近代化',       '商会の「強化」に「レンチ」と「戦闘用技術」が並ぶ。', 5, ['kyoten'], 0, -3.0, 0.6],
+        kenjou:     ['🗡️', '献上品',       '新しい施設「航海用双眼鏡」「舶来の酒」「名刀の献上」が解放される。', 12, ['kyoten'], 2, -2.6, 2.1],
+        ii:         ['🎎', '井伊直弼',     '新しい施設「井伊直弼」が解放される。', 30, ['kenjou'], 0, -4.0, 1.9],
+        meiji:      ['🏛️', '明治維新',     '明治の港へ。新しい施設「擬洋風建築」「東京駅」「鉄道」が解放される。', 100, ['kenjou'], 7, -3.2, 3.5],
+        rusuban:    ['🌙', '留守番',       'ゲームを閉じている間も、黒船が作られ続ける（開いたときに受け取れる）。', 3, ['shoten'], 0, -1.9, -0.1],
+        // 💠 かけら
+        kakera1:    ['💠', 'かけらⅠ',      '転生でもらえる開国のかけら +10%。', 4, ['shoten'], 0, 0, 1.6],
+        kakera2:    ['💠', 'かけらⅡ',      'もらえるかけら さらに +20%（合計 +30%）。', 15, ['kakera1'], 0, 0, 2.9],
+        kakera3:    ['💠', 'かけらⅢ',      'もらえるかけら さらに +30%（合計 +60%）。', 50, ['kakera2'], 5, 0.2, 4.2],
+        izumi:      ['⛲', 'かけらの泉',   '【鍛冶】もらえるかけら +5%（1段ごと・8段まで。全部で合計2倍）。', 10, ['kakera3'], 0, 0.5, 5.4, 8, 1.5],
+        // 🔀 枝をまたぐ
+        kinsenuchi: ['🏹', '金船撃ち',     '金船を押したあと10秒間、バーストの溜めが倍速。', 10, ['tamedachi', 'kinsen'], 0, 0, -2.3],
+        jokihou:    ['💨', '蒸気砲',       '会心のバーストでは、クリックに上乗せされる毎秒の生産が2倍。', 20, ['jouki', 'mikiri'], 0, 0.9, -0.2],
+        churyu:     ['🌀', '潮流の金船',   '海水が多いほど、金船が早く現れる（最大で間隔 -30%）。', 40, ['suifu', 'kinsen'], 0, 4.4, 0.7],
+        kaikoku:    ['🎌', '開国',         'すべての施設の生産 ×1.5。', 60, ['kakera2', 'kenjou'], 0, -1.3, 3.4],
+        moshimo:    ['👑', 'もしもの歴史', '超転生と「奥義」が開く。（準備中）', 300, ['meiji', 'kakera3'], 10, -1.6, 4.9],
+    };
+    const S2_COMING_SOON = { moshimo: true };
+
+    let s2tree = {};                  // id → 段（買い切りは 1）
+    let pastLivesEarned = 0;          // これまでの周回で稼いだ合計（今の周回は含まない）
+    let fragmentsEarnedTotal = 0;     // このシーズンに受け取ったかけらの総数
+    let steamLevel = 0;               // 蒸気機関の改良（周回ごと）
+
+    function s2has(id) { return (Number(s2tree[id]) || 0) > 0; }
+    function s2lvl(id) { return Number(s2tree[id]) || 0; }
+    function s2Def(id) {
+        const d = S2_TREE[id]; if (!d) return null;
+        return { id, icon: d[0], name: d[1], desc: d[2], cost: d[3], req: d[4], reinc: d[5], x: d[6], y: d[7],
+                 max: d[8] || 0, growth: d[9] || 1.5, forge: !!d[8] };
+    }
+    function s2NodeCost(def) { return def.forge ? Math.ceil(def.cost * Math.pow(def.growth, s2lvl(def.id))) : def.cost; }
+    function s2Maxed(def) { return def.forge ? s2lvl(def.id) >= def.max : s2has(def.id); }
+
+    // ---- シーズン中に稼いだ合計（ランキングと、かけらの元） ----
+    function seasonEarned() { return (Number(pastLivesEarned) || 0) + (Number(currentLifeScore) || 0); }
+
+    // ---- かけら ----
+    function s2FragMult() {
+        return 1 + (s2has('kakera1') ? 0.1 : 0) + (s2has('kakera2') ? 0.2 : 0) + (s2has('kakera3') ? 0.3 : 0) + 0.05 * s2lvl('izumi');
+    }
+    function s2FragTotalFor(earned) { return Math.floor(Math.cbrt(Math.max(0, earned) / S2_FRAG_DIV) * s2FragMult()); }
+    function s2PendingFragments() { return Math.max(0, s2FragTotalFor(seasonEarned()) - fragmentsEarnedTotal); }
+    // 次の1個まで、あと何隻稼げばよいか
+    function s2NextFragmentRemaining() {
+        const nowTotal = s2FragTotalFor(seasonEarned());
+        const need = S2_FRAG_DIV * Math.pow((nowTotal + 1) / s2FragMult(), 3);
+        return Math.max(0, Math.ceil(need - seasonEarned()));
+    }
+
+    // ---- クリック：固定ぶん ＋ 毎秒の生産の何％ ----
+    function s2ClickKpsPct(critical) {
+        let p = 0.01 + 0.005 * steamLevel + 0.002 * s2lvl('boiler');
+        if (critical && s2has('jokihou')) p *= 2;
+        return p;
+    }
+    function s2BaseKps() { const k = getKPS(); return k / (frenzyKpsMult || 1); }
+    function s2ClickValue(critical) {
+        const flat = clickPower * (combatTechPurchased ? 2 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1) * (1 + reincarnationCount * 0.1);
+        return (flat + s2BaseKps() * s2ClickKpsPct(critical)) * frenzyClickMult * eventClickMult();
+    }
+    function s2ComboBonus() {
+        if (!s2has('kikanshi')) return 1;
+        return 1 + Math.min(0.5, Math.floor((festComboCount || 0) / 10) * 0.05);
+    }
+
+    // ---- 蒸気機関の改良（商会・隻数で買う・周回ごと） ----
+    const STEAM_BASE_COST = 20000, STEAM_COST_GROWTH = 4;
+    function steamCost() { return Math.floor(STEAM_BASE_COST * Math.pow(STEAM_COST_GROWTH, steamLevel)); }
+    function buySteam() {
+        const c = steamCost();
+        if (!s2has('jouki') || clickerScore < c) return;
+        playSE('buy'); clickerScore -= c; steamLevel++;
+        updateClickerUI(); initUpgradesDOM(); flashEffect('shop-area'); saveGame();
+    }
+
+    // ---- 施設の解放 ----
+    function s2ApplyUnlocks() {
+        if (s2has('kyoten')) { facilities.flute.locked = false; facilities.cake.locked = false; facilities.gun.locked = false; }
+        if (s2has('kenjou')) { facilities.binoculars.locked = false; facilities.liquor.locked = false; facilities.katana.locked = false; }
+        if (s2has('ii')) { facilities.iiNaosuke.locked = false; }
+        if (s2has('meiji')) {
+            facilities.meijiBuilding.locked = false; facilities.tokyoStation.locked = false; facilities.railway.locked = false;
+            const app = document.getElementById('app-container'); if (app) app.classList.add('meiji-era');
+        }
+    }
+
+    // ---- 金船：木で開く。ほぼ一定の間隔で現れる ----
+    let nextGoldAt = 0, lastGoldClickAt = 0;
+    function s2GoldIntervalMs() {
+        let sec = s2has('mihari') ? 300 : 360;
+        if (s2has('churyu')) sec *= (1 - 0.3 * (typeof seaFill === 'function' ? seaFill() : 0));
+        return sec * 1000 * (0.85 + Math.random() * 0.3);   // ±15% だけ揺らす
+    }
+    function s2GoldTick() {
+        if (!s2has('kinsen')) { nextGoldAt = 0; return; }
+        const now = Date.now();
+        if (!nextGoldAt) { nextGoldAt = now + s2GoldIntervalMs(); return; }
+        if (now < nextGoldAt) return;
+        nextGoldAt = now + s2GoldIntervalMs();
+        spawnGoldenShip('golden-ship');
+        if (s2has('futago') && Math.random() < 0.25) setTimeout(() => spawnGoldenShip('golden-ship-2'), 900);
+    }
+    function s2CollectGolden() {
+        unlockAchievement('golden');
+        lastGoldClickAt = Date.now();
+        const pool = [['stock', 60]];
+        if (s2has('ougon')) pool.push(['golden', 30]);
+        if (s2has('kuji')) pool.push(['fever', 10]);
+        let r = Math.random() * pool.reduce((s, p) => s + p[1], 0), kind = 'stock';
+        for (const [k, w] of pool) { if ((r -= w) < 0) { kind = k; break; } }
+        playGoldenSlot(kind, () => s2ApplyGolden(kind));
+    }
+    function s2ApplyGolden(kind) {
+        const sunburst = document.getElementById('clicker-sunburst');
+        const tg = document.getElementById('clicker-target');
+        if (kind === 'stock') {
+            const minutes = 10 + 2 * s2lvl('kura');
+            const cap = clickerScore * (0.10 + 0.01 * s2lvl('kura'));
+            let add = Math.min(s2BaseKps() * 60 * minutes, cap);
+            if (!(add > 0)) add = Math.max(13, clickPower * 13);
+            clickerScore += add; currentLifeScore += add;
+            showGSPopup(`備蓄！\n+${formatNumber(Math.floor(add))} 隻`);
+        } else if (kind === 'golden') {
+            const sec = 77 + 10 * s2lvl('nagashio');
+            frenzyTimer = sec * 10; frenzyClickMult = 7; frenzyKpsMult = 7;
+            if (tg) tg.classList.add('gold-mode');
+            if (sunburst) sunburst.classList.add('pulse-active');
+            showGSPopup(`黄金時代！\n${sec}秒間 生産＆クリック 7倍！`);
+        } else {
+            const sec = s2has('ooatari') ? 8 : 5;
+            frenzyTimer = sec * 10; frenzyClickMult = 777; frenzyKpsMult = 1;
+            if (tg) tg.classList.remove('gold-mode');
+            if (sunburst) sunburst.classList.add('pulse-active');
+            showGSPopup(`クリックフィーバー！\n${sec}秒間 クリック 777倍！`);
+        }
+        updateClickerUI();
+    }
+
+    // ---- 転生（シーズン2） ----
+    // 次の転生で新しく買えるようになるスキル
+    function s2UnlocksAtReinc(n) {
+        return Object.keys(S2_TREE).map(s2Def).filter(d => d.reinc === n);
+    }
+    function s2NextReincMilestone() {
+        for (let n = reincarnationCount + 1; n <= 20; n++) {
+            const list = s2UnlocksAtReinc(n);
+            if (list.length) return { n, list };
+        }
+        return null;
+    }
+    let reincConfirmed = false;
+    function showReincPreview() {
+        const old = document.getElementById('reinc-preview'); if (old) old.remove();
+        const gain = s2PendingFragments();
+        const nextN = reincarnationCount + 1;
+        const opens = [];
+        if (reincarnationCount === 0) opens.push('⛩️ スキルの木が開く');
+        s2UnlocksAtReinc(nextN).forEach(d => opens.push(d.icon + ' 「' + d.name + '」が買えるようになる'));
+        const after = s2NextReincMilestone();
+        let ahead = '';
+        if (after && after.n > nextN) {
+            ahead = 'あと ' + (after.n - reincarnationCount) + ' 回の転生で：' + after.list.map(d => d.icon + d.name).join('、');
+        }
+        const el = document.createElement('div');
+        el.id = 'reinc-preview';
+        el.innerHTML = '<div class="rp-box">'
+            + '<div class="rp-title">🌸 転生すると…</div>'
+            + '<div class="rp-gain"><span class="rp-big">開国のかけら ＋' + gain + '</span>'
+            +   '<span class="rp-sub">持っているかけら ' + fragments + ' → ' + (fragments + gain) + '</span></div>'
+            + '<ul class="rp-list">'
+            +   '<li>⚡ 生産とクリック ＋10%（ずっと）　合計 +' + ((reincarnationCount + 1) * 10) + '%</li>'
+            +   opens.map(t => '<li>✨ ' + escapeHtml(t) + '</li>').join('')
+            + '</ul>'
+            + (ahead ? '<div class="rp-ahead">' + escapeHtml(ahead) + '</div>' : '')
+            + '<div class="rp-keep">🏆 ランキングの「シーズン累計」は減りません</div>'
+            + '<div class="rp-lose">なくなるもの：今の隻数、施設、商会の強化（ドック・蒸気機関など）</div>'
+            + '<div class="rp-btns"><button class="rp-no">やめておく</button><button class="rp-yes">転生する</button></div>'
+            + '</div>';
+        document.body.appendChild(el);
+        el.querySelector('.rp-no').onclick = () => el.remove();
+        el.querySelector('.rp-yes').onclick = () => { el.remove(); reincConfirmed = true; triggerReincarnation(); };
+    }
+    function s2DoReincarnationNumbers() {
+        const gain = s2PendingFragments();
+        fragmentsEarnedTotal += gain;
+        fragments += gain;
+        pastLivesEarned = seasonEarned();      // 今の周回のぶんを合計へ移す（このあと currentLifeScore は0になる）
+        steamLevel = 0;
+        return gain;
+    }
+
+    // ---- スキルを買う ----
+    function s2NodeState(def) {
+        const ownedReqs = def.req.filter(s2has).length;
+        const visible = def.req.length === 0 || ownedReqs > 0 || s2has(def.id);
+        const reqsOk = ownedReqs === def.req.length;
+        const reincOk = reincarnationCount >= def.reinc;
+        const soon = !!S2_COMING_SOON[def.id];
+        const maxed = s2Maxed(def);
+        const cost = s2NodeCost(def);
+        const canBuy = visible && reqsOk && reincOk && !soon && !maxed && fragments >= cost;
+        return { visible, reqsOk, reincOk, soon, maxed, cost, canBuy, owned: s2has(def.id) };
+    }
+    function s2BuyNode(id) {
+        const def = s2Def(id); if (!def) return false;
+        const st = s2NodeState(def);
+        if (!st.canBuy) return false;
+        fragments -= st.cost;
+        s2tree[id] = s2lvl(id) + 1;
+        playSE('buy');
+        s2ApplyUnlocks();
+        initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI();
+        if (id === 'kinsen') nextGoldAt = Date.now() + 60 * 1000;   // 初めての金船は1分後
+        if (id === 'meiji') { const pop = document.getElementById('offline-popup'), t = document.getElementById('offline-popup-text');
+            if (pop && t) { t.innerHTML = '明治維新が成った。文明開化の音がする……<br><strong>新施設「擬洋風建築」「東京駅」「鉄道」解放！</strong>'; pop.classList.add('show'); setTimeout(() => pop.classList.remove('show'), 6000); } }
+        saveGame();
+        return true;
+    }
+
+    // ---- スキルの木の画面（地図のように広がる。前提を買うと次が現れる） ----
+    const treeView = { x: 0, y: 0, s: 1, sel: null, seen: null, inited: false };
+    function ensureTreeScreen() {
+        if (document.getElementById('screen-tree')) return;
+        const main = document.getElementById('main-content'); if (!main) return;
+        const sc = document.createElement('div');
+        sc.id = 'screen-tree'; sc.className = 'screen';
+        sc.innerHTML = '<div class="tree-head">'
+            + '<button class="tree-back" id="tree-back">← 黒船へ</button>'
+            + '<div class="tree-title">⛩️ スキルの木</div>'
+            + '<div class="tree-stats"><span class="tree-frag">💠 <b id="tree-frag">0</b></span><span class="tree-reinc">転生 <b id="tree-reinc">0</b> 回</span></div>'
+            + '</div>'
+            + '<div class="tree-map" id="tree-map"><div class="tree-world" id="tree-world">'
+            + '<svg class="tree-lines" id="tree-lines" width="4000" height="4000" viewBox="-2000 -2000 4000 4000" aria-hidden="true"></svg>'
+            + '<div class="tree-nodes" id="tree-nodes"></div></div></div>'
+            + '<div class="tree-hint" id="tree-hint">引っぱって動かす／ピンチ・ホイールで拡大</div>'
+            + '<div class="tree-info" id="tree-info"></div>';
+        main.appendChild(sc);
+        document.getElementById('tree-back').onclick = () => switchScreen('screen-clicker', null);
+        initTreePanZoom(document.getElementById('tree-map'));
+    }
+
+    function applyTreeTransform() {
+        const w = document.getElementById('tree-world');
+        if (w) w.style.transform = 'translate(' + treeView.x + 'px,' + treeView.y + 'px) scale(' + treeView.s + ')';
+    }
+    function centerTree() {
+        const map = document.getElementById('tree-map'); if (!map) return;
+        const r = map.getBoundingClientRect();
+        treeView.s = r.width < 600 ? 0.72 : 1;
+        treeView.x = r.width / 2; treeView.y = r.height / 2 - (r.width < 600 ? 20 : 0);
+        applyTreeTransform();
+    }
+
+    function initTreePanZoom(map) {
+        const pts = new Map();
+        let drag = null, pinch = null, moved = false;
+        map.addEventListener('pointerdown', (e) => {
+            pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            // ここで捕まえると、スキルのボタンにクリックが届かなくなる。動かし始めてから捕まえる。
+            moved = false;
+            if (pts.size === 1) drag = { x: e.clientX, y: e.clientY, tx: treeView.x, ty: treeView.y };
+            if (pts.size === 2) {
+                const [a, b] = [...pts.values()];
+                pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: treeView.s, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, tx: treeView.x, ty: treeView.y };
+                drag = null;
+            }
+        });
+        map.addEventListener('pointermove', (e) => {
+            if (!pts.has(e.pointerId)) return;
+            pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            if (pinch && pts.size >= 2) {
+                const [a, b] = [...pts.values()];
+                const d = Math.hypot(a.x - b.x, a.y - b.y);
+                zoomTreeAt(pinch.cx, pinch.cy, Math.max(0.4, Math.min(1.8, pinch.s * d / pinch.d)), pinch);
+                moved = true;
+            } else if (drag) {
+                const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+                if (!moved && Math.abs(dx) + Math.abs(dy) > 6) { moved = true; try { map.setPointerCapture(e.pointerId); } catch (err) {} }
+                treeView.x = drag.tx + dx; treeView.y = drag.ty + dy; applyTreeTransform();
+            }
+        });
+        const up = (e) => {
+            pts.delete(e.pointerId);
+            if (pts.size < 2) pinch = null;
+            if (pts.size === 0) drag = null;
+        };
+        map.addEventListener('pointerup', up);
+        map.addEventListener('pointercancel', up);
+        // 引っぱった直後のクリックは、スキルを選んだことにしない
+        map.addEventListener('click', (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+        map.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const k = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+            zoomTreeAt(e.clientX, e.clientY, Math.max(0.4, Math.min(1.8, treeView.s * k)));
+        }, { passive: false });
+    }
+    function zoomTreeAt(cx, cy, ns, from) {
+        const map = document.getElementById('tree-map'); const r = map.getBoundingClientRect();
+        const px = cx - r.left, py = cy - r.top;
+        const base = from || { s: treeView.s, tx: treeView.x, ty: treeView.y };
+        // 指（カーソル）の下の点が動かないように拡大する
+        const wx = (px - base.tx) / base.s, wy = (py - base.ty) / base.s;
+        treeView.s = ns; treeView.x = px - wx * ns; treeView.y = py - wy * ns;
+        applyTreeTransform();
+    }
+
+    function renderTree() {
+        ensureTreeScreen();
+        const nodesEl = document.getElementById('tree-nodes'), linesEl = document.getElementById('tree-lines');
+        if (!nodesEl || !linesEl) return;
+        const defs = Object.keys(S2_TREE).map(s2Def);
+        const states = {}; defs.forEach(d => { states[d.id] = s2NodeState(d); });
+        const firstTime = treeView.seen === null;
+        const seen = treeView.seen || new Set();
+        let lines = '', html = '';
+        defs.forEach(d => {
+            const st = states[d.id];
+            if (!st.visible) return;
+            d.req.forEach(r => {
+                if (!states[r] || !states[r].visible) return;
+                const a = s2Def(r);
+                const on = s2has(r) && st.owned;
+                lines += '<line x1="' + a.x * S2_UNIT + '" y1="' + a.y * S2_UNIT + '" x2="' + d.x * S2_UNIT + '" y2="' + d.y * S2_UNIT + '" class="' + (on ? 'on' : s2has(r) ? 'half' : 'off') + '"/>';
+            });
+            let cls = 'tnode';
+            if (st.owned) cls += ' owned';
+            if (st.maxed) cls += ' maxed';
+            if (st.soon || !st.reqsOk || !st.reincOk) cls += ' locked';
+            else if (st.canBuy) cls += ' buyable';
+            else if (!st.maxed) cls += ' poor';
+            if (d.forge) cls += ' forge';
+            if (d.id === 'shoten') cls += ' root';
+            if (!firstTime && !seen.has(d.id)) cls += ' appear';
+            if (treeView.sel === d.id) cls += ' sel';
+            html += '<button class="' + cls + '" data-id="' + d.id + '" style="left:' + d.x * S2_UNIT + 'px;top:' + d.y * S2_UNIT + 'px" aria-label="' + escapeHtml(d.name) + '">'
+                + '<span class="tn-ic">' + d.icon + '</span>'
+                + (d.forge && s2lvl(d.id) > 0 ? '<span class="tn-lv">' + s2lvl(d.id) + '</span>' : '')
+                + ((st.soon || !st.reincOk) ? '<span class="tn-lock">🔒</span>' : '')
+                + '<span class="tn-name">' + escapeHtml(d.name) + '</span></button>';
+            seen.add(d.id);
+        });
+        treeView.seen = seen;
+        linesEl.innerHTML = lines;
+        nodesEl.innerHTML = html;
+        nodesEl.querySelectorAll('.tnode').forEach(b => b.onclick = () => { treeView.sel = b.dataset.id; renderTree(); });
+        const f = document.getElementById('tree-frag'); if (f) f.textContent = fragments;
+        const rc = document.getElementById('tree-reinc'); if (rc) rc.textContent = reincarnationCount;
+        renderTreeInfo();
+    }
+
+    function renderTreeInfo() {
+        const box = document.getElementById('tree-info'); if (!box) return;
+        const id = treeView.sel;
+        const d = id && s2Def(id);
+        if (!d) { box.classList.remove('show'); box.innerHTML = ''; return; }
+        const st = s2NodeState(d);
+        const notes = [];
+        const missing = d.req.filter(r => !s2has(r)).map(r => '「' + s2Def(r).name + '」');
+        if (missing.length) notes.push('前提：' + missing.join('と') + 'も必要');
+        if (!st.reincOk) notes.push('転生 ' + d.reinc + '回 で解放（いま ' + reincarnationCount + '回）');
+        let btnText = '', btnOk = false;
+        if (st.soon) btnText = '準備中';
+        else if (st.maxed) btnText = d.forge ? '最大まで上げた' : '開放ずみ';
+        else if (!st.reqsOk || !st.reincOk) btnText = 'まだ開けない';
+        else if (fragments < st.cost) btnText = 'かけらが足りない（💠' + st.cost + '）';
+        else { btnText = (d.forge ? (s2lvl(d.id) ? '段を上げる' : '鍛える') : '開く') + '　💠' + st.cost; btnOk = true; }
+        box.innerHTML = '<div class="ti-row"><span class="ti-ic">' + d.icon + '</span><div class="ti-main">'
+            + '<div class="ti-name">' + escapeHtml(d.name) + (d.forge ? '<span class="ti-lv">Lv.' + s2lvl(d.id) + ' / ' + d.max + '</span>' : '') + '</div>'
+            + '<div class="ti-desc">' + escapeHtml(d.desc) + '</div>'
+            + (notes.length ? '<div class="ti-note">' + notes.map(escapeHtml).join('<br>') + '</div>' : '')
+            + '</div><button class="ti-close" aria-label="閉じる">✕</button></div>'
+            + '<button class="ti-buy"' + (btnOk ? '' : ' disabled') + '>' + escapeHtml(btnText) + '</button>';
+        box.classList.add('show');
+        box.querySelector('.ti-close').onclick = () => { treeView.sel = null; renderTree(); };
+        box.querySelector('.ti-buy').onclick = () => {
+            if (s2BuyNode(d.id)) {
+                buzz(30);
+                renderTree();
+                const n = document.querySelector('#tree-nodes .tnode[data-id="' + d.id + '"]');
+                if (n) { n.classList.remove('bought'); void n.offsetWidth; n.classList.add('bought'); }
+            }
+        };
+    }
+
+    function openTree() {
+        ensureTreeScreen();
+        switchScreen('screen-tree', null);
+        if (!treeView.inited) { treeView.inited = true; requestAnimationFrame(centerTree); }
+        renderTree();
     }
 
     let pageVersionTag = null;
@@ -10119,7 +10678,7 @@ animation:facilitySweep 6s linear infinite;
                     if(bs) bs.textContent = ''; 
                 }
             }
-            if (Math.random() < 0.0003 * eventGoldMult()) spawnGoldenShip();
+            s2GoldTick();   // シーズン2：金船は木で開き、ほぼ一定の間隔で現れる
             let currentKps = getKPS(); if (!isNaN(currentKps)) { let added = currentKps / 10; clickerScore += added; currentLifeScore += added; }
             checkDigitMilestone();
             if (rankChase && uiTickParity) updateRankChase(false);
@@ -10262,7 +10821,7 @@ animation:facilitySweep 6s linear infinite;
     const BURST_CURVE = [[300, 1], [1000, 10], [2000, 30], [3000, 60]];
     const BURST_BASE_MAX = 60;
     // 超近代ドック拡張のレベルぶん、最大倍率が上がる。途中の溜めも同じ割合で伸ばす。
-    function burstMaxMult() { return BURST_BASE_MAX + (Number(superDockLevel) || 0); }
+    function burstMaxMult() { return BURST_BASE_MAX + (Number(superDockLevel) || 0) + 5 * s2lvl('houshin'); }
 
     let burstState = null;          // 溜めている最中の情報
     let burstSuppressClick = false; // 離した直後の普通クリックを捨てる印
@@ -10275,8 +10834,12 @@ animation:facilitySweep 6s linear infinite;
     const FEST_TAP_MS = 180;           // これより短い押しは普通のクリック
     let lastBurstEndAt = 0, burstChain = 0;
     function burstSpeed(st) {
-        if (!isFeverFestActive()) return 1;
-        return st && st.chain ? FEST_CHAIN_SPEED : FEST_BURST_SPEED;
+        let k = 1;
+        if (isFeverFestActive()) k = st && st.chain ? FEST_CHAIN_SPEED : FEST_BURST_SPEED;
+        else if (st && st.chain) k = 1.5;                                  // 連鎖：溜めが1.5倍速
+        k *= 1 + 0.1 * s2lvl('sokusha');                                   // 速射
+        if (s2has('kinsenuchi') && Date.now() - lastGoldClickAt < 10000) k *= 2;   // 金船撃ち
+        return k;
     }
     function burstTapMs() { return isFeverFestActive() ? FEST_TAP_MS : BURST_MIN_MS; }
     // 実際に押していた時間を、溜まり具合の時間に直す
@@ -10300,7 +10863,7 @@ animation:facilitySweep 6s linear infinite;
             mult = 10; phase = 'heat';
         }
         // 祭り中は溜めが速いぶん、会心の窓も同じだけ広げる（実時間で0.3秒前後を保つ）
-        const critWin = BURST_CRIT_MS * (isFeverFestActive() ? FEST_BURST_SPEED : 1);
+        const critWin = BURST_CRIT_MS * (isFeverFestActive() ? FEST_BURST_SPEED : 1) * (s2has('mikiri') ? 5 / 3 : 1) * (1 + 0.1 * s2lvl('sokusha'));
         const critical = ms >= BURST_MAX_MS && ms <= BURST_MAX_MS + critWin;
         if (critical) phase = 'crit';
         const ratio = Math.min(1, ms / BURST_MAX_MS);
@@ -10340,8 +10903,9 @@ animation:facilitySweep 6s linear infinite;
         const nowT = performance.now();
         burstState = { source, t0: nowT, x, y, mx, my,
                        // 祭り中は黄金時代（7倍）でも溜められる。777倍の間だけは普通のクリック。
-                       frenzy: frenzyTimer > 0 && (!fest || frenzyClickMult >= 777),
-                       chain: fest && (nowT - lastBurstEndAt) < FEST_CHAIN_WINDOW_MS,
+                       // 「溜め撃ち」を持っていなければ普通のクリック。777倍の間も普通のクリック。
+                       frenzy: !s2has('tamedachi') || (frenzyTimer > 0 && frenzyClickMult >= 777),
+                       chain: (fest || s2has('rensa')) && (nowT - lastBurstEndAt) < FEST_CHAIN_WINDOW_MS,
                        pinged: false };
 
         if (burstState.frenzy) return;           // フィーバー中は溜めない（普通のクリック扱い）
@@ -10416,9 +10980,9 @@ animation:facilitySweep 6s linear infinite;
         }
         // 祭りの連鎖：続けて撃つほど倍率が上がる（1連鎖ごとに +20%、最大 +100%）
         burstChain = st.chain ? Math.min(burstChain + 1, 99) : 0;
-        const chainBonus = isFeverFestActive() ? 1 + Math.min(1, burstChain * 0.2) : 1;
+        const chainBonus = (isFeverFestActive() || s2has('rensa')) ? 1 + Math.min(1, burstChain * 0.2) : 1;
         lastBurstEndAt = performance.now();
-        const superCrit = b.critical && Math.random() < SUPER_CRIT_CHANCE;
+        const superCrit = b.critical && s2has('chokaishin') && Math.random() < SUPER_CRIT_CHANCE;
         clickKurofuneDirect(target, st.x, st.y, { mult: b.mult * chainBonus * (superCrit ? SUPER_CRIT_MULT : 1),
                                                   critical: b.critical, superCrit, ms, chain: burstChain });
         if (b.critical) unlockAchievement('criticalBurst');
@@ -10576,13 +11140,15 @@ animation:facilitySweep 6s linear infinite;
             spawnClickParticles(base, posX, posY);
         }
 
-        let currentClickPower = clickPower * (combatTechPurchased ? 2 : 1) * (superSkills.efficiency ? 1.5 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1); let isCrit = false;
-        if (skills.modShip && Math.random() < 0.15) { currentClickPower *= 5; isCrit = true; }
-        currentClickPower = Math.floor(currentClickPower * (1 + reincarnationCount * 0.1) * frenzyClickMult * eventClickMult());
+        // シーズン2：固定ぶん ＋ 毎秒の生産の何％（蒸気機関で伸びる）
+        let isCrit = false;
+        let currentClickPower = Math.floor(s2ClickValue(!!(burst && burst.critical)));
         // バースト：溜めた時間に応じた倍率（会心なら ×1.5 済み）
         if (burst) currentClickPower = Math.floor(currentClickPower * burst.mult);
         // 祭りの連打ボーナス：10連打ごとに +10%（最大 +100%）
         if (isFeverFestActive()) currentClickPower = Math.floor(currentClickPower * festComboBonus());
+        // 機関士：10連打ごとに +5%（最大 +50%）
+        currentClickPower = Math.floor(currentClickPower * s2ComboBonus());
 
         clickerScore += currentClickPower; currentLifeScore += currentClickPower; 
         try { festOnClick(base, posX, posY, burst); } catch (e) {}
@@ -10635,22 +11201,19 @@ animation:facilitySweep 6s linear infinite;
         if (nowUi - lastClickUiUpdate >= 90) { lastClickUiUpdate = nowUi; updateClickerUI(); }
     }
 
-    function spawnGoldenShip() {
+    function spawnGoldenShip(gid) {
+        gid = gid || 'golden-ship';
         const sc = document.getElementById('screen-clicker');
-        if (document.getElementById('golden-ship') || !(sc && sc.classList.contains('active'))) return;
-        const gs = document.createElement('div'); gs.id = 'golden-ship'; gs.className = 'golden-ship'; gs.textContent = '🚢';
+        if (document.getElementById(gid) || !(sc && sc.classList.contains('active'))) return;
+        const gs = document.createElement('div'); gs.id = gid; gs.className = 'golden-ship'; gs.textContent = '🚢';
         const base = document.querySelector('.clicker-main-layout'); if (!base) return;
         const rect = base.getBoundingClientRect();
         gs.style.left = (Math.random() * (rect.width - 100) + 20) + 'px'; gs.style.top = (Math.random() * (rect.height - 100) + 20) + 'px';
         gs.onclick = (e) => { e.stopPropagation(); collectGoldenShip(); gs.remove(); };
-        base.appendChild(gs); setTimeout(() => { if(document.getElementById('golden-ship')) gs.remove(); }, 12000);
+        base.appendChild(gs); setTimeout(() => { if(document.getElementById(gid)) gs.remove(); }, 12000);
     }
 
-    function collectGoldenShip() {
-        unlockAchievement('golden'); const rand = Math.random();
-        const kind = rand < 0.60 ? 'stock' : rand < 0.80 ? 'golden' : 'fever';
-        playGoldenSlot(kind, () => applyGoldenShip(rand));
-    }
+    function collectGoldenShip() { s2CollectGolden(); }
     function applyGoldenShip(rand) {
         const sunburst = document.getElementById('clicker-sunburst');
         const tg = document.getElementById('clicker-target');
@@ -10774,8 +11337,10 @@ animation:facilitySweep 6s linear infinite;
 
     function triggerReincarnation() {
         if (!REINCARNATION_ENABLED) return;
-        if(calcPendingFragments() <= 0) return;
-        if(!confirmDestructiveReincarnation()) return;
+        if (s2PendingFragments() <= 0) return;
+        // 押す前に「もらえるもの」を見せる。「転生する」を押すとここへ戻ってくる
+        if (!reincConfirmed) { showReincPreview(); return; }
+        reincConfirmed = false;
         const overlay = document.getElementById('reincarnation-overlay');
         if (!overlay) {
             doReincarnation();
@@ -10922,21 +11487,11 @@ animation:facilitySweep 6s linear infinite;
         // かけらの計算は reincarnationCount を増やす「前」に行う。
         // 先にカウントを増やすと必要隻数の基準が1.4倍に上がってしまい、
         // 本来もらえるはずのかけらが0個になってしまうため。
-        let pendingFragments = 0;
-        let shardsGained = 0;
-        const isSuperReincarnation = !!skills.ifSkill;
-
-        if (isSuperReincarnation) {
-            // 開国のかけらは、達成した隻数を通常の転生ペースに換算して計算する
-            // （超転生の成長曲線のまま計算すると、かけらがほとんど増えなくなってしまうため）
-            pendingFragments = calcEquivalentNormalFragments(currentLifeScore);
-            shardsGained = getSuperShardGainPreview();
-        } else {
-            pendingFragments = calcPendingFragments();
-        }
-
+        // シーズン2：かけらは「シーズン中に稼いだ合計」の立方根で決まる
+        const shardsGained = 0;
+        const isSuperReincarnation = false;
+        s2DoReincarnationNumbers();
         reincarnationCount++;
-        if (pendingFragments > 0) fragments += pendingFragments;
 
         if (isSuperReincarnation) {
             sakokuShards += shardsGained;

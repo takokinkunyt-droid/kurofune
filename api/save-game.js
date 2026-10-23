@@ -152,8 +152,9 @@ async function checkToken(playerId, saveToken) {
 function findGutted(prev, next) {
   if (next.currentEra === 'jomon') return null;        // 本当の転生は正常
 
-  const prevSkill = countTrue(prev.skills) + countTrue(prev.superSkills);
-  const nextSkill = countTrue(next.skills) + countTrue(next.superSkills);
+  // シーズン2のスキルの木（s2tree）も「積み上げ」として数える
+  const prevSkill = countTrue(prev.skills) + countTrue(prev.superSkills) + countTrue(prev.s2tree);
+  const nextSkill = countTrue(next.skills) + countTrue(next.superSkills) + countTrue(next.s2tree);
   if (prevSkill > 0 && nextSkill === 0) return 'skills';
 
   const prevReinc = num(prev.reincarnationCount) + num(prev.superReincarnationCount);

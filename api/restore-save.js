@@ -200,12 +200,12 @@ module.exports = async (req, res) => {
       // 片方だけ直すと、順位は正しいのに転生回数やかけらが古い値のまま表示される。
       const hiddenNow = await redisRequest(['sismember', 'ranking_hidden_players', playerId]);
       if (hiddenNow.result !== 1) {
-        commands.push(['zadd', 'ranking', Math.floor(Number(toWrite.clickerScore) || 0), playerId]);
+        commands.push(['zadd', 'ranking', rankScoreOf(toWrite), playerId]);
       }
       commands.push(['set', `player:${playerId}`, JSON.stringify({
         playerId,
         playerName: String(toWrite.playerName || '名無しの船長').substring(0, 20),
-        clickerScore: Math.floor(Number(toWrite.clickerScore) || 0),
+        clickerScore: rankScoreOf(toWrite),
         reincarnationCount: Number(toWrite.reincarnationCount) || 0,
         fragments: Number(toWrite.fragments) || 0,
         era: eraLabelOf(toWrite),
@@ -361,7 +361,7 @@ async function resyncRanking(playerId) {
   const r = await redisRequest(['get', `save:${playerId}`]);
   if (!r.result) return { ok: false, error: 'No save' };
   let s; try { s = JSON.parse(r.result); } catch (e) { return { ok: false, error: 'Corrupt save' }; }
-  const score = Math.floor(Number(s.clickerScore) || 0);
+  const score = rankScoreOf(s);
   const hid = await redisRequest(['sismember', 'ranking_hidden_players', playerId]);
   if (hid.result === 1) {
     await redisRequest(['zrem', 'ranking', playerId]);
@@ -388,6 +388,14 @@ function eraLabelOf(save) {
   if (save.superSkills && save.superSkills.meijiRestoration) return '明治時代';
   if (save.skills && save.skills.kaikoku) return '江戸時代（開国）';
   return '江戸時代（初期）';
+}
+
+// ランキングの値：シーズン2は「シーズン中に稼いだ合計」（これまでの周回＋今の周回）
+function rankScoreOf(save) {
+  if (save && save.pastLivesEarned != null) {
+    return Math.floor((Number(save.pastLivesEarned) || 0) + (Number(save.currentLifeScore) || 0));
+  }
+  return Math.floor(Number(save && save.clickerScore) || 0);
 }
 
 function num(v) { const n = Number(v); return Number.isFinite(n) ? n : 0; }
