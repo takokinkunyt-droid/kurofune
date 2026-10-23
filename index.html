@@ -3702,6 +3702,22 @@
         #reinc-preview .rp-btns button { flex: 1; height: 48px; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
         #reinc-preview .rp-no { background: #fff8e6; color: #5a3415; border: 1px solid #c9a35a; }
         #reinc-preview .rp-yes { background: #8a1a10; color: #fff3d6; border: none; }
+
+        /* ===== 海水と水夫 ===== */
+        :root { --sea-fill: 0; }
+        body.s2ui #s2-sky .sea, body.s2ui #s2-sky .s2-waves { height: calc(34% + 9% * var(--sea-fill)); transition: height 1.5s ease; }
+        body.s2ui .ship-wrapper { bottom: calc(22% + 7% * var(--sea-fill)) !important; }
+        @media (min-width: 901px) { body.s2ui .ship-wrapper, body.s2ui.s2-drawer-open .ship-wrapper { bottom: calc(21% + 7% * var(--sea-fill)) !important; } }
+        @media (max-width: 900px) { body.s2ui.s2-drawer-open .ship-wrapper { bottom: calc(min(56vh, 520px) - 58px + 6px) !important; } }
+        #s2-sea-chip { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 6; pointer-events: none; white-space: nowrap;
+            font-size: .78rem; font-weight: 800; color: #eaf8ff; padding: 4px 12px; border-radius: 14px;
+            background: rgba(6, 40, 70, .6); border: 1px solid rgba(160, 230, 255, .5); }
+        #s2-sailors { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; z-index: 1;
+            animation: sailorSpin 26s linear infinite; }
+        #s2-sailors span { position: absolute; left: 0; top: 0; font-size: 1.3rem;
+            transform: rotate(var(--a)) translate(clamp(90px, 26vw, 170px)) rotate(calc(-1 * var(--a))); }
+        @keyframes sailorSpin { to { transform: rotate(360deg); } }
+        body.lite-mode #s2-sailors { animation: none; }
         /* スマホで縦が足りないとき（画面下に広告が出ている時など）は、
            黒船が見えることを最優先に、上の飾りと看板を詰める */
         @media (max-width: 820px) {
@@ -5503,6 +5519,14 @@ animation:facilitySweep 6s linear infinite;
     // クリッカー用
     let clickerScore = 0, currentLifeScore = 0, clickPower = 1, clickerInterval = null;    
     const SUPER_DOCK_BASE_COST = 1000, SUPER_DOCK_COST_GROWTH = 1.6;
+    // ---- シーズン2の状態（中身の仕組みは「シーズン2「クリックとかけら」の仕組み」の所） ----
+    let s2tree = {};                  // スキルの木：id → 段（買い切りは 1）
+    let pastLivesEarned = 0;          // これまでの周回で稼いだ合計（今の周回は含まない）
+    let fragmentsEarnedTotal = 0;     // このシーズンに受け取ったかけらの総数
+    let steamLevel = 0;               // 蒸気機関の改良（周回ごと）
+    let sailorLevel = 0;              // 水夫（周回ごと）
+    let s2Ach = {};                   // このシーズンに条件を満たした実績（海水）
+    const S2_SEA_EXCLUDE = ['lastVoyage', 'feverFestival'];   // シーズン1のイベント限定は海水に数えない
     let superDockLevel = 0, upSuperDockCost = SUPER_DOCK_BASE_COST; // 超近代ドック拡張（最大バースト倍率 +1/Lv）
     let upClickCost = 15, upClickLevel = 1, frenzyTimer = 0, frenzyClickMult = 1, frenzyKpsMult = 1;
     let reincarnationCount = 0, fragments = 0;
@@ -5940,6 +5964,16 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function unlockAchievement(key) {
+        // シーズン2の海水：このシーズンに条件を満たした実績を数える。
+        // シーズン1から引き継いだ実績は、もう一度条件を満たした時点で数えに入る。
+        if (achievements[key] && !s2Ach[key] && !S2_SEA_EXCLUDE.includes(key)) {
+            s2Ach[key] = true;
+            if (achievements[key].unlocked) {
+                const sc = document.getElementById('screen-clicker');
+                if (s2has('suifu') && sc && sc.classList.contains('active')) showGSPopup('🌊 海水が満ちた\n『' + achievements[key].title + '』');
+                saveGame();
+            }
+        }
         if (achievements[key] && !achievements[key].unlocked) {
             achievements[key].unlocked = true;
             const isFinal = achievements[key].isFinal;
@@ -6061,7 +6095,7 @@ animation:facilitySweep 6s linear infinite;
         // 進行状況をすべて初期化
         clickerScore = 0; currentLifeScore = 0;
         clickPower = 1; upClickCost = 15; upClickLevel = 1;
-        s2tree = {}; pastLivesEarned = 0; fragmentsEarnedTotal = 0; steamLevel = 0;
+        s2tree = {}; pastLivesEarned = 0; fragmentsEarnedTotal = 0; steamLevel = 0; sailorLevel = 0; s2Ach = {};
         superDockLevel = 0; upSuperDockCost = SUPER_DOCK_BASE_COST;
         reincarnationCount = 0; fragments = 0;
         sakokuShards = 0; superReincarnationCount = 0;
@@ -8036,7 +8070,7 @@ animation:facilitySweep 6s linear infinite;
             saveVersion: SAVE_DATA_VERSION,
             clickerScore, currentLifeScore, clickPower, upClickCost, upClickLevel,
             superDockLevel, upSuperDockCost,
-            s2tree, pastLivesEarned, fragmentsEarnedTotal, steamLevel,
+            s2tree, pastLivesEarned, fragmentsEarnedTotal, steamLevel, s2Ach, sailorLevel,
             reincarnationCount, fragments, skills, achievements,
             facilities, availableFacilityUpgrades,
             wrenchLevel, upWrenchCost, combatTechPurchased,
@@ -8515,6 +8549,9 @@ animation:facilitySweep 6s linear infinite;
         }
         pastLivesEarned = sanitizeNum(save.pastLivesEarned, 0); fragmentsEarnedTotal = sanitizeNum(save.fragmentsEarnedTotal, 0);
         steamLevel = sanitizeNum(save.steamLevel, 0);
+        sailorLevel = Math.min(SAILOR_MAX, sanitizeNum(save.sailorLevel, 0));
+        s2Ach = {};
+        if (save.s2Ach && typeof save.s2Ach === 'object') { for (const k in save.s2Ach) { if (save.s2Ach[k] && achievements[k]) s2Ach[k] = true; } }
         reincarnationCount = sanitizeNum(save.reincarnationCount, 0); fragments = sanitizeNum(save.fragments, 0);
         sakokuShards = sanitizeNum(save.sakokuShards, 0); superReincarnationCount = sanitizeNum(save.superReincarnationCount, 0); buyQuantity = sanitizeNum(save.buyQuantity, 1);
         superSkills = { ...superSkills, ...(save.superSkills || {}) };
@@ -8793,6 +8830,14 @@ animation:facilitySweep 6s linear infinite;
             `;
             container.appendChild(stCard);
         }
+        if (s2has('suifu')) {
+            const sfCard = document.createElement('div'); sfCard.className = 'shop-card special-card'; sfCard.id = 'up-sailor'; sfCard.onclick = () => buySailor();
+            sfCard.innerHTML = `
+                <div class="shop-info-left"><span class="shop-icon">🧑‍✈️</span><div class="shop-details"><h4>水夫を雇う</h4><p>海水が多いほどクリックが強くなる（いま <span id="up-sailor-mult">×${s2SailorMult().toFixed(2)}</span>）</p></div></div>
+                <div class="shop-info-right"><div class="shop-cost" id="up-sailor-cost">${sailorLevel >= SAILOR_MAX ? '満員' : formatNumber(sailorCost()) + ' 隻'}</div><div class="shop-count" id="up-sailor-level">${sailorLevel}人</div></div>
+            `;
+            container.appendChild(sfCard);
+        }
 
         if (skills.modernization || s2has('kindaika')) {
             let wrenchCard = document.createElement('div'); wrenchCard.className = 'shop-card special-card'; wrenchCard.id = 'up-wrench'; wrenchCard.onclick = () => buyWrench();
@@ -9063,6 +9108,14 @@ animation:facilitySweep 6s linear infinite;
             upSuperDockCard.classList.toggle('disabled', clickerScore < upSuperDockCost);
         }
 
+        const upSailorCard = document.getElementById('up-sailor');
+        if (upSailorCard) {
+            const c = document.getElementById('up-sailor-cost'), l = document.getElementById('up-sailor-level'), m = document.getElementById('up-sailor-mult');
+            if (c) c.textContent = sailorLevel >= SAILOR_MAX ? '満員' : `${formatNumber(sailorCost())} 隻`;
+            if (l) l.textContent = `${sailorLevel}人`;
+            if (m) m.textContent = '×' + s2SailorMult().toFixed(2);
+            upSailorCard.classList.toggle('disabled', sailorLevel >= SAILOR_MAX || clickerScore < sailorCost());
+        }
         const upSteamCard = document.getElementById('up-steam');
         if (upSteamCard) {
             const c = document.getElementById('up-steam-cost'), l = document.getElementById('up-steam-level'), pc = document.getElementById('up-steam-pct');
@@ -10122,6 +10175,8 @@ animation:facilitySweep 6s linear infinite;
         applyTod();
         setInterval(applyTod, 30000);
         setInterval(updateS2PerClick, 500);
+        setInterval(renderSea, 1000);
+        renderSea();
 
         // スキルの木への入口（旧「昇天ゾーン」ボタンを使い回す）
         ensureTreeScreen();
@@ -10202,10 +10257,6 @@ animation:facilitySweep 6s linear infinite;
     };
     const S2_COMING_SOON = { moshimo: true };
 
-    let s2tree = {};                  // id → 段（買い切りは 1）
-    let pastLivesEarned = 0;          // これまでの周回で稼いだ合計（今の周回は含まない）
-    let fragmentsEarnedTotal = 0;     // このシーズンに受け取ったかけらの総数
-    let steamLevel = 0;               // 蒸気機関の改良（周回ごと）
 
     function s2has(id) { return (Number(s2tree[id]) || 0) > 0; }
     function s2lvl(id) { return Number(s2tree[id]) || 0; }
@@ -10242,7 +10293,7 @@ animation:facilitySweep 6s linear infinite;
     function s2BaseKps() { const k = getKPS(); return k / (frenzyKpsMult || 1); }
     function s2ClickValue(critical) {
         const flat = clickPower * (combatTechPurchased ? 2 : 1) * (currentSkin === 'realBlackShip' ? 9 : 1) * (1 + reincarnationCount * 0.1);
-        return (flat + s2BaseKps() * s2ClickKpsPct(critical)) * frenzyClickMult * eventClickMult();
+        return (flat + s2BaseKps() * s2ClickKpsPct(critical)) * frenzyClickMult * eventClickMult() * s2SailorMult();
     }
     function s2ComboBonus() {
         if (!s2has('kikanshi')) return 1;
@@ -10371,7 +10422,7 @@ animation:facilitySweep 6s linear infinite;
         fragmentsEarnedTotal += gain;
         fragments += gain;
         pastLivesEarned = seasonEarned();      // 今の周回のぶんを合計へ移す（このあと currentLifeScore は0になる）
-        steamLevel = 0;
+        steamLevel = 0; sailorLevel = 0;
         return gain;
     }
 
@@ -10395,7 +10446,7 @@ animation:facilitySweep 6s linear infinite;
         s2tree[id] = s2lvl(id) + 1;
         playSE('buy');
         s2ApplyUnlocks();
-        initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI();
+        initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); renderSea();
         if (id === 'kinsen') nextGoldAt = Date.now() + 60 * 1000;   // 初めての金船は1分後
         if (id === 'meiji') { const pop = document.getElementById('offline-popup'), t = document.getElementById('offline-popup-text');
             if (pop && t) { t.innerHTML = '明治維新が成った。文明開化の音がする……<br><strong>新施設「擬洋風建築」「東京駅」「鉄道」解放！</strong>'; pop.classList.add('show'); setTimeout(() => pop.classList.remove('show'), 6000); } }
@@ -10573,6 +10624,53 @@ animation:facilitySweep 6s linear infinite;
         switchScreen('screen-tree', null);
         if (!treeView.inited) { treeView.inited = true; requestAnimationFrame(centerTree); }
         renderTree();
+    }
+
+
+    // ---- 海水と水夫（シーズン2） ----
+    // 海水：このシーズンに取った実績の割合。水夫：海水が多いほどクリックを伸ばす（周回ごと）。
+    const SAILOR_BASE_COST = 500000, SAILOR_COST_GROWTH = 5, SAILOR_MAX = 12;
+    function seaAchTotal() { return Object.keys(achievements).filter(k => !S2_SEA_EXCLUDE.includes(k)).length; }
+    function seaAchCount() { return Object.keys(s2Ach).filter(k => s2Ach[k] && achievements[k] && !S2_SEA_EXCLUDE.includes(k)).length; }
+    function seaFill() { const t = seaAchTotal(); return t ? Math.min(1, seaAchCount() / t) : 0; }
+    function s2SailorMult() {
+        if (!s2has('suifu') || sailorLevel <= 0) return 1;
+        return 1 + sailorLevel * 0.2 * seaFill() * (1 + 0.1 * s2lvl('shio'));
+    }
+    function sailorCost() { return Math.floor(SAILOR_BASE_COST * Math.pow(SAILOR_COST_GROWTH, sailorLevel)); }
+    function buySailor() {
+        const c = sailorCost();
+        if (!s2has('suifu') || sailorLevel >= SAILOR_MAX || clickerScore < c) return;
+        playSE('buy'); clickerScore -= c; sailorLevel++;
+        updateClickerUI(); initUpgradesDOM(); flashEffect('shop-area'); renderSea(); saveGame();
+    }
+    // 黒船の画面：海の高さ・周りを回る水夫・海水の札
+    function renderSea() {
+        const on = s2has('suifu');
+        const fill = on ? seaFill() : 0;
+        document.documentElement.style.setProperty('--sea-fill', fill.toFixed(3));
+        const base = document.getElementById('clicker-base');
+        if (!base) return;
+        let chip = document.getElementById('s2-sea-chip');
+        let ring = document.getElementById('s2-sailors');
+        if (!on) { if (chip) chip.remove(); if (ring) ring.remove(); return; }
+        if (!chip) { chip = document.createElement('div'); chip.id = 's2-sea-chip'; base.appendChild(chip); }
+        const t = '🌊 海水 ' + Math.round(fill * 100) + '%（実績 ' + seaAchCount() + '/' + seaAchTotal() + '）'
+            + (sailorLevel > 0 ? '　🧑‍✈️ 水夫 ×' + s2SailorMult().toFixed(2) : '');
+        if (chip.textContent !== t) chip.textContent = t;
+        const wrap = base.querySelector('.ship-wrapper');
+        if (!wrap) return;
+        if (!ring) { ring = document.createElement('div'); ring.id = 's2-sailors'; wrap.appendChild(ring); }
+        const n = Math.min(SAILOR_MAX, sailorLevel);
+        if (Number(ring.dataset.n) !== n) {
+            ring.dataset.n = n;
+            let h = '';
+            for (let i = 0; i < n; i++) {
+                const a = (i / Math.max(1, n)) * 360;
+                h += '<span style="--a:' + a + 'deg">🧑‍✈️</span>';
+            }
+            ring.innerHTML = h;
+        }
     }
 
     let pageVersionTag = null;
