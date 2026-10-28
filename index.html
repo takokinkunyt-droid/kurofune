@@ -4108,8 +4108,26 @@
         .modal-panel button.close-btn { background: #95a5a6; margin-top: 15px;}
         .modal-panel button.danger-btn { background: #e74c3c; margin-top: 20px;}
 
-        #offline-popup { position: absolute; top: 20px; right: -400px; background: rgba(41, 128, 185, 0.95); color: white; padding: 20px 30px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 99999; transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 5px solid var(--gold-color); }
-        #offline-popup.show { right: 20px; }
+        /* 横から出てきて、また引っ込むお知らせ。
+           以前は「右に400pxずらして隠す」だけだったので、文が長くて幅が400pxを超えると
+           端が画面に残り続けていた。いまは自分の幅ぶん丸ごと外へ出し、隠れている間は見えなくする。 */
+        #offline-popup {
+            position: fixed; bottom: calc(76px + var(--admax-h, 0px)); right: 12px; box-sizing: border-box;   /* 実績の通知（上）と重ねない */
+            max-width: min(440px, calc(100vw - 24px));
+            background: rgba(41, 128, 185, 0.95); color: white; padding: 16px 22px; border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 99999; border-left: 5px solid var(--gold-color);
+            transform: translateX(calc(100% + 40px)); visibility: hidden; pointer-events: none; cursor: pointer;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0s linear 0.5s;
+        }
+        #offline-popup.show {
+            transform: none; visibility: visible; pointer-events: auto;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0s;
+        }
+        @media (min-width: 901px) {
+            /* PCでは右の棚に重ねず、その左に出す */
+            body.s2ui #offline-popup { right: 412px; bottom: calc(24px + var(--admax-h, 0px)); transform: translateX(calc(100% + 460px)); }
+            body.s2ui #offline-popup.show { transform: none; }
+        }
 
         /* ── 実績ページ ── */
         #screen-achievements { overflow-y: auto; }
@@ -5524,7 +5542,7 @@ animation:facilitySweep 6s linear infinite;
 
 <!-- モーダル・オーバーレイ群（全画面対応のため app-container 内に配置） -->
 <div id="achievement-toast-container" style="position:absolute;"></div>
-<div id="offline-popup"><h3 style="margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom:5px;">🌙 オフライン生産報告</h3><p style="margin-bottom:0;" id="offline-popup-text"></p></div>
+<div id="offline-popup" onclick="this.classList.remove('show')" title="タップで閉じる"><h3 style="margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom:5px;">🌙 オフライン生産報告</h3><p style="margin-bottom:0;" id="offline-popup-text"></p></div>
 
 <div id="settings-modal" class="modal-panel">
     <h3 class="serif-font">システム設定</h3>
@@ -12464,7 +12482,8 @@ animation:facilitySweep 6s linear infinite;
             content: [
                 "「◯位 次の ◯◯ まで あと ◯隻」の表示を、隻数・毎秒・1クリックのすぐ下に並べました。宙に浮いて黒船や数字に重なることがなくなります。",
                 "ランキング・アップデートログ・殿堂・実績などのページで、左右の余白が広すぎて文字が数文字ごとに折り返していたのを直しました。画面の幅いっぱいに読めます。",
-                "ランキングの「名前を更新」ボタンが縦書きになっていたのを直しました。"
+                "ランキングの「名前を更新」ボタンが縦書きになっていたのを直しました。",
+                "「オフライン生産報告」などのお知らせが、引っ込んだあとも画面の右はしに残り続けていたのを直しました。お知らせは画面の下（PCは棚の左）に出て、タップすると閉じます。"
             ]
         },
         {
