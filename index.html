@@ -12462,7 +12462,6 @@ animation:facilitySweep 6s linear infinite;
             title: "スマホの画面を見やすく",
             date: "2026-10-28",
             content: [
-                "スマホでは広告を出さないようにしました。大きな広告が黒船の画面を半分近く覆っていたためです。",
                 "「◯位 次の ◯◯ まで あと ◯隻」の表示を、隻数・毎秒・1クリックのすぐ下に並べました。宙に浮いて黒船や数字に重なることがなくなります。",
                 "ランキング・アップデートログ・殿堂・実績などのページで、左右の余白が広すぎて文字が数文字ごとに折り返していたのを直しました。画面の幅いっぱいに読めます。",
                 "ランキングの「名前を更新」ボタンが縦書きになっていたのを直しました。"
@@ -12995,16 +12994,7 @@ animation:facilitySweep 6s linear infinite;
             var s = JSON.parse(localStorage.getItem('kurofuneSub') || 'null');
             adFree = !!(s && s.until > Date.now() && { edo: 1, meiji: 1, sakigake: 1 }[s.plan]);
         } catch (e) {}
-        // スマホでは読み込まない。
-        // この広告は 300×250 の大きな枠で、スマホでは黒船の画面の半分近くを覆ってしまう。
-        // シーズン2は開いたらすぐ黒船の画面なので、スマホではここで止める。
-        // （読み込んだ広告をCSSで隠すのは広告の規約違反になりうるので、そもそも読み込まない。
-        //   この形式はあとから差し込めないので、他のページに移ったときだけ出す、もできない。）
-        var phone = false;
-        try {
-            phone = window.matchMedia('(max-width: 900px), (pointer: coarse) and (max-height: 520px)').matches;
-        } catch (e) {}
-        if (!adFree && !phone) document.write('<script src="https://adm.shinobi.jp/s/3be17414808f98f7b7b8aa2a50d609ac"><\/script>');
+        if (!adFree) document.write('<script src="https://adm.shinobi.jp/s/3be17414808f98f7b7b8aa2a50d609ac"><\/script>');
     })();
 </script>
 <!-- admax -->
