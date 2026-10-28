@@ -4675,6 +4675,28 @@ animation:facilitySweep 6s linear infinite;
 @keyframes liquorSpin{50%{transform:rotate(18deg) scale(1.15);}}
 @keyframes katanaSlash{50%{transform:rotate(-20deg) scale(1.2);}}
 
+        /* ---------- 未読の数（iPhone のアプリの通知の数字ふう） ---------- */
+        .ios-badge {
+            position: absolute; top: -7px; right: -7px; z-index: 2;
+            min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 10px; background: #ff3b30; color: #fff;
+            font: 700 12px/1 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Noto Sans JP', sans-serif;
+            letter-spacing: 0; text-shadow: none; pointer-events: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+            animation: iosBadgeIn .35s cubic-bezier(.2, 1.6, .4, 1) both;
+        }
+        @keyframes iosBadgeIn { from { transform: scale(0); } to { transform: scale(1); } }
+        body.lite-mode .ios-badge { animation: none; }
+        #mobile-menu-btn { overflow: visible; }
+        #nav-changelog .nav-icon { position: relative; display: inline-block; }
+        #nav-changelog .nav-icon .ios-badge { top: -8px; right: -12px; min-width: 18px; height: 18px; font-size: 11px; padding: 0 5px; }
+        /* 読んでいないスレッドの題の前に赤い点 */
+        .changelog-thread.unread .changelog-thread-title::before {
+            content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+            background: #ff3b30; margin-right: 7px; vertical-align: middle; transform: translateY(-1px);
+        }
+
         /* ---------- スマホ：各ページを画面いっぱいに使う ----------
            スマホ用の調整は上の方にも書いてあるが、そのあとに書かれたPC向けの余白
            （左右60pxなど）に負けて、文字が5文字ごとに折り返していた。
@@ -4739,7 +4761,7 @@ animation:facilitySweep 6s linear infinite;
             <div class="nav-item" onclick="switchScreen('screen-home', null)"><span class="nav-icon">⛩️</span><span class="nav-text">ホームに戻る</span></div>
             <div class="nav-item" onclick="switchScreen('screen-music', this)"><span class="nav-icon">🎵</span><span class="nav-text">音（音楽室）</span></div>
             <div class="nav-item" onclick="openShipGachaScreen(this)"><span class="nav-icon">🎁</span><span class="nav-text">貢ぎ物の蔵（ガチャ）</span></div>
-            <div class="nav-item" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
+            <div class="nav-item" id="nav-changelog" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
             <div class="nav-item" onclick="switchScreen('screen-ranking', this); refreshRanking();"><span class="nav-icon">🏆</span><span class="nav-text">世界ランキング</span></div>
             <div class="nav-item" id="nav-hall" onclick="openSeasonHall(this)"><span class="nav-icon">🏛</span><span class="nav-text">殿堂</span></div>
             <div class="nav-item" onclick="openGamblingHall(this)"><span class="nav-icon">🎲</span><span class="nav-text">浦賀賭博室</span></div>
@@ -12592,6 +12614,16 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v4.2.4",
+            title: "未読のアップデートに通知の数字",
+            date: "2026-10-28",
+            content: [
+                "まだ読んでいないアップデートがあると、左上のメニューボタンと、メニューの「📰 アップデートログ」の右上に、赤い丸で件数が出るようになりました。",
+                "アップデートログを開くと、読んだことになって数字が消えます。読んでいなかったスレッドには、題の前に赤い点が付きます。",
+                "予告がないスレッドでは、空っぽの「予告」の枠を出さないようにしました。"
+            ]
+        },
+        {
             version: "v4.2.3",
             title: "スリープ中も黒船が増える",
             date: "2026-10-28",
@@ -12983,14 +13015,51 @@ animation:facilitySweep 6s linear infinite;
         }
     ];
 
+    // ---- 未読のアップデートログ（iPhone のアプリの通知の数字のように出す） ----
+    // 最後に読んだ版をこの端末に控えておき、それより新しいスレッドの数を「未読」とする。
+    // 控えがない人（初めての人・この仕組みより前から遊んでいる人）は、ここ1週間のぶんだけ未読にする。
+    const LOG_SEEN_KEY = 'kurofuneLogSeen';
+    function unreadLogCount() {
+        let seen = null;
+        try { seen = JSON.parse(localStorage.getItem(LOG_SEEN_KEY) || 'null'); } catch (e) {}
+        if (seen && seen.v) {
+            const i = changelogData.findIndex(e => e.version === seen.v);
+            if (i >= 0) return i;
+            return changelogData.filter(e => String(e.date) > String(seen.d || '')).length;
+        }
+        const weekAgo = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+        return changelogData.filter(e => String(e.date) >= weekAgo).length;
+    }
+    function markLogRead() {
+        const top = changelogData[0];
+        if (!top) return;
+        try { localStorage.setItem(LOG_SEEN_KEY, JSON.stringify({ v: top.version, d: top.date })); } catch (e) {}
+        updateLogBadges();
+    }
+    function setBadge(host, n) {
+        if (!host) return;
+        let b = host.querySelector(':scope > .ios-badge');
+        if (n <= 0) { if (b) b.remove(); return; }
+        if (!b) { b = document.createElement('span'); b.className = 'ios-badge'; host.appendChild(b); }
+        b.textContent = n > 99 ? '99+' : String(n);
+        b.setAttribute('aria-label', '未読 ' + n + ' 件');
+    }
+    function updateLogBadges() {
+        const n = unreadLogCount();
+        setBadge(document.getElementById('mobile-menu-btn'), n);
+        const nav = document.getElementById('nav-changelog');
+        setBadge(nav && nav.querySelector('.nav-icon'), n);
+    }
+
     function renderChangelog() {
         const container = document.getElementById('changelog-list');
         if (!container) return;
+        const unread = unreadLogCount();   // 読んだ印を付ける前に、どこまでが新しいかを控える
 
         container.innerHTML = '';
         changelogData.forEach((entry, index) => {
             const thread = document.createElement('div');
-            thread.className = 'changelog-thread' + (index === 0 ? ' latest' : '');
+            thread.className = 'changelog-thread' + (index === 0 ? ' latest' : '') + (index < unread ? ' unread' : '');
             thread.id = `changelog-thread-${index}`;
 
             const contentItems = (entry.content || []).map(c => `<li>${escapeHtmlWithLinks(c)}</li>`).join('');
@@ -13014,8 +13083,8 @@ animation:facilitySweep 6s linear infinite;
                     <div class="changelog-thread-body-inner">
                         ${videoHtml}
                         ${contentSection}
-                        <div class="changelog-section-title preview-title">■ 予告</div>
-                        <div class="changelog-preview-box">${escapeHtml(entry.preview || '')}</div>
+                        ${entry.preview ? `<div class="changelog-section-title preview-title">■ 予告</div>
+                        <div class="changelog-preview-box">${escapeHtml(entry.preview)}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -13026,6 +13095,7 @@ animation:facilitySweep 6s linear infinite;
         if (changelogData.length > 0) {
             toggleChangelogThread(0, true);
         }
+        markLogRead();
     }
 
     function toggleChangelogThread(index, forceOpen) {
@@ -13127,6 +13197,7 @@ animation:facilitySweep 6s linear infinite;
         loadGame();
         if (S2_ON) { try { initS2Ui(); } catch (e) { console.error('S2 UI', e); } }
         try { applySubPerks(); refreshSub(); setInterval(refreshSub, 10 * 60 * 1000); } catch (e) { console.error('sub', e); }
+        try { updateLogBadges(); } catch (e) { console.error('log badge', e); }
 
         // 告知バーはどの画面にいても動かす
         updateSeasonEventBar();
