@@ -39,6 +39,7 @@
         .kurofune-click-target {
             -webkit-user-select: none; user-select: none;
             -webkit-touch-callout: none;
+            touch-action: manipulation;   /* 連打をダブルタップの拡大と取り違えない */
         }
         /* 入力欄は 16px 以上にする。小さいままだとフォーカスで拡大される。
            見た目を変えたくないので、拡大が起きるスマホ幅だけ上書きする。 */
@@ -511,7 +512,9 @@
         #fest-combo .fc-n { display: block; font-size: 3rem; }
         #fest-combo .fc-l { display: block; font-size: 0.9rem; color: #ffd36b; margin-top: 4px; }
         #fest-combo.bump .fc-n { animation: festBump .18s ease-out; }
+        #fest-combo.bump2 .fc-n { animation: festBump2 .18s ease-out; }
         @keyframes festBump { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        @keyframes festBump2 { 0% { transform: scale(1.5); } 100% { transform: scale(1); } }
         .fest-boom {
             position: absolute; z-index: 125; pointer-events: none; font-size: 5rem; line-height: 1;
             transform: translate(-50%, -50%) scale(0.1); opacity: 0;
@@ -1436,7 +1439,10 @@
             margin: 10px 0;
             display: inline-block;
             transform-origin: center center;
-            transition: transform 0.08s ease, filter 0.25s ease;
+            /* 押すたびに影（filter）を変えると、そのたびに大きな絵を描き直すことになり重い。
+               動かすのは大きさ（transform）だけにして、黒船を専用の層に乗せておく。 */
+            transition: transform 0.08s ease;
+            will-change: transform;
             filter:
                 grayscale(1) brightness(0.55) contrast(1.2)
                 drop-shadow(0 18px 24px rgba(0,0,0,0.55))
@@ -1467,6 +1473,7 @@
         body.lite-mode .kurofune-click-target { animation: none !important; }
         body.lite-mode .kurofune-click-target:hover { transform: none !important; }
         body.lite-mode .click-pop { animation-duration: 0.35s !important; }
+        body.lite-mode #screen-clicker .click-pop-num { text-shadow: 0 2px 0 rgba(123, 74, 25, 0.95) !important; }
         body.lite-mode .facility-row::before,
         body.lite-mode .facility-row::after { display: none !important; }
         body.lite-mode .facility-row:hover { transform: none !important; }
@@ -1482,20 +1489,12 @@
         body.lite-mode .clicker-col-right { backdrop-filter: none !important; }
         body.lite-mode * { backdrop-filter: none !important; }
 
-        .kurofune-click-target:hover {
-            transform: translateY(-2px) scale(1.03);
-            filter:
-                grayscale(1) brightness(0.62) contrast(1.2)
-                drop-shadow(0 22px 28px rgba(0,0,0,0.58))
-                drop-shadow(0 0 36px rgba(255, 230, 175, 0.18));
+        @media (hover: hover) {
+            .kurofune-click-target:hover { transform: translateY(-2px) scale(1.03); }
         }
 
         .kurofune-click-target:active {
             transform: scale(0.86) translateY(10px);
-            filter:
-                grayscale(1) brightness(0.55) contrast(1.2)
-                drop-shadow(0 10px 12px rgba(0,0,0,0.72))
-                drop-shadow(0 0 16px rgba(255, 220, 140, 0.12));
             animation: shipSmash 0.18s ease-out;
         }
 
@@ -5879,6 +5878,46 @@ animation:facilitySweep 6s linear infinite;
 
     document.getElementById('date-display').textContent = `${today.getFullYear()} . ${String(today.getMonth() + 1).padStart(2, '0')} . ${String(today.getDate()).padStart(2, '0')}`;
 
+    // ---- 効果音 ----
+    // 以前はクリックのたびに new Audio() で音声プレーヤーを1つずつ作っていた。
+    // スマホではこれが片付くまで溜まり続け、連打するほど重くなっていた。
+    // いまは音を1回だけ読み込んで（Web Audio）、鳴らすたびに使い回す。
+    // 読み込みが終わるまで・読み込めない環境では、少数のプレーヤーを順番に使い回す。
+    var sharedAudioCtxObj = null;
+    function sharedAudioCtx() {
+        try {
+            if (!sharedAudioCtxObj) {
+                const C = window.AudioContext || window.webkitAudioContext;
+                if (!C) return null;
+                sharedAudioCtxObj = new C();
+            }
+            if (sharedAudioCtxObj.state === 'suspended') sharedAudioCtxObj.resume().catch(() => {});
+            return sharedAudioCtxObj;
+        } catch (e) { return null; }
+    }
+    const seBuffers = {}, seLoading = {}, sePools = {};
+    function loadSEBuffer(src) {
+        if (seBuffers[src] || seLoading[src]) return;
+        const ctx = sharedAudioCtx();
+        if (!ctx || !window.fetch) { seBuffers[src] = 'fail'; return; }
+        seLoading[src] = fetch(encodeURI(src))
+            .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+            .then(ab => new Promise((res, rej) => ctx.decodeAudioData(ab, res, rej)))
+            .then(buf => { seBuffers[src] = buf; })
+            .catch(() => { seBuffers[src] = 'fail'; });
+    }
+    function playSEPooled(src, vol, onFail) {
+        let pool = sePools[src];
+        if (!pool) { pool = sePools[src] = { list: [], i: 0 }; }
+        let a = pool.list[pool.i];
+        if (!a) { a = new Audio(src); pool.list[pool.i] = a; }
+        pool.i = (pool.i + 1) % 4;
+        try { a.pause(); a.currentTime = 0; } catch (e) {}
+        a.volume = vol;
+        const pr = a.play();
+        if (pr && pr.catch) pr.catch(() => { if (onFail) onFail(); });
+    }
+    let lastClickSEAt = 0;
     function playSE(type, isRare = false) {
         let src = ''; let vol = 0.5;
         if (type === 'click') { src = '大砲4.mp3'; vol = 0.3; }
@@ -5891,20 +5930,31 @@ animation:facilitySweep 6s linear infinite;
             src = 'minecraft-rare-achievement.mp3';
             vol = 0.8;
         }
-        if (src) {
-            const se = new Audio(src);
-            se.volume = vol;
-            se.play().catch(e => {
-                console.warn(`SE再生エラー [${src}]:`, e);
-                // ファイルが読めない場合はWeb Audio APIでフォールバック音を鳴らす
-                if (type === 'achieve' && isRare) playFallbackRareSE();
-            });
+        if (!src) return;
+        // 連打の音は、人の耳で分かる間隔（40ms）より細かくは鳴らさない
+        if (type === 'click') {
+            const n = performance.now();
+            if (n - lastClickSEAt < 40) return;
+            lastClickSEAt = n;
         }
+        const onFail = () => { if (type === 'achieve' && isRare) playFallbackRareSE(); };
+        const buf = seBuffers[src];
+        const ctx = buf && buf !== 'fail' ? sharedAudioCtx() : null;
+        if (ctx) {
+            try {
+                const s = ctx.createBufferSource(); s.buffer = buf;
+                const g = ctx.createGain(); g.gain.value = vol;
+                s.connect(g); g.connect(ctx.destination); s.start();
+                return;
+            } catch (e) {}
+        }
+        if (!buf) loadSEBuffer(src);
+        playSEPooled(src, vol, onFail);
     }
 
     function playFallbackRareSE() {
         try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = sharedAudioCtx(); if (!ctx) return;
             const freqs = [523, 659, 784, 1047]; // C5 E5 G5 C6
             freqs.forEach((freq, i) => {
                 const osc = ctx.createOscillator();
@@ -8639,10 +8689,19 @@ animation:facilitySweep 6s linear infinite;
 
     // 数字がどれだけ長くなっても省略せず、コンテナに収まるよう自動で縮小表示する。
     // （「…」で切り捨てず、文字が小さくなっても全桁を表示し続けるための処理）
+    //
+    // 測る（clientWidth / scrollWidth）たびにブラウザは画面の配置を全部計算し直す。
+    // 連打中は1秒に何十回も呼ばれ、これがもっさりの一番の原因だった。
+    // 桁数が変わったとき・画面の大きさが変わったとき・3秒おきにだけ測り、それ以外は前の倍率のまま。
+    let fitScoreGen = 0;
+    window.addEventListener('resize', () => { fitScoreGen++; });
     function fitScoreText(el) {
         if (!el) return;
         const wrap = el.parentElement;
         if (!wrap) return;
+        const len = el.textContent.length, nowF = performance.now();
+        if (el._fitLen === len && el._fitGen === fitScoreGen && nowF - (el._fitAt || 0) < 3000) return;
+        el._fitLen = len; el._fitGen = fitScoreGen; el._fitAt = nowF;
         el.style.transform = 'scale(1)';
         const wrapWidth = wrap.clientWidth;
         const contentWidth = el.scrollWidth;
@@ -9931,7 +9990,9 @@ animation:facilitySweep 6s linear infinite;
             const bonus = festComboBonus();
             cb.querySelector('.fc-l').textContent = (COMBO_TIERS[comboTier - 1] ? COMBO_TIERS[comboTier - 1][fest ? 1 : 2] : (fest ? '🥁 連打' : '連打'))
                 + (fest && bonus > 1 ? ' ×' + bonus.toFixed(1) : '');
-            cb.classList.remove('bump'); void cb.offsetWidth; cb.classList.add('bump');
+            // 2つの同じアニメを交互に付け替えると、計算し直しなしで頭から再生される
+            const b2 = cb.classList.contains('bump');
+            cb.classList.toggle('bump', !b2); cb.classList.toggle('bump2', b2);
         }
         if (liteMode || !fest) return;
         // バースト・10連打ごと・ときどき、掛け声が飛ぶ
@@ -9993,8 +10054,8 @@ animation:facilitySweep 6s linear infinite;
     function playComboTone(n) {
         if (n < 3) return;
         try {
-            if (!burstAudioCtx) burstAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const ctx = burstAudioCtx, t = ctx.currentTime;
+            const ctx = sharedAudioCtx(); if (!ctx) return;
+            const t = ctx.currentTime;
             const step = Math.min(24, n - 3);
             const f = 440 * Math.pow(2, step / 12);
             const o = ctx.createOscillator(), g = ctx.createGain();
@@ -11316,20 +11377,34 @@ animation:facilitySweep 6s linear infinite;
         return m;
     }
 
+    // 黒船の舞台の位置。
+    // getBoundingClientRect は呼ぶたびに画面の配置を計算し直させるので、連打中に毎回は呼ばない。
+    // 舞台は画面に貼り付いていてほとんど動かないので、0.5秒・画面サイズが変わるまでは前の値を使う。
+    let clickerBaseRectCache = null, clickerBaseRectAt = 0;
+    window.addEventListener('resize', () => { clickerBaseRectCache = null; });
+    window.addEventListener('scroll', () => { clickerBaseRectCache = null; }, true);
+    function clickerBaseRect(base) {
+        const n = performance.now();
+        if (!clickerBaseRectCache || !clickerBaseRectCache.width || n - clickerBaseRectAt > 500) {
+            clickerBaseRectCache = base.getBoundingClientRect(); clickerBaseRectAt = n;
+        }
+        return clickerBaseRectCache;
+    }
+
     // source: 'pointer'（クリック・タッチ）か 'key'（スペースキー）
     function startBurstCharge(source, ev) {
         if (burstState) return;
         const base = document.getElementById('clicker-base');
         const target = document.getElementById('clicker-target');
         if (!base || !target) return;
-        const br = base.getBoundingClientRect();
-        const tr = target.getBoundingClientRect();
+        const br = clickerBaseRect(base);
 
         let x, y, mx, my;
         if (source === 'pointer' && ev) {
             x = ev.clientX - br.left; y = ev.clientY - br.top;
             mx = x; my = y - 78;                 // 指で隠れないよう、押した点の少し上に出す
         } else {
+            const tr = target.getBoundingClientRect();
             x = tr.left + tr.width / 2 - br.left; y = tr.top + tr.height / 2 - br.top;
             mx = x; my = tr.top - br.top - 14;   // スペースキーは黒船の上側
         }
@@ -11486,8 +11561,7 @@ animation:facilitySweep 6s linear infinite;
     let burstAudioCtx = null;
     function burstSound(kind, power) {
         try {
-            if (!burstAudioCtx) burstAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const ctx = burstAudioCtx;
+            const ctx = sharedAudioCtx(); if (!ctx) return;
             if (ctx.state === 'suspended') ctx.resume();
             const t = ctx.currentTime;
             const out = ctx.createGain(); out.gain.value = 0.55; out.connect(ctx.destination);
@@ -11557,7 +11631,7 @@ animation:facilitySweep 6s linear infinite;
         if (burstSuppressClick) { burstSuppressClick = false; return; }
         const base = document.getElementById('clicker-base');
         if(!base) return;
-        const rect = base.getBoundingClientRect();
+        const rect = clickerBaseRect(base);
         clickKurofuneDirect(e.target, e.clientX - rect.left, e.clientY - rect.top);
     }
 
@@ -11613,7 +11687,8 @@ animation:facilitySweep 6s linear infinite;
         if (base) {
             // 連打で「+N」が溜まらないよう、古いものから間引く
             const pops = base.getElementsByClassName('click-pop-num');
-            while (pops.length >= POP_MAX) pops[0].remove();
+            const popMax = liteMode ? 6 : POP_MAX;
+            while (pops.length >= popMax) pops[0].remove();
             base.appendChild(pop);
             setTimeout(() => pop.remove(), burst ? 1500 : 800);
         }
@@ -12475,6 +12550,17 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.2.2",
+            title: "連打を軽く",
+            date: "2026-10-28",
+            content: [
+                "連打するほど重くなっていたのを直しました。クリックの音を鳴らすたびに音声プレーヤーを1つずつ作っていて、スマホではそれが溜まっていたのが原因です。いまは音を1回だけ読み込んで使い回します。",
+                "1回のクリックで画面の配置を4〜5回計算し直していたのを、ほぼ0回にしました（隻数の文字の大きさ合わせ・連打数の「ぽん」・押した場所の計算）。",
+                "黒船を押したときに影の描き直しが走らないようにしました。押したときの縮む動きはそのままです。",
+                "軽量化の設定では、「+◯隻」の数字の光を控えめにし、同時に出る数も減らしました。"
+            ]
+        },
         {
             version: "v4.2.1",
             title: "スマホの画面を見やすく",
