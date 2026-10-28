@@ -3533,7 +3533,7 @@
             body.s2ui .ship-wrapper { position: absolute !important; left: 0; right: 0; bottom: 22%; min-height: 0 !important; padding: 0 !important; }
             body.s2ui .ship-wrapper::before, body.s2ui .ship-wrapper::after { display: none !important; }
             body.s2ui .clicker-col-left .kurofune-click-target { font-size: clamp(7rem, 30vw, 11rem) !important; margin: 0 !important; }
-            body.s2ui #rank-chip { bottom: auto; top: 118px; left: 50%; transform: translateX(-50%); }
+            body.s2ui #rank-chip { position: static; transform: none; width: max-content; max-width: 100%; margin: 8px auto 0; box-sizing: border-box; }
 
             /* 下から引き出す棚 */
             body.s2ui #s2-drawer {
@@ -3583,7 +3583,6 @@
             body.s2ui .ship-wrapper { bottom: 21% !important; }
             body.s2ui.s2-drawer-open .ship-wrapper { bottom: 21% !important; }
             body.s2ui.s2-drawer-open .clicker-col-left .kurofune-click-target { font-size: clamp(9rem, min(17vw, 30vh), 16rem) !important; }
-            body.s2ui #rank-chip { top: 150px; }
 
             /* 右の棚 */
             body.s2ui #s2-drawer, body.s2ui #s2-drawer.open {
@@ -4659,6 +4658,41 @@ animation:facilitySweep 6s linear infinite;
 @keyframes liquorSpin{50%{transform:rotate(18deg) scale(1.15);}}
 @keyframes katanaSlash{50%{transform:rotate(-20deg) scale(1.2);}}
 
+        /* ---------- スマホ：各ページを画面いっぱいに使う ----------
+           スマホ用の調整は上の方にも書いてあるが、そのあとに書かれたPC向けの余白
+           （左右60pxなど）に負けて、文字が5文字ごとに折り返していた。
+           ここでいちばん最後に、もう一度きめ直す。 */
+        @media (max-width: 900px) {
+            .changelog-layout, .study-layout, .ach-page-wrap, .page-wrap, .music-layout,
+            .gacha-shop-layout, .gambling-layout, .game-select-layout, .gacha-layout {
+                padding-left: 12px !important; padding-right: 12px !important;
+            }
+            .changelog-layout { padding-bottom: 40px !important; }
+            .page-wrap { padding-bottom: 40px !important; }
+            .ach-page-wrap { padding-top: 64px !important; }          /* 左上のメニューボタンと重ねない */
+            #screen-plan { padding-top: 64px !important; }
+            .study-layout { gap: 24px !important; padding-bottom: 40px !important; }
+            .study-card { padding-left: 16px !important; padding-right: 16px !important; }
+            .game-select-layout, .gacha-layout {
+                flex-direction: column !important; height: auto !important; gap: 16px !important; padding-bottom: 40px !important;
+            }
+            .game-select-layout > *, .gacha-layout > * { width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
+            .game-select-desc { width: auto !important; max-width: 100% !important; }
+
+            /* ランキング：名前の欄と「名前を更新」を横に並べ、ボタンは縦書きにしない */
+            .rank-name-row input { min-width: 0; }
+            .rank-name-row button { flex-shrink: 0; white-space: nowrap; padding: 10px 14px !important; }
+
+            /* 閉じたメニューの影が、画面の左はしに黒くはみ出していた */
+            #sidebar:not(.mobile-open) { box-shadow: none !important; }
+        }
+        /* スマホを横にしたとき：高さが足りず黒船が数字に重なるので、小さくして下に置く */
+        @media (max-width: 900px) and (max-height: 500px) {
+            body.s2ui .kurofune-count { font-size: 1.9rem !important; }
+            body.s2ui .clicker-col-left .kurofune-click-target { font-size: clamp(3.5rem, 24vh, 6rem) !important; }
+            body.s2ui:not(.s2-drawer-open) .ship-wrapper { bottom: calc(2% + 3% * var(--sea-fill, 0)) !important; }
+        }
+
     </style>
 </head>
 <body>
@@ -5041,7 +5075,7 @@ animation:facilitySweep 6s linear infinite;
                 <h2 class="serif-font">🏛 殿堂 ― シーズン1の記録</h2>
                 <p style="color: #888;">シーズン1を駆け抜けた船長たちの最終順位。ここに刻まれた記録は、リセットされても永久に残ります。</p>
             </div>
-            <div style="padding: 0 60px 60px; max-width: 860px; margin: 0 auto; width: 100%;">
+            <div class="page-wrap" style="padding: 0 60px 60px; max-width: 860px; margin: 0 auto; width: 100%;">
                 <div id="hall-status" style="background:white; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 6px 20px rgba(0,0,0,0.08); text-align:center; color:#666;">
                     読み込み中…
                 </div>
@@ -5052,10 +5086,10 @@ animation:facilitySweep 6s linear infinite;
         <!-- 世界ランキング -->
         <div id="screen-ranking" class="screen">
             <div class="screen-header"><h2 class="serif-font">🏆 世界ランキング：シーズン累計</h2><p style="color: #888;">シーズン中に稼いだ黒船の合計で競おう！転生しても減りません。</p></div>
-            <div style="padding: 0 60px 60px; max-width: 800px; margin: 0 auto; width: 100%;">
+            <div class="page-wrap" style="padding: 0 60px 60px; max-width: 800px; margin: 0 auto; width: 100%;">
                 <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.08);">
                     <label style="font-size: 0.9rem; font-weight: bold; color: #555; display:block; margin-bottom: 6px;">ランキングに表示する名前</label>
-                    <div style="display:flex; gap:10px;">
+                    <div class="rank-name-row" style="display:flex; gap:10px;">
                         <input type="text" id="player-name-input" maxlength="20" placeholder="名無しの船長" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:6px; font-size:1rem;">
                         <button class="btn-primary" style="padding: 10px 20px; font-size:0.95rem;" onclick="updatePlayerName(document.getElementById('player-name-input').value)">名前を更新</button>
                     </div>
@@ -10109,19 +10143,32 @@ animation:facilitySweep 6s linear infinite;
         lastRank = info.rank;
         renderRankChip(info);
     }
+    // 「5兆」「12.3億」のように、日本の位で短く書く（順位のチップは横幅が狭いので）
+    function jpShortNum(n) {
+        n = Math.max(0, Math.floor(n));
+        const U = [[1e20, '垓'], [1e16, '京'], [1e12, '兆'], [1e8, '億'], [1e4, '万']];
+        if (n >= 1e24) return formatNumber(n);
+        for (const [v, name] of U) if (n >= v) return String(+(n / v).toPrecision(3)) + name;
+        return n.toLocaleString();
+    }
     function renderRankChip(info) {
         const base = document.getElementById('clicker-base');
         let chip = document.getElementById('rank-chip');
         if (!info) { if (chip) chip.remove(); return; }
-        if (!chip && base) {
+        // シーズン2の画面では、隻数・毎秒・1クリックの下に並べる（宙に浮かせない）
+        const board = document.body.classList.contains('s2ui') && base ? base.querySelector('.clicker-score-board') : null;
+        const home = board || base;
+        if (!chip && home) {
             chip = document.createElement('div'); chip.id = 'rank-chip';
-            base.appendChild(chip);
+            home.appendChild(chip);
+        } else if (chip && home && chip.parentElement !== home) {
+            home.appendChild(chip);
         }
         if (!chip) return;
         const gap = info.above ? Math.max(0, Math.ceil(info.above.score - seasonEarned())) : 0;
         chip.innerHTML = '<span class="rc-rank">' + info.rank + '位</span>'
             + (info.above
-                ? '<span class="rc-gap">次の ' + escapeHtml(String(info.above.name).slice(0, 10)) + ' まで あと ' + formatNumber(gap) + ' 隻</span>'
+                ? '<span class="rc-gap">次の ' + escapeHtml(String(info.above.name).slice(0, 8)) + ' まで あと ' + jpShortNum(gap) + ' 隻</span>'
                 : '<span class="rc-gap">首位独走中！</span>');
     }
     function showRankUp(name, from, to) {
@@ -12411,6 +12458,17 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v4.2.1",
+            title: "スマホの画面を見やすく",
+            date: "2026-10-28",
+            content: [
+                "スマホでは広告を出さないようにしました。大きな広告が黒船の画面を半分近く覆っていたためです。",
+                "「◯位 次の ◯◯ まで あと ◯隻」の表示を、隻数・毎秒・1クリックのすぐ下に並べました。宙に浮いて黒船や数字に重なることがなくなります。",
+                "ランキング・アップデートログ・殿堂・実績などのページで、左右の余白が広すぎて文字が数文字ごとに折り返していたのを直しました。画面の幅いっぱいに読めます。",
+                "ランキングの「名前を更新」ボタンが縦書きになっていたのを直しました。"
+            ]
+        },
+        {
             version: "v4.2",
             title: "加入プランを始めます",
             date: "2026-10-28",
@@ -12937,7 +12995,16 @@ animation:facilitySweep 6s linear infinite;
             var s = JSON.parse(localStorage.getItem('kurofuneSub') || 'null');
             adFree = !!(s && s.until > Date.now() && { edo: 1, meiji: 1, sakigake: 1 }[s.plan]);
         } catch (e) {}
-        if (!adFree) document.write('<script src="https://adm.shinobi.jp/s/3be17414808f98f7b7b8aa2a50d609ac"><\/script>');
+        // スマホでは読み込まない。
+        // この広告は 300×250 の大きな枠で、スマホでは黒船の画面の半分近くを覆ってしまう。
+        // シーズン2は開いたらすぐ黒船の画面なので、スマホではここで止める。
+        // （読み込んだ広告をCSSで隠すのは広告の規約違反になりうるので、そもそも読み込まない。
+        //   この形式はあとから差し込めないので、他のページに移ったときだけ出す、もできない。）
+        var phone = false;
+        try {
+            phone = window.matchMedia('(max-width: 900px), (pointer: coarse) and (max-height: 520px)').matches;
+        } catch (e) {}
+        if (!adFree && !phone) document.write('<script src="https://adm.shinobi.jp/s/3be17414808f98f7b7b8aa2a50d609ac"><\/script>');
     })();
 </script>
 <!-- admax -->
