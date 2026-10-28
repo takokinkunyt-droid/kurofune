@@ -178,6 +178,21 @@
     <div id="subOut"></div>
   </section>
 
+  <!-- 8. ソーシャル（通報） -->
+  <section>
+    <h2>8. ソーシャルの通報</h2>
+    <div class="note">談話室・DMで通報されたものの一覧です。DMは<b>通報された会話だけ</b>読めます（通報されていない会話は、管理人でも読めません）。<br>
+      ひどい場合は「話す機能を止める」で、その人のDM・談話室・申請だけを止められます（ゲームとセーブはそのまま）。</div>
+    <button class="primary" onclick="repList()">通報を見る</button>
+    <div class="row" style="margin-top:10px;">
+      <div><label>船長ID（playerId）</label><input id="muteId" class="mono" placeholder="player_xxxxxxxx_xxxxxxxx"></div>
+    </div>
+    <button class="danger" onclick="repMute(true)">話す機能を止める</button>
+    <button onclick="repMute(false)">止めたのを戻す</button>
+    <div id="repOut"></div>
+    <div id="repDmOut"></div>
+  </section>
+
 </div>
 
 <script>
@@ -411,6 +426,47 @@ async function subLog() {
        + '</td><td>' + escapeHtml(x.name || x.playerId) + '</td><td class="mono">' + dateJa(x.until) + '</td></tr>';
   });
   $('subOut').innerHTML = h + '</table>';
+}
+
+// ---- 8. ソーシャルの通報 ----------------------------------------
+let REPORTS = [];
+async function repList() {
+  if (!secret()) return show('repOut', '先に管理キーを入れてください。');
+  const { status, body } = await post('/social', { secret: secret(), action: 'admin_reports' });
+  if (status !== 200) return show('repOut', body, 'err');
+  REPORTS = body.reports || [];
+  if (!REPORTS.length) return show('repOut', '通報はありません。');
+  let h = '<table><tr><th>日時</th><th>場所</th><th>通報した人</th><th>された人</th><th>内容</th><th></th></tr>';
+  REPORTS.forEach((r, i) => {
+    h += '<tr><td class="mono">' + new Date(r.at).toLocaleString('ja-JP') + '</td><td>' + (r.kind === 'dm' ? 'DM' : '談話室') + '</td><td>' + escapeHtml(r.reporterName || '-')
+       + '</td><td>' + escapeHtml(r.targetName || r.name || '-') + '<br><span class="mono" style="font-size:11px">' + escapeHtml(r.target || '') + '</span></td><td>' + escapeHtml(r.text || '(消えています)')
+       + (r.reason ? '<br><small>理由：' + escapeHtml(r.reason) + '</small>' : '') + '</td><td>'
+       + (r.kind === 'dm' ? '<button onclick="repDm(' + i + ')">会話を読む</button>' : '<button class="danger" onclick="repDel(' + i + ')">発言を消す</button>')
+       + '<button onclick="$(\'muteId\').value=REPORTS[' + i + '].target">IDを入れる</button></td></tr>';
+  });
+  $('repOut').innerHTML = h + '</table>';
+}
+async function repDm(i) {
+  const r = REPORTS[i]; if (!r) return;
+  const { status, body } = await post('/social', { secret: secret(), action: 'admin_dm', convo: r.convo });
+  if (status !== 200) return show('repDmOut', body, 'err');
+  let h = '<h3>会話（古い順）</h3><table><tr><th>日時</th><th>送った人</th><th>内容</th></tr>';
+  body.messages.forEach(m => {
+    h += '<tr' + (m.id === r.msgId ? ' style="background:#fff3cd"' : '') + '><td class="mono">' + new Date(m.t).toLocaleString('ja-JP') + '</td><td>' + escapeHtml(m.name || m.from)
+       + (m.hidden ? ' <small>(相手に見えていない)</small>' : '') + '</td><td>' + escapeHtml(m.x) + '</td></tr>';
+  });
+  $('repDmOut').innerHTML = h + '</table>';
+}
+async function repDel(i) {
+  const r = REPORTS[i]; if (!r || !confirm('この発言を談話室から消しますか？')) return;
+  const { status, body } = await post('/social', { secret: secret(), action: 'admin_lounge_delete', msgId: r.msgId });
+  show('repDmOut', status === 200 ? '消しました。' : body, status === 200 ? 'ok' : 'err');
+}
+async function repMute(on) {
+  if (!secret()) return show('repDmOut', '先に管理キーを入れてください。');
+  const id = $('muteId').value.trim(); if (!id) return show('repDmOut', '船長IDを入れてください。');
+  const { status, body } = await post('/social', { secret: secret(), action: on ? 'admin_mute' : 'admin_unmute', playerId: id });
+  show('repDmOut', status === 200 ? (on ? '話す機能を止めました。' : '元に戻しました。') : body, status === 200 ? 'ok' : 'err');
 }
 
 // ---- 6. シーズン ----------------------------------------------

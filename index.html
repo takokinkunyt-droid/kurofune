@@ -4675,6 +4675,112 @@ animation:facilitySweep 6s linear infinite;
 @keyframes liquorSpin{50%{transform:rotate(18deg) scale(1.15);}}
 @keyframes katanaSlash{50%{transform:rotate(-20deg) scale(1.2);}}
 
+        /* ---------- ソーシャル ---------- */
+        .social-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; background: rgba(0,0,0,0.06);
+                       padding: 5px; border-radius: 14px; margin-bottom: 14px; }
+        .social-tabs button { border: none; background: transparent; border-radius: 10px; padding: 10px 4px; font-weight: 800; font-size: 0.92rem;
+                              color: #6b5a3a; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .social-tabs button.on { background: #fff; color: #3a1d0a; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+        .social-tabs .st-ic { position: relative; display: inline-block; }
+        .social-tabs .st-ic > span { position: absolute; top: 0; right: 0; }
+        .social-tabs .st-ic .ios-badge { top: -9px; right: -12px; min-width: 17px; height: 17px; font-size: 10px; padding: 0 4px; }
+        .social-panel { display: none; }
+        .social-panel.on { display: block; }
+        .social-error { background: #fdecea; color: #a12a1a; border: 1px solid #f5c2bc; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.88rem; }
+        .soc-card { background: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .soc-h { font-weight: 900; color: #5a3415; font-size: 0.92rem; margin-bottom: 8px; cursor: default; }
+        .soc-count { color: #999; font-weight: 700; }
+        .soc-me { text-align: center; background: linear-gradient(180deg, #2a1508, #1b0d06); color: #f6ead0; }
+        .soc-me-name { font-weight: 900; font-size: 1.15rem; }
+        .soc-me-lv { color: #ffd36b; font-weight: 800; margin-top: 2px; }
+        .soc-me-lv small { color: rgba(255,240,200,0.6); font-weight: 600; }
+        .soc-code-label { margin-top: 12px; font-size: 0.75rem; color: rgba(255,240,200,0.7); }
+        .soc-code-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 4px; }
+        .soc-code { font-family: 'DotGothic16', monospace; font-size: 1.6rem; letter-spacing: 0.12em; color: #fff; }
+        .soc-hint { font-size: 0.72rem; color: rgba(255,240,200,0.6); margin-top: 8px; }
+        .soc-add-row { display: flex; gap: 8px; }
+        .soc-add-row input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .soc-msg { font-size: 0.82rem; color: #6b5a3a; margin-top: 8px; min-height: 1em; }
+        .soc-btn { border: 1px solid #c9a35a; background: #fff8e6; color: #5a3415; border-radius: 10px; padding: 8px 12px; font-weight: 800;
+                   font-size: 0.85rem; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans JP', sans-serif; }
+        .soc-btn.primary { background: #8a1a10; border-color: #8a1a10; color: #fff3d6; }
+        .soc-me .soc-btn { background: rgba(255,255,255,0.12); color: #ffe3a0; border-color: rgba(255,211,107,0.5); }
+        .soc-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.06); }
+        .soc-row:first-child { border-top: none; }
+        .soc-click { cursor: pointer; }
+        .soc-who { min-width: 0; }
+        .soc-name { font-weight: 800; color: #2a1408; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .soc-sub { font-size: 0.75rem; color: #888; margin-top: 2px; }
+        .soc-on { color: #2e9d4f; font-weight: 700; margin-left: 4px; }
+        .soc-off { color: #aaa; margin-left: 4px; }
+        .soc-acts { display: flex; gap: 6px; flex-shrink: 0; color: #b8a27a; font-size: 1.3rem; }
+        .soc-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #ff3b30; vertical-align: middle; }
+        .soc-empty { color: #999; font-size: 0.88rem; text-align: center; padding: 14px 6px; line-height: 1.7; }
+        .soc-safety { font-size: 0.78rem; color: #7a6a4a; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.35);
+                      border-radius: 12px; padding: 12px 14px; line-height: 1.8; }
+        details.soc-card summary { list-style: none; cursor: pointer; margin-bottom: 0; }
+        details.soc-card[open] summary { margin-bottom: 8px; }
+        .soc-convo-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: 800; }
+        .soc-convo-head small { color: #b8860b; }
+        .soc-chat { background: #fffdf6; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; padding: 12px; height: min(56vh, 520px);
+                    overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; }
+        .soc-lounge-note { font-size: 0.8rem; color: #7a6a4a; margin: 0 2px 8px; }
+        .soc-input-row { display: flex; gap: 8px; margin-top: 8px; align-items: flex-end; }
+        .soc-input-row textarea { flex: 1; min-width: 0; resize: none; padding: 10px 12px; border: 1px solid #ccc; border-radius: 12px;
+                                  font-size: 1rem; font-family: 'Noto Sans JP', sans-serif; max-height: 120px; }
+        .cm { display: flex; flex-direction: column; max-width: 82%; }
+        .cm.mine { align-self: flex-end; align-items: flex-end; }
+        .cm.theirs { align-self: flex-start; align-items: flex-start; }
+        .cm-who { font-size: 0.75rem; font-weight: 800; color: #5a3415; margin: 0 4px 2px; }
+        .cm-lv { color: #b8860b; font-weight: 700; }
+        .cm-bubble { padding: 8px 12px; border-radius: 16px; line-height: 1.6; word-break: break-word; overflow-wrap: anywhere; font-size: 0.95rem; }
+        .cm.mine .cm-bubble { background: #8a1a10; color: #fff3d6; border-bottom-right-radius: 4px; }
+        .cm.theirs .cm-bubble { background: #efe4c8; color: #2a1408; border-bottom-left-radius: 4px; }
+        .cm-meta { font-size: 0.68rem; color: #aaa; margin: 2px 6px 0; display: flex; align-items: center; gap: 4px; }
+        .cm-menu { border: none; background: none; color: #aaa; cursor: pointer; font-size: 0.9rem; padding: 0 4px; }
+        .soc-sheet-bg { position: fixed; inset: 0; z-index: 99990; background: rgba(0,0,0,0.4); display: flex; align-items: flex-end; justify-content: center;
+                        animation: ssFade .15s ease-out; }
+        .soc-sheet { width: min(480px, calc(100% - 16px)); margin-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); animation: ssUp .22s cubic-bezier(.2,.9,.3,1); }
+        .soc-sheet .ss-group { background: rgba(250,247,240,0.98); border-radius: 14px; overflow: hidden; margin-bottom: 8px; }
+        .soc-sheet .ss-title { font-size: 0.8rem; color: #888; text-align: center; padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+        .soc-sheet .ss-item { display: block; width: 100%; border: none; background: transparent; padding: 15px; font-size: 1rem; color: #1a6fd6;
+                              border-top: 1px solid rgba(0,0,0,0.06); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+        .soc-sheet .ss-group .ss-item:first-of-type { border-top: none; }
+        .soc-sheet .ss-item.danger { color: #e0332a; }
+        .soc-sheet .ss-cancel { background: #fff; border-radius: 14px; font-weight: 800; }
+        @keyframes ssFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes ssUp { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+        .plan-fair { font-size: 0.82rem; color: #7a6a4a; background: rgba(212,175,55,0.1); border-radius: 10px; padding: 10px 12px; line-height: 1.7; }
+
+        /* ---------- ランキングの種類 ---------- */
+        .rank-tabs-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+        .rank-tabs { display: inline-flex; background: rgba(0,0,0,0.06); border-radius: 12px; padding: 4px; gap: 4px; }
+        .rank-tabs button { border: none; background: transparent; padding: 8px 16px; border-radius: 9px; font-weight: 800; font-size: 0.92rem;
+                            color: #6b5a3a; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+        .rank-tabs button.on { background: #fff; color: #3a1d0a; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+        .rank-mode-note { font-size: 0.8rem; color: #888; margin: 4px 2px 12px; line-height: 1.6; }
+
+        /* ---------- レベル ---------- */
+        .sb-level { margin: 10px auto 0; max-width: 200px; text-align: left; }
+        .sb-level .sbl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+        .sb-level .sbl-lv { color: #ffd36b; font-weight: 900; font-size: 0.95rem; }
+        .sb-level .sbl-next { color: rgba(255, 240, 200, 0.6); font-size: 0.68rem; }
+        .sb-level .sbl-bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.15); margin-top: 4px; overflow: hidden; }
+        .sb-level .sbl-bar i { display: block; height: 100%; background: linear-gradient(90deg, #ffd36b, #fff2c4); border-radius: 3px; }
+        #sidebar.collapsed .sb-level { display: none; }
+        .level-up-pop {
+            position: fixed; left: 50%; top: 32%; z-index: 99998; pointer-events: none; text-align: center;
+            transform: translate(-50%, -50%); padding: 14px 30px; border-radius: 16px;
+            background: linear-gradient(180deg, rgba(40, 24, 6, 0.95), rgba(20, 10, 2, 0.95)); border: 2px solid #ffd36b;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 30px rgba(255, 211, 107, 0.35);
+            animation: lvPop 2.6s cubic-bezier(.2, 1.4, .4, 1) forwards;
+        }
+        .level-up-pop .lu-t { color: #ffe9a8; font-weight: 900; letter-spacing: 0.2em; font-size: 0.85rem; }
+        .level-up-pop .lu-n { color: #fff; font-weight: 900; font-size: 2rem; margin-top: 2px; }
+        @keyframes lvPop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); } 12% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+                           20% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -60%) scale(1); } }
+
         /* ---------- 未読の数（iPhone のアプリの通知の数字ふう） ---------- */
         .ios-badge {
             position: absolute; top: -7px; right: -7px; z-index: 2;
@@ -4689,8 +4795,9 @@ animation:facilitySweep 6s linear infinite;
         @keyframes iosBadgeIn { from { transform: scale(0); } to { transform: scale(1); } }
         body.lite-mode .ios-badge { animation: none; }
         #mobile-menu-btn { overflow: visible; }
-        #nav-changelog .nav-icon { position: relative; display: inline-block; }
-        #nav-changelog .nav-icon .ios-badge { top: -8px; right: -12px; min-width: 18px; height: 18px; font-size: 11px; padding: 0 5px; }
+        .nav-item .nav-icon { position: relative; display: inline-block; }
+        .nav-item .nav-icon .ios-badge { top: -8px; right: -12px; min-width: 18px; height: 18px; font-size: 11px; padding: 0 5px; }
+        body.s2ui #sidebar:not(.mobile-open) { box-shadow: none !important; }   /* 閉じたメニューの影を画面の左はしに出さない */
         /* 読んでいないスレッドの題の前に赤い点 */
         .changelog-thread.unread .changelog-thread-title::before {
             content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
@@ -4754,13 +4861,14 @@ animation:facilitySweep 6s linear infinite;
     <button id="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
     <div id="mobile-sidebar-backdrop" onclick="closeMobileSidebar()"></div>
     <div id="sidebar" style="display: none;">
-        <div class="sidebar-header"><div class="date" id="date-display"></div><h1 class="serif-font">黒船クリッカー<br><span>1853</span></h1></div>
+        <div class="sidebar-header"><div class="date" id="date-display"></div><h1 class="serif-font">黒船クリッカー<br><span>1853</span></h1><div id="sb-level" class="sb-level"></div></div>
         <div class="nav-menu">
             <div class="nav-item" id="nav-clicker" onclick="switchScreen('screen-clicker', this)"><span class="nav-icon">🚢</span><span class="nav-text">黒船クリッカー</span></div>
             <div class="nav-item" id="nav-plan" onclick="openPlanScreen(this)"><span class="nav-icon">🎫</span><span class="nav-text">加入プラン</span></div>
             <div class="nav-item" onclick="switchScreen('screen-home', null)"><span class="nav-icon">⛩️</span><span class="nav-text">ホームに戻る</span></div>
             <div class="nav-item" onclick="switchScreen('screen-music', this)"><span class="nav-icon">🎵</span><span class="nav-text">音（音楽室）</span></div>
             <div class="nav-item" onclick="openShipGachaScreen(this)"><span class="nav-icon">🎁</span><span class="nav-text">貢ぎ物の蔵（ガチャ）</span></div>
+            <div class="nav-item" id="nav-social" onclick="openSocial(this)"><span class="nav-icon">👥</span><span class="nav-text">ソーシャル</span></div>
             <div class="nav-item" id="nav-changelog" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
             <div class="nav-item" onclick="switchScreen('screen-ranking', this); refreshRanking();"><span class="nav-icon">🏆</span><span class="nav-text">世界ランキング</span></div>
             <div class="nav-item" id="nav-hall" onclick="openSeasonHall(this)"><span class="nav-icon">🏛</span><span class="nav-text">殿堂</span></div>
@@ -5124,7 +5232,7 @@ animation:facilitySweep 6s linear infinite;
 
         <!-- 世界ランキング -->
         <div id="screen-ranking" class="screen">
-            <div class="screen-header"><h2 class="serif-font">🏆 世界ランキング：シーズン累計</h2><p style="color: #888;">シーズン中に稼いだ黒船の合計で競おう！転生しても減りません。</p></div>
+            <div class="screen-header"><h2 class="serif-font">🏆 世界ランキング</h2><p style="color: #888;">「隻数」はシーズン中に稼いだ黒船の合計（転生しても減りません）。「レベル」は遊んだぶんだけたまるEXPです。</p></div>
             <div class="page-wrap" style="padding: 0 60px 60px; max-width: 800px; margin: 0 auto; width: 100%;">
                 <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 20px rgba(0,0,0,0.08);">
                     <label style="font-size: 0.9rem; font-weight: bold; color: #555; display:block; margin-bottom: 6px;">ランキングに表示する名前</label>
@@ -5134,10 +5242,77 @@ animation:facilitySweep 6s linear infinite;
                     </div>
                     <p id="cloud-status" style="margin-top:10px; font-size:0.85rem; color:#888;">☁️ 読み込み中…</p>
                 </div>
-                <div style="display:flex; justify-content: flex-end; margin-bottom: 10px;">
-                    <button class="btn-primary" style="padding: 8px 18px; font-size:0.9rem;" onclick="refreshRanking()">🔄 ランキングを更新</button>
+                <div class="rank-tabs-row">
+                    <div class="rank-tabs" role="tablist">
+                        <button id="rank-tab-ships" class="on" onclick="setRankingMode('ships')">🚢 隻数</button>
+                        <button id="rank-tab-level" onclick="setRankingMode('level')">⭐ レベル</button>
+                    </div>
+                    <button class="btn-primary" style="padding: 8px 18px; font-size:0.9rem;" onclick="refreshRanking()">🔄 更新</button>
                 </div>
+                <p id="rank-mode-note" class="rank-mode-note">シーズン中に稼いだ黒船の合計で競います。</p>
                 <div id="ranking-list"></div>
+            </div>
+        </div>
+
+        <!-- ソーシャル：フレンド・DM・黒船談話室S2 -->
+        <div id="screen-social" class="screen">
+            <div class="screen-header"><h2 class="serif-font">👥 ソーシャル</h2><p style="color: #888;">フレンドコードでつながって、DMや談話室で話そう。</p></div>
+            <div class="page-wrap social-wrap" style="padding: 0 60px 60px; max-width: 760px; margin: 0 auto; width: 100%;">
+                <div class="social-tabs" role="tablist">
+                    <button data-tab="friends" class="on" onclick="socialTab('friends')"><span class="st-ic">👥<span id="st-badge-friends"></span></span>フレンド</button>
+                    <button data-tab="dm" onclick="socialTab('dm')"><span class="st-ic">✉️<span id="st-badge-dm"></span></span>DM</button>
+                    <button data-tab="lounge" onclick="socialTab('lounge')"><span class="st-ic">⚓</span>談話室</button>
+                </div>
+                <div id="social-error" class="social-error" style="display:none;"></div>
+
+                <div class="social-panel on" id="social-panel-friends">
+                    <div class="soc-card soc-me">
+                        <div class="soc-me-name" id="social-myname">名無しの船長</div>
+                        <div class="soc-me-lv" id="social-mylevel"></div>
+                        <div class="soc-code-label">あなたのフレンドコード</div>
+                        <div class="soc-code-row"><span class="soc-code" id="social-mycode">読み込み中…</span><button class="soc-btn" onclick="copyFriendCode()">コピー</button></div>
+                        <div class="soc-hint">このコードを、友だちに直接教えてね。知らない人には教えないこと。</div>
+                    </div>
+                    <div class="soc-card">
+                        <div class="soc-h">コードでフレンド申請</div>
+                        <div class="soc-add-row">
+                            <input type="text" id="social-add-code" maxlength="12" placeholder="KF-XXXXXX" autocomplete="off" autocapitalize="characters">
+                            <button class="soc-btn primary" onclick="sendFriendRequest()">申請</button>
+                        </div>
+                        <div class="soc-msg" id="social-add-msg"></div>
+                    </div>
+                    <div class="soc-card" id="social-incoming-card" style="display:none;"><div class="soc-h">届いた申請</div><div id="social-incoming"></div></div>
+                    <div class="soc-card"><div class="soc-h">フレンド <span class="soc-count" id="social-friend-count"></span></div><div id="social-friends"><div class="soc-empty">まだフレンドがいません。</div></div></div>
+                    <div class="soc-card" id="social-outgoing-card" style="display:none;"><div class="soc-h">返事待ちの申請</div><div id="social-outgoing"></div></div>
+                    <details class="soc-card" id="social-blocked-card" style="display:none;"><summary class="soc-h">ブロック中</summary><div id="social-blocked"></div></details>
+                    <div class="soc-safety">
+                        <b>🛡 安全のお約束</b><br>
+                        ・DMはフレンドどうしだけ。電話番号・メールアドレス・リンクは送れません（＊になります）。<br>
+                        ・いやなことをされたら「通報」や「ブロック」を使ってください。<br>
+                        ・通報されたDMは、管理人が読んで確かめることがあります。
+                    </div>
+                </div>
+
+                <div class="social-panel" id="social-panel-dm">
+                    <div id="social-dm-list"></div>
+                    <div id="social-dm-convo" style="display:none;">
+                        <div class="soc-convo-head"><button class="soc-btn" onclick="closeDm()">← 戻る</button><span id="social-dm-with"></span></div>
+                        <div class="soc-chat" id="social-dm-msgs"></div>
+                        <div class="soc-input-row">
+                            <textarea id="social-dm-input" rows="1" maxlength="200" placeholder="メッセージ（200文字まで）"></textarea>
+                            <button class="soc-btn primary" onclick="sendDm()">送信</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="social-panel" id="social-panel-lounge">
+                    <div class="soc-lounge-note">⚓ 黒船談話室S2 ― 誰でも話せる部屋です。やさしい言葉で話そう。</div>
+                    <div class="soc-chat" id="social-lounge-msgs"><div class="soc-empty">読み込み中…</div></div>
+                    <div class="soc-input-row">
+                        <textarea id="social-lounge-input" rows="1" maxlength="200" placeholder="談話室に書く（200文字まで）"></textarea>
+                        <button class="soc-btn primary" onclick="sendLounge()">送信</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -5667,6 +5842,9 @@ animation:facilitySweep 6s linear infinite;
     let steamLevel = 0;               // 蒸気機関の改良（周回ごと）
     let sailorLevel = 0;              // 水夫（周回ごと）
     let s2Ach = {};                   // このシーズンに条件を満たした実績（海水）
+    // レベル（EXP）用の、このシーズンの記録
+    let s2Clicks = 0, s2GachaPulls = 0, s2PlayDays = 0, s2LastPlayDay = '';
+    let serverSubExp = 0;             // 加入プランの毎月のEXP（サーバーが数えた分）
     const S2_SEA_EXCLUDE = ['lastVoyage', 'feverFestival'];   // シーズン1のイベント限定は海水に数えない
     let superDockLevel = 0, upSuperDockCost = SUPER_DOCK_BASE_COST; // 超近代ドック拡張（最大バースト倍率 +1/Lv）
     let upClickCost = 15, upClickLevel = 1, frenzyTimer = 0, frenzyClickMult = 1, frenzyKpsMult = 1;
@@ -8054,6 +8232,7 @@ animation:facilitySweep 6s linear infinite;
             pTicket--;
             rarity = rollPExclusiveRarity();
         }
+        s2GachaPulls++;
 
         // 期間限定スキンは、イベント期間中だけ抽選に混ぜる
         const eventOn = isSeasonEventActive();
@@ -8270,6 +8449,7 @@ animation:facilitySweep 6s linear infinite;
             clickerScore, currentLifeScore, clickPower, upClickCost, upClickLevel,
             superDockLevel, upSuperDockCost,
             s2tree, pastLivesEarned, fragmentsEarnedTotal, steamLevel, s2Ach, sailorLevel,
+            s2Clicks, s2GachaPulls, s2PlayDays, s2LastPlayDay,
             reincarnationCount, fragments, skills, achievements,
             facilities, availableFacilityUpgrades,
             wrenchLevel, upWrenchCost, combatTechPurchased,
@@ -8495,6 +8675,7 @@ animation:facilitySweep 6s linear infinite;
             }
             if (data.success) {
                 if (resetIntended) seasonResetSave = false;   // 受け取られたので、ここで下ろす
+                if (data.subExp != null) { serverSubExp = Math.max(0, Number(data.subExp) || 0); updateLevelUi(); }
                 // ランキング用データも同時更新
                 return fetch(getNetlifyFunctionUrl('update-ranking'), {
                     method: 'POST',
@@ -8604,9 +8785,52 @@ animation:facilitySweep 6s linear infinite;
     }
 
     // ランキング画面の表示更新
+    // ランキングの種類：隻数（シーズン累計）／レベル（EXP）
+    let rankingMode = 'ships';
+    function setRankingMode(m) {
+        rankingMode = m === 'level' ? 'level' : 'ships';
+        const a = document.getElementById('rank-tab-ships'), b = document.getElementById('rank-tab-level');
+        if (a) a.classList.toggle('on', rankingMode === 'ships');
+        if (b) b.classList.toggle('on', rankingMode === 'level');
+        const note = document.getElementById('rank-mode-note');
+        if (note) note.textContent = rankingMode === 'level'
+            ? 'クリック・ガチャ・実績・転生・遊んだ日数でたまるEXPで競います。隻数とは関係ありません（シーズンごとに0から）。'
+            : 'シーズン中に稼いだ黒船の合計で競います。';
+        refreshRanking();
+    }
+    function refreshLevelRanking(listEl) {
+        listEl.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">読み込み中…</p>`;
+        fetch(getNetlifyFunctionUrl('get-ranking') + '?type=level&me=' + encodeURIComponent(playerId || ''))
+            .then(r => r.json())
+            .then(data => {
+                if (rankingMode !== 'level') return;
+                if (!data.success || !data.data || !data.data.length) {
+                    listEl.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">まだレベルのランキングがありません。</p>`;
+                    return;
+                }
+                listEl.innerHTML = data.data.map((p, i) => {
+                    const rank = i + 1, isMe = !!p.isMe;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}位`;
+                    return `<div class="${p.sub && p.sub.plate && p.sub.plate !== 'none' ? 'plate-' + p.sub.plate : ''}" style="display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-radius:8px; margin-bottom:8px;
+                            background:${isMe ? 'rgba(212,175,55,0.18)' : 'rgba(0,0,0,0.03)'}; border:1px solid ${isMe ? 'var(--gold-color)' : 'rgba(0,0,0,0.08)'};">
+                            <div style="display:flex; align-items:center; gap:14px;">
+                                <span style="font-size:1.3rem; font-weight:bold; min-width:48px; text-align:center;">${medal}</span>
+                                <div style="font-weight:bold;">${subNameHtml(p.playerName, p.sub)}${isMe ? ' (自分)' : ''}</div>
+                            </div>
+                            <div style="text-align:right; font-size:0.9rem; color:#555;">
+                                <div style="font-weight:900; color:#b8860b; font-size:1.15rem;">⭐ Lv.${Math.floor(p.level || 1)}</div>
+                                <div>${Math.floor(p.exp || 0).toLocaleString()} EXP</div>
+                            </div>
+                        </div>`;
+                }).join('');
+            })
+            .catch(e => { listEl.innerHTML = `<p style="text-align:center; color:#c0392b; padding: 20px;">取得に失敗しました。</p>`; });
+    }
+
     function refreshRanking() {
         const listEl = document.getElementById('ranking-list');
         if (!listEl) return;
+        if (rankingMode === 'level' && netlifyEnabled) return refreshLevelRanking(listEl);
 
         if (!netlifyEnabled) {
             listEl.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">
@@ -8623,6 +8847,7 @@ animation:facilitySweep 6s linear infinite;
         fetch(getNetlifyFunctionUrl('get-ranking') + '?me=' + encodeURIComponent(playerId || ''))
             .then(response => response.json())
             .then(data => {
+                if (rankingMode !== 'ships') return;
                 if (!data.success || !data.data || data.data.length === 0) {
                     listEl.innerHTML = `<p style="text-align:center; color:#888; padding: 20px;">まだランキングデータがありません。</p>`;
                     return;
@@ -8760,6 +8985,8 @@ animation:facilitySweep 6s linear infinite;
         sailorLevel = Math.min(SAILOR_MAX, sanitizeNum(save.sailorLevel, 0));
         s2Ach = {};
         if (save.s2Ach && typeof save.s2Ach === 'object') { for (const k in save.s2Ach) { if (save.s2Ach[k] && achievements[k]) s2Ach[k] = true; } }
+        s2Clicks = Math.floor(sanitizeNum(save.s2Clicks, 0)); s2GachaPulls = Math.floor(sanitizeNum(save.s2GachaPulls, 0));
+        s2PlayDays = Math.floor(sanitizeNum(save.s2PlayDays, 0)); s2LastPlayDay = typeof save.s2LastPlayDay === 'string' ? save.s2LastPlayDay.slice(0, 10) : '';
         reincarnationCount = sanitizeNum(save.reincarnationCount, 0); fragments = sanitizeNum(save.fragments, 0);
         sakokuShards = sanitizeNum(save.sakokuShards, 0); superReincarnationCount = sanitizeNum(save.superReincarnationCount, 0); buyQuantity = sanitizeNum(save.buyQuantity, 1);
         superSkills = { ...superSkills, ...(save.superSkills || {}) };
@@ -11018,9 +11245,9 @@ animation:facilitySweep 6s linear infinite;
         const st = (mySub && mySub.style) || {};
         const untilText = lv ? new Date(mySub.until).toLocaleDateString('ja-JP') : '';
         const perks = {
-            edo: ['広告が出なくなる'],
-            meiji: ['広告が出なくなる', 'ランキングの名前の色・フォントを変えられる', 'ランキングにネームプレート（木札・金箔など）', 'サイト全体のテーマ（桜・雪・黄金の浦賀）'],
-            sakigake: ['明治プランの特典すべて', '毎月、加入者限定の黒船の意匠（見た目だけ）', 'ランキングの名前の横に「⚔️ 魁」の印', '新しい要素を一足先に試せる（先行体験）',
+            edo: ['広告が出なくなる', '毎月 +100 EXP（レベル）'],
+            meiji: ['広告が出なくなる', '毎月 +300 EXP（レベル）', 'ランキングの名前の色・フォントを変えられる', 'ランキングにネームプレート（木札・金箔など）', 'サイト全体のテーマ（桜・雪・黄金の浦賀）'],
+            sakigake: ['明治プランの特典すべて', '毎月 +600 EXP（レベル）', '毎月、加入者限定の黒船の意匠（見た目だけ）', 'ランキングの名前の横に「⚔️ 魁」の印', '新しい要素を一足先に試せる（先行体験）',
                        '自分の考えた実績やスキルの名前がゲームに入るかも', '殿堂に「シーズンを支えた人」として名前が残る', '開発に参加できる'],
         };
         let h = '<div class="plan-wrap">'
@@ -11037,6 +11264,7 @@ animation:facilitySweep 6s linear infinite;
            + '<div class="plan-how"><h3>申し込み方</h3>'
            + '<p>開発者に直接申し込んでください。お金のやりとりの前に、<b>必ずおうちの人の了解をもらってください。</b></p>'
            + '<p>申し込むときは、下の「船長ID」を伝えてください。</p>'
+           + '<p class="plan-fair">隻数・クリック・施設など、ゲームの強さと隻数のランキングには一切関係しません。レベルだけは、加入している月ごとに決まった量のEXPが入ります（たくさん払っても青天井にはなりません）。</p>'
            + '<div class="plan-id"><code id="plan-my-id">' + escapeHtml(playerId || '') + '</code><button id="plan-copy">コピー</button></div></div>';
         if (lv >= 2) {
             const sw = (key, map, labels) => Object.keys(map).map(k =>
@@ -11090,6 +11318,341 @@ animation:facilitySweep 6s linear infinite;
             if (!box) { box = document.createElement('div'); box.id = 'hall-supporters'; list.parentElement.appendChild(box); }
             box.innerHTML = '<h3>⚔️ シーズンを支えた人</h3><p>' + d.names.map(escapeHtml).join('　') + '</p>';
         } catch (e) {}
+    }
+
+    // ==========================================
+    // レベル（EXP）
+    // 隻数とは別の「どれだけ遊んだか」。シーズンごとに0から。
+    // 式は api/_level.js と同じにしておくこと（ランキングはサーバーが数え直す）。
+    // ==========================================
+    const LEVEL_RARE_ACH = new Set(['music', 'noEasy', 'perryFan', 'perryAnti', 'classicShip', 'fastClick', 'deleteSave',
+        'flagLover', 'clickLover', 'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
+    function computeExpFromPlay() {
+        let exp = Math.floor(Math.min(s2Clicks, 5e7) / 100) + Math.min(s2GachaPulls, 1e6) * 5;
+        for (const k in s2Ach) if (s2Ach[k]) exp += LEVEL_RARE_ACH.has(k) ? 50 : 20;
+        exp += Math.min(reincarnationCount, 1e5) * 50 + Math.min(s2PlayDays, 400) * 10;
+        return exp;
+    }
+    function computeExp() { return computeExpFromPlay() + serverSubExp; }
+    function levelNeed(level) { return Math.floor(100 * Math.pow(level, 1.5)); }
+    function levelFromExp(exp) {
+        let level = 1, rest = Math.max(0, Math.floor(exp || 0));
+        while (rest >= levelNeed(level) && level < 9999) { rest -= levelNeed(level); level++; }
+        return { level, into: rest, need: levelNeed(level) };
+    }
+    function jstDay() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
+    // 遊んだ日：その日に初めて開いたとき1日ぶん
+    function touchPlayDay() {
+        const d = jstDay();
+        if (s2LastPlayDay !== d) { s2LastPlayDay = d; s2PlayDays++; updateLevelUi(); }
+    }
+    const LV_SEEN_KEY = 'kurofuneLvSeen:s2';
+    function updateLevelUi() {
+        const lv = levelFromExp(computeExp());
+        const el = document.getElementById('sb-level');
+        if (el) {
+            el.innerHTML = '<div class="sbl-top"><span class="sbl-lv">⭐ Lv.' + lv.level + '</span><span class="sbl-next">次まで ' + (lv.need - lv.into).toLocaleString() + ' EXP</span></div>'
+                + '<div class="sbl-bar"><i style="width:' + Math.min(100, lv.into / lv.need * 100).toFixed(1) + '%"></i></div>';
+        }
+        const sl = document.getElementById('social-mylevel');
+        if (sl) sl.innerHTML = '⭐ Lv.' + lv.level + ' <small>（' + computeExp().toLocaleString() + ' EXP・次まで ' + (lv.need - lv.into).toLocaleString() + '）</small>';
+        // レベルが上がったら知らせる（この端末で最後に見たレベルと比べる）
+        let seen = 0; try { seen = Number(localStorage.getItem(LV_SEEN_KEY)) || 0; } catch (e) {}
+        if (!seen) { try { localStorage.setItem(LV_SEEN_KEY, lv.level); } catch (e) {} }
+        else if (lv.level > seen) {
+            try { localStorage.setItem(LV_SEEN_KEY, lv.level); } catch (e) {}
+            showLevelUp(lv.level);
+        }
+    }
+    function showLevelUp(level) {
+        const el = document.createElement('div');
+        el.className = 'level-up-pop';
+        el.innerHTML = '<div class="lu-t">LEVEL UP!</div><div class="lu-n">⭐ Lv.' + level + '</div>';
+        document.body.appendChild(el);
+        try { burstSound('ping'); } catch (e) {}
+        setTimeout(() => el.remove(), 2600);
+    }
+
+    // ==========================================
+    // ソーシャル（フレンド・DM・黒船談話室S2）
+    // サーバーは api/social.js。相手はフレンドコードで指定する（playerId は外に出さない）。
+    // 新しい発言の確認は、この画面を開いている間だけ5秒おき。
+    // それ以外は2分おきに、届いた申請と未読DMの数だけ確かめる（メニューの赤い数字用）。
+    // ==========================================
+    let socialState = { tab: 'friends', me: null, dmWith: null, loungeLast: 0, loungeMsgs: [], counts: { incoming: 0, unreadDm: 0 } };
+    function socialApi(action, extra) {
+        return fetch(getNetlifyFunctionUrl('social'), {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({ playerId, saveToken: saveToken || getOrCreateSaveToken(), playerName, action }, extra || {})),
+        }).then(r => r.json().then(b => {
+            if (r.status === 403) { showSocialError(b.error || '使えません'); throw new Error(b.code || 'FORBIDDEN'); }
+            return b;
+        }));
+    }
+    function showSocialError(msg) {
+        const el = document.getElementById('social-error');
+        if (el) { el.textContent = '⚠️ ' + msg; el.style.display = msg ? '' : 'none'; }
+    }
+    function socialActive() {
+        const sc = document.getElementById('screen-social');
+        return !!(sc && sc.classList.contains('active')) && !document.hidden;
+    }
+    function openSocial(nav) {
+        switchScreen('screen-social', nav || document.getElementById('nav-social'));
+        showSocialError('');
+        const nm = document.getElementById('social-myname'); if (nm) nm.textContent = playerName || '名無しの船長';
+        updateLevelUi();
+        socialTab(socialState.tab);
+        loadSocialMe();
+    }
+    function socialTab(t) {
+        socialState.tab = t;
+        document.querySelectorAll('.social-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+        document.querySelectorAll('.social-panel').forEach(p => p.classList.toggle('on', p.id === 'social-panel-' + t));
+        if (t === 'lounge') loadLounge(true);
+        if (t === 'dm') { if (socialState.dmWith) loadDm(); else renderDmList(); }
+    }
+    function nameHtml(name, style) { return subNameHtml(name, style && style.plan ? Object.assign({ plate: 'none' }, style) : null); }
+    function timeText(t) {
+        const d = new Date(t), now = new Date();
+        const hm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        return d.toDateString() === now.toDateString() ? hm : (d.getMonth() + 1) + '/' + d.getDate() + ' ' + hm;
+    }
+    function seenText(p) {
+        if (p.online) return '<span class="soc-on">● オンライン</span>';
+        if (!p.seenAt) return '';
+        const m = Math.floor((Date.now() - p.seenAt) / 60000);
+        return '<span class="soc-off">' + (m < 60 ? m + '分前' : m < 1440 ? Math.floor(m / 60) + '時間前' : Math.floor(m / 1440) + '日前') + '</span>';
+    }
+    function loadSocialMe() {
+        return socialApi('me').then(d => {
+            if (!d.success) return;
+            socialState.me = d;
+            if (d.subExp != null) { serverSubExp = Number(d.subExp) || 0; updateLevelUi(); }
+            socialState.counts = { incoming: d.incoming.length, unreadDm: d.unreadDm || 0 };
+            updateSocialBadges();
+            renderSocialFriends();
+            if (socialState.tab === 'dm' && !socialState.dmWith) renderDmList();
+        }).catch(() => {});
+    }
+    function personRow(p, buttons) {
+        return '<div class="soc-row"><div class="soc-who"><div class="soc-name">' + nameHtml(p.name, p.style) + (p.unread ? ' <span class="soc-dot"></span>' : '')
+            + '</div><div class="soc-sub">⭐ Lv.' + p.level + ' ' + seenText(p) + '</div></div><div class="soc-acts">' + buttons + '</div></div>';
+    }
+    function codeArg(c) { return "'" + String(c || '').replace(/[^A-Z0-9-]/g, '') + "'"; }
+    function renderSocialFriends() {
+        const d = socialState.me; if (!d) return;
+        const code = document.getElementById('social-mycode'); if (code) code.textContent = d.code;
+        const inc = document.getElementById('social-incoming'), incCard = document.getElementById('social-incoming-card');
+        incCard.style.display = d.incoming.length ? '' : 'none';
+        inc.innerHTML = d.incoming.map(p => personRow(p,
+            '<button class="soc-btn primary" onclick="answerFriend(' + codeArg(p.code) + ', true)">承認</button>'
+            + '<button class="soc-btn" onclick="answerFriend(' + codeArg(p.code) + ', false)">断る</button>')).join('');
+        const fr = document.getElementById('social-friends');
+        document.getElementById('social-friend-count').textContent = d.friends.length ? '（' + d.friends.length + '人）' : '';
+        const sorted = d.friends.slice().sort((a, b) => (b.online - a.online) || (b.seenAt - a.seenAt));
+        fr.innerHTML = sorted.length ? sorted.map(p => personRow(p,
+            '<button class="soc-btn primary" onclick="openDm(' + codeArg(p.code) + ')">✉️ DM</button>'
+            + '<button class="soc-btn" onclick="friendMenu(' + codeArg(p.code) + ')">⋯</button>')).join('')
+            : '<div class="soc-empty">まだフレンドがいません。上の欄に友だちのコードを入れて申請しよう。</div>';
+        const out = document.getElementById('social-outgoing'), outCard = document.getElementById('social-outgoing-card');
+        outCard.style.display = d.outgoing.length ? '' : 'none';
+        out.innerHTML = d.outgoing.map(p => personRow(p, '<button class="soc-btn" onclick="cancelFriendReq(' + codeArg(p.code) + ')">取り消す</button>')).join('');
+        const bl = document.getElementById('social-blocked'), blCard = document.getElementById('social-blocked-card');
+        blCard.style.display = d.blocked.length ? '' : 'none';
+        bl.innerHTML = d.blocked.map(p => personRow(p, '<button class="soc-btn" onclick="unblockUser(' + codeArg(p.code) + ')">解除</button>')).join('');
+    }
+    function copyFriendCode() {
+        const c = socialState.me && socialState.me.code; if (!c) return;
+        const done = () => { const m = document.getElementById('social-add-msg'); if (m) m.textContent = 'コードをコピーしました：' + c; };
+        try { navigator.clipboard.writeText(c).then(done, done); } catch (e) { done(); }
+    }
+    function sendFriendRequest() {
+        const inp = document.getElementById('social-add-code'), msg = document.getElementById('social-add-msg');
+        const code = (inp.value || '').trim();
+        if (!code) { msg.textContent = 'コードを入れてください'; return; }
+        msg.textContent = '送っています…';
+        socialApi('request', { code }).then(d => {
+            msg.textContent = d.success ? (d.friends ? '🎉 フレンドになりました！' : '申請を送りました。相手が承認するとフレンドになります。') : (d.error || '送れませんでした');
+            if (d.success) inp.value = '';
+            loadSocialMe();
+        }).catch(() => { msg.textContent = '送れませんでした'; });
+    }
+    function answerFriend(code, accept) { socialApi('respond', { code, accept }).then(loadSocialMe).catch(() => {}); }
+    function cancelFriendReq(code) { socialApi('cancel', { code }).then(loadSocialMe).catch(() => {}); }
+    function unblockUser(code) { socialApi('unblock', { code }).then(loadSocialMe).catch(() => {}); }
+    // 下から出る選択肢（iPhone のアクションシートふう）
+    function socialSheet(title, items) {
+        closeSocialSheet();
+        const bg = document.createElement('div'); bg.id = 'soc-sheet'; bg.className = 'soc-sheet-bg';
+        bg.innerHTML = '<div class="soc-sheet"><div class="ss-group"><div class="ss-title">' + escapeHtml(title) + '</div>'
+            + items.map((it, i) => '<button class="ss-item' + (it.danger ? ' danger' : '') + '" data-i="' + i + '">' + escapeHtml(it.label) + '</button>').join('')
+            + '</div><button class="ss-item ss-cancel">やめる</button></div>';
+        bg.addEventListener('click', e => {
+            const b = e.target.closest('button');
+            if (e.target === bg || (b && b.classList.contains('ss-cancel'))) return closeSocialSheet();
+            if (b && b.dataset.i != null) { closeSocialSheet(); items[+b.dataset.i].fn(); }
+        });
+        document.body.appendChild(bg);
+    }
+    function closeSocialSheet() { const x = document.getElementById('soc-sheet'); if (x) x.remove(); }
+    function friendMenu(code) {
+        const p = socialState.me && socialState.me.friends.find(f => f.code === code);
+        const name = p ? p.name : 'この人';
+        socialSheet(name + ' さん', [
+            { label: 'フレンドをやめる', fn: () => { if (confirm(name + ' さんとのフレンドをやめますか？')) socialApi('unfriend', { code }).then(loadSocialMe).catch(() => {}); } },
+            { label: 'ブロックする（DMも申請も届かなくなります）', danger: true, fn: () => { if (confirm(name + ' さんをブロックしますか？')) socialApi('block', { code }).then(() => { if (socialState.dmWith === code) closeDm(); loadSocialMe(); }).catch(() => {}); } },
+        ]);
+    }
+
+    // ---- DM ----
+    function renderDmList() {
+        const el = document.getElementById('social-dm-list'); if (!el) return;
+        document.getElementById('social-dm-convo').style.display = 'none'; el.style.display = '';
+        const d = socialState.me;
+        if (!d) { el.innerHTML = '<div class="soc-empty">読み込み中…</div>'; return; }
+        if (!d.friends.length) { el.innerHTML = '<div class="soc-empty">DMはフレンドとだけできます。「フレンド」からコードで申請しよう。</div>'; return; }
+        const sorted = d.friends.slice().sort((a, b) => (b.unread - a.unread) || ((b.lastDmAt || 0) - (a.lastDmAt || 0)));
+        el.innerHTML = '<div class="soc-card">' + sorted.map(p => '<div class="soc-row soc-click" onclick="openDm(' + codeArg(p.code) + ')">'
+            + '<div class="soc-who"><div class="soc-name">' + nameHtml(p.name, p.style) + (p.unread ? ' <span class="soc-dot"></span>' : '') + '</div>'
+            + '<div class="soc-sub">⭐ Lv.' + p.level + ' ' + seenText(p) + '</div></div><div class="soc-acts">›</div></div>').join('') + '</div>';
+    }
+    function openDm(code) {
+        socialState.dmWith = code;
+        if (socialState.tab !== 'dm') socialTab('dm');
+        const p = socialState.me && socialState.me.friends.find(f => f.code === code);
+        document.getElementById('social-dm-with').innerHTML = p ? nameHtml(p.name, p.style) + ' <small>⭐ Lv.' + p.level + '</small>' : '';
+        document.getElementById('social-dm-list').style.display = 'none';
+        document.getElementById('social-dm-convo').style.display = '';
+        document.getElementById('social-dm-msgs').innerHTML = '<div class="soc-empty">読み込み中…</div>';
+        loadDm(true);
+    }
+    function closeDm() { socialState.dmWith = null; renderDmList(); loadSocialMe(); }
+    function chatHtml(m, kind) {
+        const who = kind === 'lounge'
+            ? '<div class="cm-who">' + nameHtml(m.name, m.style) + ' <span class="cm-lv">Lv.' + (m.lv || 1) + '</span></div>' : '';
+        const menu = m.mine ? '' : '<button class="cm-menu" title="通報など" onclick="chatMenu(\'' + kind + '\', \'' + m.id + '\')">⋯</button>';
+        return '<div class="cm ' + (m.mine ? 'mine' : 'theirs') + '">' + (m.mine ? '' : who)
+            + '<div class="cm-bubble">' + escapeHtml(m.x).replace(/\n/g, '<br>') + '</div>'
+            + '<div class="cm-meta">' + timeText(m.t) + menu + '</div></div>';
+    }
+    function scrollChat(el, force) {
+        const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+        if (force || near) el.scrollTop = el.scrollHeight;
+    }
+    function loadDm(force) {
+        const code = socialState.dmWith; if (!code) return;
+        const msgs = socialState.dmMsgs || [];
+        const since = (!force && socialState.dmMsgsWith === code && msgs.length) ? msgs[msgs.length - 1].t : 0;
+        socialApi('dm_get', { code, since }).then(d => {
+            if (socialState.dmWith !== code || d.unchanged) return;
+            socialState.dmMsgsWith = code;
+            const el = document.getElementById('social-dm-msgs');
+            if (!d.success) { el.innerHTML = '<div class="soc-empty">' + escapeHtml(d.error || '読めませんでした') + '</div>'; return; }
+            socialState.dmMsgs = d.messages;
+            el.innerHTML = d.messages.length ? d.messages.map(m => chatHtml(m, 'dm')).join('') : '<div class="soc-empty">まだメッセージはありません。あいさつしてみよう。</div>';
+            scrollChat(el, force);
+            pollSocialCounts();
+        }).catch(() => {});
+    }
+    function sendDm() {
+        const inp = document.getElementById('social-dm-input'), code = socialState.dmWith;
+        const text = (inp.value || '').trim(); if (!text || !code) return;
+        inp.value = '';
+        socialApi('dm_send', { code, text }).then(d => {
+            if (!d.success) { inp.value = text; alertSocial(d.error); return; }
+            loadDm(true);
+        }).catch(() => { inp.value = text; });
+    }
+
+    // ---- 談話室 ----
+    function loadLounge(force) {
+        socialApi('lounge_get', { since: force ? 0 : socialState.loungeLast }).then(d => {
+            if (!d.success) return;
+            if (force) socialState.loungeMsgs = [];
+            const have = new Set(socialState.loungeMsgs.map(m => m.id));
+            d.messages.forEach(m => { if (!have.has(m.id)) socialState.loungeMsgs.push(m); });
+            socialState.loungeMsgs = socialState.loungeMsgs.slice(-150);
+            if (socialState.loungeMsgs.length) socialState.loungeLast = socialState.loungeMsgs[socialState.loungeMsgs.length - 1].t;
+            const el = document.getElementById('social-lounge-msgs');
+            if (!force && !d.messages.length) return;
+            el.innerHTML = socialState.loungeMsgs.length ? socialState.loungeMsgs.map(m => chatHtml(m, 'lounge')).join('') : '<div class="soc-empty">まだ誰も話していません。最初のひとことをどうぞ。</div>';
+            scrollChat(el, force);
+        }).catch(() => {});
+    }
+    function sendLounge() {
+        const inp = document.getElementById('social-lounge-input');
+        const text = (inp.value || '').trim(); if (!text) return;
+        inp.value = '';
+        socialApi('lounge_send', { text }).then(d => {
+            if (!d.success) { inp.value = text; alertSocial(d.error); return; }
+            loadLounge(false);
+        }).catch(() => { inp.value = text; });
+    }
+    function alertSocial(msg) { if (msg) alert(msg); }
+    function chatMenu(kind, id) {
+        const list = kind === 'lounge' ? socialState.loungeMsgs : (socialState.dmMsgs || []);
+        const m = list.find(x => x.id === id); if (!m) return;
+        const report = () => {
+            const note = kind === 'dm' ? '\n通報すると、管理人がこの会話を読んで確かめます。' : '';
+            if (confirm('このメッセージを通報しますか？' + note)) {
+                socialApi('report', kind === 'dm' ? { kind: 'dm', code: socialState.dmWith, msgId: id } : { kind: 'lounge', msgId: id })
+                    .then(d => alertSocial(d.success ? '通報しました。ありがとう。' : d.error)).catch(() => {});
+            }
+        };
+        if (kind === 'dm') return socialSheet('このメッセージ', [{ label: '⚑ 通報する', danger: true, fn: report }]);
+        const name = m.name || 'この人';
+        const items = [];
+        if (m.code) items.push({ label: '👥 フレンド申請を送る', fn: () => socialApi('request', { code: m.code })
+            .then(d => alertSocial(d.success ? (d.friends ? 'フレンドになりました！' : '申請を送りました。') : d.error)).catch(() => {}) });
+        items.push({ label: '⚑ この発言を通報する', danger: true, fn: report });
+        if (m.code) items.push({ label: '🚫 ブロックする（発言が見えなくなります）', danger: true, fn: () => {
+            if (confirm(name + ' さんをブロックしますか？')) socialApi('block', { code: m.code }).then(() => { loadLounge(true); loadSocialMe(); }).catch(() => {});
+        } });
+        socialSheet(name + ' さんの発言', items);
+    }
+
+    // ---- 赤い数字 ----
+    function socialBadgeCount() { return (socialState.counts.incoming || 0) + (socialState.counts.unreadDm || 0); }
+    function updateSocialBadges() {
+        const nav = document.getElementById('nav-social');
+        setBadge(nav && nav.querySelector('.nav-icon'), socialBadgeCount());
+        setBadge(document.getElementById('st-badge-friends'), socialState.counts.incoming || 0);
+        setBadge(document.getElementById('st-badge-dm'), socialState.counts.unreadDm || 0);
+        updateLogBadges();
+    }
+    function pollSocialCounts() {
+        if (!netlifyEnabled || !playerId) return;
+        socialApi('poll').then(d => {
+            if (!d.success) return;
+            socialState.counts = { incoming: d.incoming || 0, unreadDm: d.unreadDm || 0 };
+            updateSocialBadges();
+        }).catch(() => {});
+    }
+    let socialTickN = 0;
+    function socialTick() {
+        if (!netlifyEnabled || !playerId) return;
+        socialTickN++;
+        if (socialActive()) {
+            if (socialState.tab === 'lounge') loadLounge(false);
+            else if (socialState.tab === 'dm' && socialState.dmWith) loadDm(false);
+            else if (socialTickN % 12 === 0) loadSocialMe();    // フレンドの一覧は1分おき
+            if (socialTickN % 6 === 3) pollSocialCounts();
+        } else if (!document.hidden && socialTickN % 24 === 0) {
+            pollSocialCounts();                                  // 画面の外では2分おき
+        }
+    }
+    function initSocial() {
+        ['social-dm-input', 'social-lounge-input'].forEach(id => {
+            const el = document.getElementById(id); if (!el) return;
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); id === 'social-dm-input' ? sendDm() : sendLounge(); }
+            });
+        });
+        const add = document.getElementById('social-add-code');
+        if (add) add.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) sendFriendRequest(); });
+        setTimeout(pollSocialCounts, 4000);
+        setInterval(socialTick, 5000);
     }
 
     let pageVersionTag = null;
@@ -11700,6 +12263,7 @@ animation:facilitySweep 6s linear infinite;
 
     function clickKurofuneDirect(target, posX, posY, burst) {
         let now = Date.now();
+        s2Clicks++;
         if (lastClickTime > 0 && (now - lastClickTime) <= 10) { unlockAchievement('fastClick'); } 
         lastClickTime = now;
 
@@ -12614,6 +13178,21 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v4.3",
+            title: "ソーシャル（フレンド・DM・談話室）とレベルを追加",
+            date: "2026-10-28",
+            content: [
+                "メニューに「👥 ソーシャル」ができました。中は「フレンド」「DM」「⚓ 黒船談話室S2」の3つです。",
+                "フレンド：一人ずつ「フレンドコード」（KF-から始まる文字）があります。友だちのコードを入れて申請し、相手が承認するとフレンドになります。コードは知っている人にだけ教えてね。",
+                "DM：フレンドどうしだけで話せます。黒船談話室S2：誰でも話せる部屋がひとつあります。",
+                "安全のために：1通200文字まで、電話番号・メールアドレス・リンクやひどい言葉は＊になります。いやなことをされたら、発言の「⋯」から通報・ブロックできます。通報されたDMは、管理人が読んで確かめることがあります。",
+                "「レベル」ができました。クリック100回で1、ガチャ1回で5、実績1つで20（珍しい実績は50）、転生1回で50、遊んだ日1日で10のEXPがたまります。レベルはメニューの上に出ます。",
+                "世界ランキングに「⭐ レベル」のタブができました。隻数とは関係なく、どれだけ遊んだかで競います。レベルはシーズンごとに0からです。",
+                "加入プランに入っていると、加入している月ごとにEXPが入ります（江戸 +100・明治 +300・魁 +600）。隻数やゲームの強さには関係しません。",
+                "未読のアップデートログと同じように、届いたフレンド申請と読んでいないDMも、メニューに赤い数字で出ます。"
+            ]
+        },
+        {
             version: "v4.2.4",
             title: "未読のアップデートに通知の数字",
             date: "2026-10-28",
@@ -13046,7 +13625,8 @@ animation:facilitySweep 6s linear infinite;
     }
     function updateLogBadges() {
         const n = unreadLogCount();
-        setBadge(document.getElementById('mobile-menu-btn'), n);
+        const social = (typeof socialBadgeCount === 'function') ? socialBadgeCount() : 0;
+        setBadge(document.getElementById('mobile-menu-btn'), n + social);
         const nav = document.getElementById('nav-changelog');
         setBadge(nav && nav.querySelector('.nav-icon'), n);
     }
@@ -13198,6 +13778,8 @@ animation:facilitySweep 6s linear infinite;
         if (S2_ON) { try { initS2Ui(); } catch (e) { console.error('S2 UI', e); } }
         try { applySubPerks(); refreshSub(); setInterval(refreshSub, 10 * 60 * 1000); } catch (e) { console.error('sub', e); }
         try { updateLogBadges(); } catch (e) { console.error('log badge', e); }
+        try { initSocial(); } catch (e) { console.error('social', e); }
+        try { touchPlayDay(); updateLevelUi(); setInterval(() => { touchPlayDay(); updateLevelUi(); }, 5000); } catch (e) { console.error('level', e); }
 
         // 告知バーはどの画面にいても動かす
         updateSeasonEventBar();

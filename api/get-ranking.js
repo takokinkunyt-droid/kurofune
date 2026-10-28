@@ -1,4 +1,5 @@
-const { redisRequest, CORS } = require('./_redis');
+const { redisRequest, redisPipeline, CORS } = require('./_redis');
+const LV = require('./_level');
 
 // ランキングの取得口。
 //
@@ -18,6 +19,7 @@ module.exports = async (req, res) => {
 
   try {
     const me = (req.query && req.query.me) || null;
+    if (req.query && req.query.type === 'level') return levelRanking(req, res, me);
 
     const [rankResult, hiddenResult] = await Promise.all([
       redisRequest(['zrevrange', 'ranking', 0, 99]),
@@ -57,6 +59,27 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+// レベルのランキング（隻数とは別。シーズンごとに0から）
+async function levelRanking(req, res, me) {
+  const [rankResult, hiddenResult] = await redisPipeline([
+    ['zrevrange', LV.LEVEL_KEY, 0, 99, 'WITHSCORES'],
+    ['smembers', 'ranking_hidden_players'],
+  ]);
+  const hiddenSet = new Set(hiddenResult.result || []);
+  const flat = rankResult.result || [];
+  const rows = [];
+  for (let i = 0; i + 1 < flat.length; i += 2) if (!hiddenSet.has(flat[i])) rows.push({ id: flat[i], exp: Number(flat[i + 1]) || 0 });
+  if (!rows.length) return res.status(200).json({ data: [], count: 0, success: true });
+  const recs = await redisPipeline(rows.flatMap(r => [['get', `player:${r.id}`], ['get', `sub:${r.id}`]]));
+  const data = rows.map((r, i) => {
+    let p = null; try { p = JSON.parse(recs[i * 2].result); } catch (e) {}
+    const lv = LV.levelFromExp(r.exp);
+    return { playerName: (p && p.playerName) || '名無しの船長', exp: r.exp, level: lv.level,
+             isMe: !!(me && r.id === me), sub: subView(recs[i * 2 + 1].result) };
+  });
+  return res.status(200).json({ data, count: data.length, success: true });
+}
 
 const PLAN_LEVEL = { edo: 1, meiji: 2, sakigake: 3 };
 function subView(raw) {

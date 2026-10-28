@@ -1,4 +1,5 @@
 const { redisRequest, redisPipeline, parseBody, CORS } = require('./_redis');
+const LV = require('./_level');
 
 // =====================================================================
 // セーブの書き込み口。
@@ -87,13 +88,45 @@ module.exports = async (req, res) => {
     commands.push(['set', `save:${playerId}`, JSON.stringify(dataToSave)]);
     await redisPipeline(commands);
 
-    return res.status(200).json({ success: true, timestamp: dataToSave.lastSaveTime });
+    // レベル（EXP）を数え直して、レベルのランキングへ。失敗しても保存は成功扱い。
+    let lv = null;
+    try { lv = await updateLevel(playerId, dataToSave); } catch (e) { console.error('[save-game] level', e.message); }
+
+    return res.status(200).json({ success: true, timestamp: dataToSave.lastSaveTime, ...(lv || {}) });
 
   } catch (e) {
     console.error('[save-game]', e);
     return res.status(500).json({ error: e.message });
   }
 };
+
+// レベル：セーブの記録から数えた EXP ＋ 加入プランの毎月の EXP。
+// 加入プランの分は「その月に加入していた」ことを月ごとに記録しておき、合計する（同じ月は1回だけ）。
+async function updateLevel(playerId, save) {
+  const subKey = LV.SUBEXP_PREFIX + playerId;
+  const [shadow, hidden, subRaw, subExpRaw] = await redisPipeline([
+    ['sismember', 'shadow_banned_players', playerId],
+    ['sismember', 'ranking_hidden_players', playerId],
+    ['get', `sub:${playerId}`],
+    ['hgetall', subKey],
+  ]);
+  const months = {};
+  const arr = (subExpRaw && subExpRaw.result) || [];
+  for (let i = 0; i + 1 < arr.length; i += 2) months[arr[i]] = Number(arr[i + 1]) || 0;
+
+  let sub = null; try { sub = JSON.parse(subRaw && subRaw.result); } catch (e) {}
+  const cmds = [];
+  if (sub && sub.until > Date.now() && LV.PLAN_MONTHLY_EXP[sub.plan]) {
+    const m = LV.jstMonth(), amount = LV.PLAN_MONTHLY_EXP[sub.plan];
+    if ((months[m] || 0) < amount) { months[m] = amount; cmds.push(['hset', subKey, m, amount]); }
+  }
+  const subExp = Object.values(months).reduce((a, b) => a + b, 0);
+  const exp = LV.expFromSave(save) + subExp;
+  if (shadow.result !== 1 && hidden.result !== 1) cmds.push(['zadd', LV.LEVEL_KEY, exp, playerId]);
+  else cmds.push(['zrem', LV.LEVEL_KEY, playerId]);
+  if (cmds.length) await redisPipeline(cmds);
+  return { exp, subExp, level: LV.levelFromExp(exp).level };
+}
 
 // トークンがあれば固定・照合する。無い場合は REQUIRE_TOKEN 次第。
 async function checkToken(playerId, saveToken) {
