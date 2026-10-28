@@ -30,6 +30,8 @@ module.exports = async (req, res) => {
     const results = await Promise.all(
       playerIds.map(id => redisRequest(['get', `player:${id}`]))
     );
+    // 加入プランの見た目（名前の色・フォント・札・魁の印）
+    const subs = await Promise.all(playerIds.map(id => redisRequest(['get', `sub:${id}`])));
 
     const data = [];
     playerIds.forEach((id, i) => {
@@ -45,6 +47,7 @@ module.exports = async (req, res) => {
         era: p.era || '江戸時代（初期）',
         updatedAt: p.updatedAt || 0,
         isMe: !!(me && id === me),
+        sub: subView(subs[i] && subs[i].result),
       });
     });
 
@@ -54,3 +57,14 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+const PLAN_LEVEL = { edo: 1, meiji: 2, sakigake: 3 };
+function subView(raw) {
+  if (!raw) return null;
+  let s; try { s = JSON.parse(raw); } catch (e) { return null; }
+  if (!s || !(s.until > Date.now()) || !PLAN_LEVEL[s.plan]) return null;
+  const st = s.style || {};
+  // 見た目は明治から。江戸は印だけ返さない（広告が消えるだけのプラン）
+  if (PLAN_LEVEL[s.plan] < 2) return null;
+  return { plan: s.plan, color: st.color || 'default', font: st.font || 'default', plate: st.plate || 'none' };
+}

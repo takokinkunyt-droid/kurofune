@@ -155,6 +155,29 @@
     <div id="seasonOut"></div>
   </section>
 
+  <!-- 7. 加入プラン -->
+  <section>
+    <h2>7. 加入プラン</h2>
+    <div class="note">お金を受け取ったら、ここで登録します。相手の「船長ID」は、ゲームのメニュー「🎫 加入プラン」に出ています（コピーボタンあり）。<br>
+      同じか上のプランが続いている人に足すと、今の期限から延びます。登録・取り消しはすべて履歴に残ります。</div>
+    <label>船長ID（playerId）</label>
+    <input id="subPlayerId" class="mono" placeholder="player_xxxxxxxx_xxxxxxxx">
+    <div class="row">
+      <div><label>プラン</label>
+        <select id="subPlan">
+          <option value="edo">江戸プラン（月10円）</option>
+          <option value="meiji">明治プラン（月50円）</option>
+          <option value="sakigake">魁プラン（月100円）</option>
+        </select></div>
+      <div><label>何か月ぶん</label><input id="subMonths" type="number" value="1" min="1" max="12"></div>
+    </div>
+    <button class="primary" onclick="subGrant()">登録・延長する</button>
+    <button class="danger" onclick="subRevoke()">取り消す</button>
+    <button onclick="subList()">加入者の一覧</button>
+    <button onclick="subLog()">登録の履歴</button>
+    <div id="subOut"></div>
+  </section>
+
 </div>
 
 <script>
@@ -344,6 +367,50 @@ async function doRestore() {
   const { status, body } = await post('/restore-save', { secret: secret(), playerId: pid, index: idx });
   show('restoreOut', body, status === 200 ? 'ok' : 'err');
   if (status === 200) listHistory();
+}
+
+// ---- 7. 加入プラン --------------------------------------------
+const PLAN_JA = { edo: '江戸', meiji: '明治', sakigake: '魁' };
+const dateJa = (t) => t ? new Date(t).toLocaleDateString('ja-JP') : '-';
+async function subGrant() {
+  if (!secret()) return show('subOut', '先に管理キーを入れてください。');
+  const pid = $('subPlayerId').value.trim();
+  if (!pid) return show('subOut', '船長IDを入れてください。');
+  const plan = $('subPlan').value, months = parseInt($('subMonths').value, 10) || 1;
+  if (!confirm(pid + '\n\n' + PLAN_JA[plan] + 'プランを ' + months + ' か月ぶん登録します。よろしいですか？')) return;
+  const { status, body } = await post('/sub', { secret: secret(), action: 'grant', playerId: pid, plan, months });
+  if (status === 200) show('subOut', (body.name || '（名前未登録）') + ' さん：' + body.planName + '　' + body.untilText + ' まで', 'ok');
+  else show('subOut', body, 'err');
+}
+async function subRevoke() {
+  if (!secret()) return show('subOut', '先に管理キーを入れてください。');
+  const pid = $('subPlayerId').value.trim();
+  if (!pid) return show('subOut', '船長IDを入れてください。');
+  if (!confirm(pid + '\n\nこの人の加入を取り消します。よろしいですか？')) return;
+  const { status, body } = await post('/sub', { secret: secret(), action: 'revoke', playerId: pid });
+  show('subOut', body, status === 200 ? 'ok' : 'err');
+}
+async function subList() {
+  if (!secret()) return show('subOut', '先に管理キーを入れてください。');
+  const { status, body } = await api('/sub?action=list&secret=' + encodeURIComponent(secret()));
+  if (status !== 200) return show('subOut', body, 'err');
+  let h = '<table><tr><th>名前</th><th>プラン</th><th>期限</th><th>状態</th><th>船長ID</th></tr>';
+  body.list.sort((a, b) => (b.until || 0) - (a.until || 0)).forEach(x => {
+    h += '<tr><td>' + escapeHtml(x.name || '-') + '</td><td>' + escapeHtml(PLAN_JA[x.plan] || '-') + '</td><td class="mono">' + dateJa(x.until)
+       + '</td><td>' + (x.active ? '<span class="ok">加入中</span>' : '期限切れ') + '</td><td class="mono">' + escapeHtml(x.playerId) + '</td></tr>';
+  });
+  $('subOut').innerHTML = h + '</table>';
+}
+async function subLog() {
+  if (!secret()) return show('subOut', '先に管理キーを入れてください。');
+  const { status, body } = await api('/sub?action=log&secret=' + encodeURIComponent(secret()));
+  if (status !== 200) return show('subOut', body, 'err');
+  let h = '<table><tr><th>日時</th><th>内容</th><th>名前</th><th>期限</th></tr>';
+  body.log.forEach(x => {
+    h += '<tr><td class="mono">' + new Date(x.at).toLocaleString('ja-JP') + '</td><td>' + (x.action === 'grant' ? escapeHtml((PLAN_JA[x.plan] || x.plan) + ' ' + x.months + 'か月') : '取り消し')
+       + '</td><td>' + escapeHtml(x.name || x.playerId) + '</td><td class="mono">' + dateJa(x.until) + '</td></tr>';
+  });
+  $('subOut').innerHTML = h + '</table>';
 }
 
 // ---- 6. シーズン ----------------------------------------------
