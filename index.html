@@ -11150,6 +11150,47 @@ animation:facilitySweep 6s linear infinite;
         }
     }
 
+    // ---- 毎秒の生産を、実際に過ぎた時間で足す ----
+    // 以前は「100msごとに毎秒の1/10を足す」だったので、スマホがスリープしたり、
+    // タブが裏に回ってタイマーが止まると、その間は1隻も増えなかった。
+    // いまは前回からの実際の時間を測って足す。
+    //  ・5秒以内のずれ（端末が重い・裏で1秒に1回しか動かない）は、そのまま全部足す
+    //  ・5秒以上止まっていた（スリープ・ほかのアプリ・ほかのページ）は「留守」とみなし、
+    //    スキルの木の「🌙 留守番」を持っていれば、閉じていたときと同じく毎秒の生産ぶん全部足す
+    //    （金船の黄金時代の×7は留守の間には掛けない）
+    let lastProdTick = 0;
+    function creditProduction() {
+        const now = Date.now();
+        if (!lastProdTick) lastProdTick = now - 100;
+        const dt = (now - lastProdTick) / 1000;
+        lastProdTick = now;
+        if (!(dt > 0)) return;                       // 時計が戻ったときなど
+        if (dt <= 5) {
+            const k = getKPS();
+            if (!isNaN(k)) { const add = k * dt; clickerScore += add; currentLifeScore += add; }
+            return;
+        }
+        if (!(skills.rebellion || s2has('rusuban'))) return;
+        const add = (getKPS() / (frenzyKpsMult || 1)) * dt;
+        if (!isFinite(add) || add <= 0) return;
+        clickerScore += add; currentLifeScore += add;
+        if (dt >= 60) showAwayReport(add, dt);
+        saveGame();
+    }
+    function formatAwayTime(sec) {
+        const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
+        return h > 0 ? h + '時間' + (m ? m + '分' : '') : Math.max(1, m) + '分';
+    }
+    function showAwayReport(amount, sec) {
+        const pop = document.getElementById('offline-popup'), t = document.getElementById('offline-popup-text');
+        if (!pop || !t) return;
+        t.innerHTML = '留守にしていた ' + formatAwayTime(sec) + ' の間も、黒船が作られていました。<br><strong>+'
+            + Math.floor(amount).toLocaleString() + ' 隻</strong>';
+        pop.classList.add('show');
+        clearTimeout(showAwayReport.timer);
+        showAwayReport.timer = setTimeout(() => pop.classList.remove('show'), 6000);
+    }
+
     let uiTickParity = false;
     function initClickerLoop() {
         if (clickerInterval) clearInterval(clickerInterval);
@@ -11174,7 +11215,7 @@ animation:facilitySweep 6s linear infinite;
                 }
             }
             s2GoldTick();   // シーズン2：金船は木で開き、ほぼ一定の間隔で現れる
-            let currentKps = getKPS(); if (!isNaN(currentKps)) { let added = currentKps / 10; clickerScore += added; currentLifeScore += added; }
+            creditProduction();
             checkDigitMilestone();
             if (rankChase && uiTickParity) updateRankChase(false);
             if (clickerScore >= 1000) unlockAchievement('ship1000');
@@ -12550,6 +12591,17 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.2.3",
+            title: "スリープ中も黒船が増える",
+            date: "2026-10-28",
+            content: [
+                "スキルの木の「🌙 留守番」を持っていると、スマホのスリープ中・ほかのアプリを使っている間・音楽堂などほかのページにいる間も、黒船が作られ続けるようになりました。戻ってきたときにまとめて受け取れます（1分以上留守にしていたら、画面の下にお知らせが出ます）。",
+                "これまでは、タブを閉じたときしか受け取れず、開いたままスリープすると1隻も増えていませんでした。",
+                "留守の間は、金船の「黄金時代」（生産×7）は掛かりません。",
+                "毎秒の生産は、実際に過ぎた時間で足すようにしました。端末が重くて動きが遅れても、生産が目減りしなくなります。"
+            ]
+        },
         {
             version: "v4.2.2",
             title: "連打を軽く",
