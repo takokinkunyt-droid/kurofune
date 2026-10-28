@@ -8841,7 +8841,7 @@ animation:facilitySweep 6s linear infinite;
         if (s2has('jouki')) {
             const stCard = document.createElement('div'); stCard.className = 'shop-card special-card'; stCard.id = 'up-steam'; stCard.onclick = () => buySteam();
             stCard.innerHTML = `
-                <div class="shop-info-left"><span class="shop-icon">⚙️</span><div class="shop-details"><h4>蒸気機関の改良</h4><p>クリックに毎秒の生産の <strong>+0.5%</strong> を上乗せ（いま <span id="up-steam-pct">${(s2ClickKpsPct(false) * 100).toFixed(1)}</span>%）</p></div></div>
+                <div class="shop-info-left"><span class="shop-icon">⚙️</span><div class="shop-details"><h4>蒸気機関の改良</h4><p>クリックに毎秒の生産の <strong>+3%</strong> を上乗せ（いま <span id="up-steam-pct">${(s2ClickKpsPct(false) * 100).toFixed(1)}</span>%）</p></div></div>
                 <div class="shop-info-right"><div class="shop-cost" id="up-steam-cost">${formatNumber(steamCost())} 隻</div><div class="shop-count" id="up-steam-level">Lv.${steamLevel}</div></div>
             `;
             container.appendChild(stCard);
@@ -10248,7 +10248,7 @@ animation:facilitySweep 6s linear infinite;
         futago:     ['🛳️', '双子の金船',   'ときどき、金船が2隻同時に現れる。', 80, ['mihari'], 7, 2.7, -3.9],
         // ⚙️ 蒸気（クリック）
         jouki:      ['⚙️', '蒸気機関',     '商会の「強化」に「蒸気機関の改良」が並ぶ（クリックに上乗せされる毎秒の生産の割合を上げる）。', 2, ['shoten'], 0, 1.7, 0.9],
-        boiler:     ['🔥', '高圧ボイラー', '【鍛冶】クリックに上乗せされる毎秒の生産 +0.2%（1段ごと）。', 3, ['jouki'], 0, 2.9, 0.5, 50, 1.5],
+        boiler:     ['🔥', '高圧ボイラー', '【鍛冶】クリックに上乗せされる毎秒の生産 +1%（1段ごと）。', 3, ['jouki'], 0, 2.9, 0.5, 50, 1.5],
         kikanshi:   ['🧑‍🔧', '機関士',     '連打ボーナス：10連打ごとにクリック +5%（最大 +50%）。', 10, ['jouki'], 0, 2.6, 1.9],
         suifu:      ['🌊', '水夫',         '水夫が雇えるようになり、黒船の下に海水が満ちる。', 12, ['jouki'], 5, 3.4, 2.9],
         shio:       ['🐚', '潮の満ち引き', '【鍛冶】海水の効き +10%（1段ごと）。', 5, ['suifu'], 0, 4.6, 3.4, 30, 1.5],
@@ -10302,7 +10302,8 @@ animation:facilitySweep 6s linear infinite;
 
     // ---- クリック：固定ぶん ＋ 毎秒の生産の何％ ----
     function s2ClickKpsPct(critical) {
-        let p = 0.01 + 0.005 * steamLevel + 0.002 * s2lvl('boiler');
+        // 1%だと連打しても施設の数%にしかならなかったので、6%から。蒸気機関は+3%、ボイラーは+1%
+        let p = 0.06 + 0.03 * steamLevel + 0.01 * s2lvl('boiler');
         if (critical && s2has('jokihou')) p *= 2;
         return p;
     }
@@ -12155,6 +12156,16 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.1.1",
+            title: "クリックを強く",
+            date: "2026-10-28",
+            content: [
+                "クリックが施設に比べて弱すぎたので、強くしました。1回のクリックに上乗せされる毎秒の生産が、1% → 6% になりました。1秒に8回押せば、放置のおよそ1.5倍のペースで増えます。",
+                "商会の「蒸気機関の改良」は、1段ごとに +0.5% → +3% になりました。スキルの木の「高圧ボイラー」は、1段ごとに +0.2% → +1% です。育てるほど、クリックが施設を追い越せるようになります。",
+                "バーストは、このクリックにさらに倍率を掛けるので、そのぶん大きく強くなっています。"
+            ]
+        },
         {
             version: "v4.1",
             title: "シーズン2「クリックとかけら」開港",
