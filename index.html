@@ -4754,6 +4754,7 @@ animation:facilitySweep 6s linear infinite;
         .soc-img-btn { padding: 8px 10px; font-size: 1.1rem; }
         .cm-img { display: block; max-width: min(240px, 60vw); max-height: 260px; border-radius: 10px; margin: 2px 0; cursor: zoom-in; background: rgba(0,0,0,0.06); }
         .cm-bubble .cm-img + div { margin-top: 6px; }
+        .cm-img-gone { font-size: 0.8rem; color: #8a7a5a; padding: 4px 0; }
         .soc-img-preview, .soc-img-full { position: fixed; inset: 0; z-index: 99991; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; padding: 16px; }
         .soc-img-preview .sip-box { background: #fff; border-radius: 16px; padding: 14px; width: min(420px, 100%); text-align: center; }
         .soc-img-preview img { max-width: 100%; max-height: 50vh; border-radius: 10px; }
@@ -4853,6 +4854,17 @@ animation:facilitySweep 6s linear infinite;
 
             /* 閉じたメニューの影が、画面の左はしに黒くはみ出していた */
             #sidebar:not(.mobile-open) { box-shadow: none !important; }
+
+            /* 画面の下に広告があるとき、各ページのいちばん下が広告に隠れないよう、広告の高さぶんの余白を最後に足す */
+            .screen:not(#screen-clicker):not(#screen-tree):not(#screen-plan)::after {
+                content: ''; display: block; flex: 0 0 var(--admax-h, 0px); height: var(--admax-h, 0px);
+            }
+            /* ソーシャル：入力欄はいつも広告のすぐ上に見えるようにする（下に貼り付けて、会話の欄は画面に収まる高さに） */
+            #screen-social .soc-input-row {
+                position: sticky; bottom: var(--admax-h, 0px); z-index: 3;
+                background: var(--bg-color, #f4f1ea); margin-top: 0; padding: 8px 0 10px;
+            }
+            #screen-social .soc-chat { height: clamp(200px, calc(100dvh - 330px - var(--admax-h, 0px) - var(--admax-top, 0px)), 520px); }
         }
         /* スマホを横にしたとき：高さが足りず黒船が数字に重なるので、小さくして下に置く */
         @media (max-width: 900px) and (max-height: 500px) {
@@ -11500,6 +11512,11 @@ animation:facilitySweep 6s linear infinite;
             where === 'dm' ? loadDm(true) : loadLounge(false);
         }).catch(() => { inp.value = text; alertSocial('送れませんでした'); });
     }
+    // 30日たった・管理人が消した画像は、壊れた絵ではなく一言で出す
+    function socialImgGone(img) {
+        const d = document.createElement('div'); d.className = 'cm-img-gone'; d.textContent = '🖼 この画像はもう見られません';
+        img.replaceWith(d);
+    }
     function openSocialImage(src) {
         const bg = document.createElement('div'); bg.className = 'soc-img-full';
         bg.innerHTML = '<img src="' + src + '" alt="画像">';
@@ -11644,7 +11661,7 @@ animation:facilitySweep 6s linear infinite;
             ? '<div class="cm-who">' + nameHtml(m.name, m.style) + ' <span class="cm-lv">Lv.' + (m.lv || 1) + '</span></div>' : '';
         const menu = m.mine ? '' : '<button class="cm-menu" title="通報など" onclick="chatMenu(\'' + kind + '\', \'' + m.id + '\')">⋯</button>';
         return '<div class="cm ' + (m.mine ? 'mine' : 'theirs') + '">' + (m.mine ? '' : who)
-            + '<div class="cm-bubble">' + (m.g ? '<img class="cm-img" src="' + socialImgUrl(m.g) + '" loading="lazy" alt="画像" onclick="openSocialImage(this.src)">' : '')
+            + '<div class="cm-bubble">' + (m.g ? '<img class="cm-img" src="' + socialImgUrl(m.g) + '" loading="lazy" alt="画像" onclick="openSocialImage(this.src)" onerror="socialImgGone(this)">' : '')
             + (m.x ? '<div>' + escapeHtml(m.x).replace(/\n/g, '<br>') + '</div>' : '') + '</div>'
             + '<div class="cm-meta">' + timeText(m.t) + menu + '</div></div>';
     }
@@ -13291,6 +13308,15 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.4.1",
+            title: "スマホでソーシャルの入力欄が広告に隠れるのを修正",
+            date: "2026-10-29",
+            content: [
+                "スマホで、DMや談話室の入力欄・送信ボタンが画面の下の広告に隠れて、メッセージを送れないことがあったのを直しました。入力欄はいつも広告のすぐ上に出ます。",
+                "ほかのページも、いちばん下の部分が広告に隠れないよう、広告の高さぶんだけ下まで動かせるようにしました。"
+            ]
+        },
         {
             version: "v4.4",
             title: "超魁プランを始めます／江戸プランは終了",
