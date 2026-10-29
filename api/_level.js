@@ -8,14 +8,14 @@
 //   実績1つ            … 20（珍しい実績は 50）
 //   転生1回            … 50
 //   遊んだ日（1日1回）  … 10
-//   加入プラン          … 毎月 江戸100・明治300・魁600（サーバーが月ごとに記録して足す）
+//   加入プラン          … 毎月 明治300・魁600・超魁1500（サーバーが月ごとに記録して足す）
 //
 // 次のレベルまでに必要な EXP ＝ floor(100 × いまのレベル^1.5)
 // =====================================================================
 
 const LEVEL_KEY = 'level_rank:s2';          // 次のシーズンでは名前を変える（＝0から）
 const SUBEXP_PREFIX = 'subexp:s2:';
-const PLAN_MONTHLY_EXP = { edo: 100, meiji: 300, sakigake: 600 };
+const PLAN_MONTHLY_EXP = { edo: 100, meiji: 300, sakigake: 600, cho: 1500 };   // 江戸は廃止（残っている記録のためだけに置いてある）
 
 const RARE_ACH = new Set(['music', 'noEasy', 'perryFan', 'perryAnti', 'classicShip', 'fastClick', 'deleteSave',
   'flagLover', 'clickLover', 'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);

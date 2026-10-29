@@ -3741,6 +3741,7 @@
         .plan-card ul { margin: 0; padding-left: 1.2em; font-size: .9rem; line-height: 1.7; }
         .plan-card .pc-now { position: absolute; top: 12px; right: 12px; background: var(--gold-color); color: #3a1d0a; font-weight: 900; font-size: .75rem; padding: 2px 10px; border-radius: 10px; }
         .plan-edo { border-top: 6px solid #8b5a2b; } .plan-meiji { border-top: 6px solid #2e5c8a; } .plan-sakigake { border-top: 6px solid #8a1a10; }
+        .plan-cho { border-top: 6px solid #d4af37; background: linear-gradient(180deg, #fffaf0, #fff) !important; }
         .plan-how, .plan-style { margin-top: 18px; background: #fff; border-radius: 14px; padding: 16px; border: 1px solid rgba(0,0,0,0.08); }
         .plan-how h3, .plan-style h3 { margin: 0 0 8px; font-size: 1.05rem; }
         .plan-how p, .plan-style p { margin: 6px 0; font-size: .92rem; line-height: 1.7; }
@@ -3755,6 +3756,7 @@
         .ps-msg { font-size: .85rem; color: #2f6b2f; min-height: 1.2em; }
         .sub-badge { display: inline-block; margin-left: 6px; font-size: .72rem; font-weight: 900; padding: 1px 8px; border-radius: 10px; vertical-align: middle; }
         .sub-badge.sakigake { background: #8a1a10; color: #ffe3a0; }
+        .sub-badge.cho { background: linear-gradient(90deg, #b8860b, #ffd36b, #b8860b); color: #3a1d0a; }
         .sub-badge.meiji { padding: 0 2px; }
         /* ネームプレート（ランキングの行） */
         .plate-wood { background: linear-gradient(180deg, #d9a86c, #b27a3e) !important; border: 2px solid #6b4422 !important; color: #2b1606; }
@@ -4749,6 +4751,15 @@ animation:facilitySweep 6s linear infinite;
         .cm.theirs .cm-bubble { background: #efe4c8; color: #2a1408; border-bottom-left-radius: 4px; }
         .cm-meta { font-size: 0.68rem; color: #aaa; margin: 2px 6px 0; display: flex; align-items: center; gap: 4px; }
         .cm-menu { border: none; background: none; color: #aaa; cursor: pointer; font-size: 0.9rem; padding: 0 4px; }
+        .soc-img-btn { padding: 8px 10px; font-size: 1.1rem; }
+        .cm-img { display: block; max-width: min(240px, 60vw); max-height: 260px; border-radius: 10px; margin: 2px 0; cursor: zoom-in; background: rgba(0,0,0,0.06); }
+        .cm-bubble .cm-img + div { margin-top: 6px; }
+        .soc-img-preview, .soc-img-full { position: fixed; inset: 0; z-index: 99991; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .soc-img-preview .sip-box { background: #fff; border-radius: 16px; padding: 14px; width: min(420px, 100%); text-align: center; }
+        .soc-img-preview img { max-width: 100%; max-height: 50vh; border-radius: 10px; }
+        .soc-img-preview .sip-note { font-size: 0.82rem; color: #6b5a3a; line-height: 1.7; margin: 10px 4px; text-align: left; }
+        .soc-img-preview .sip-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .soc-img-full img { max-width: 100%; max-height: 100%; border-radius: 8px; }
         .soc-sheet-bg { position: fixed; inset: 0; z-index: 99990; background: rgba(0,0,0,0.4); display: flex; align-items: flex-end; justify-content: center;
                         animation: ssFade .15s ease-out; }
         .soc-sheet { width: min(480px, calc(100% - 16px)); margin-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); animation: ssUp .22s cubic-bezier(.2,.9,.3,1); }
@@ -5310,16 +5321,19 @@ animation:facilitySweep 6s linear infinite;
                         <div class="soc-convo-head"><button class="soc-btn" onclick="closeDm()">← 戻る</button><span id="social-dm-with"></span></div>
                         <div class="soc-chat" id="social-dm-msgs"></div>
                         <div class="soc-input-row">
+                            <button class="soc-btn soc-img-btn" style="display:none;" title="画像を送る（超魁プラン）" onclick="pickSocialImage('dm')">📷</button>
                             <textarea id="social-dm-input" rows="1" maxlength="200" placeholder="メッセージ（200文字まで）"></textarea>
                             <button class="soc-btn primary" onclick="sendDm()">送信</button>
                         </div>
                     </div>
                 </div>
 
+                <input type="file" id="social-img-file" accept="image/*" style="display:none;">
                 <div class="social-panel" id="social-panel-lounge">
                     <div class="soc-lounge-note">⚓ 黒船談話室S2 ― 誰でも話せる部屋です。やさしい言葉で話そう。</div>
                     <div class="soc-chat" id="social-lounge-msgs"><div class="soc-empty">読み込み中…</div></div>
                     <div class="soc-input-row">
+                        <button class="soc-btn soc-img-btn" style="display:none;" title="画像を送る（超魁プラン）" onclick="pickSocialImage('lounge')">📷</button>
                         <textarea id="social-lounge-input" rows="1" maxlength="200" placeholder="談話室に書く（200文字まで）"></textarea>
                         <button class="soc-btn primary" onclick="sendLounge()">送信</button>
                     </div>
@@ -11147,9 +11161,11 @@ animation:facilitySweep 6s linear infinite;
     //   お金は開発者が直接受け取り、管理コンソールで登録する。
     //   ここでは自分のプランを読み、特典（広告なし・見た目・テーマ・限定意匠）を効かせる。
     // =====================================================================
-    const SUB_LEVEL = { edo: 1, meiji: 2, sakigake: 3 };
-    const SUB_NAME  = { edo: '江戸プラン', meiji: '明治プラン', sakigake: '魁プラン' };
-    const SUB_PRICE = { edo: 10, meiji: 50, sakigake: 100 };
+    // 江戸プランは廃止（新しくは入れない。残っている記録を読むためだけに置いてある）
+    const SUB_LEVEL = { edo: 1, meiji: 2, sakigake: 3, cho: 4 };
+    const SUB_NAME  = { edo: '江戸プラン', meiji: '明治プラン', sakigake: '魁プラン', cho: '超魁プラン' };
+    const SUB_PRICE = { edo: 10, meiji: 50, sakigake: 100, cho: 1500 };
+    const SUB_ON_SALE = ['meiji', 'sakigake', 'cho'];
     const SUB_COLORS = { default: null, gold: '#d4af37', red: '#e74c3c', blue: '#2e86de', green: '#27ae60',
                          purple: '#8e44ad', pink: '#e84393', orange: '#e67e22', teal: '#16a085' };
     const SUB_COLOR_LABEL = { default: 'ふつう', gold: '金', red: '紅', blue: '藍', green: '若葉', purple: '紫', pink: '桃', orange: '橙', teal: '青緑' };
@@ -11209,6 +11225,7 @@ animation:facilitySweep 6s linear infinite;
         }
         const nav = document.getElementById('nav-plan');
         if (nav) nav.querySelector('.nav-text').textContent = lv ? SUB_NAME[mySub.plan] : '加入プラン';
+        if (typeof updateSocialImageButtons === 'function') updateSocialImageButtons();
     }
 
     // ---- サイト全体のテーマ ----
@@ -11236,7 +11253,8 @@ animation:facilitySweep 6s linear infinite;
         if (!sub) return n;
         const color = SUB_COLORS[sub.color] || '';
         const font = (SUB_FONTS[sub.font] || SUB_FONTS.default).css;
-        const badge = sub.plan === 'sakigake' ? '<span class="sub-badge sakigake">⚔️ 魁</span>' : '<span class="sub-badge meiji">🏯</span>';
+        const badge = sub.plan === 'cho' ? '<span class="sub-badge cho">👑 超魁</span>'
+            : sub.plan === 'sakigake' ? '<span class="sub-badge sakigake">⚔️ 魁</span>' : '<span class="sub-badge meiji">🏯</span>';
         return '<span style="' + (color ? 'color:' + color + ';' : '') + (font ? 'font-family:' + font + ';' : '') + '">' + n + '</span>' + badge;
     }
 
@@ -11261,18 +11279,19 @@ animation:facilitySweep 6s linear infinite;
         const st = (mySub && mySub.style) || {};
         const untilText = lv ? new Date(mySub.until).toLocaleDateString('ja-JP') : '';
         const perks = {
-            edo: ['広告が出なくなる', '毎月 +100 EXP（レベル）'],
             meiji: ['広告が出なくなる', '毎月 +300 EXP（レベル）', 'ランキングの名前の色・フォントを変えられる', 'ランキングにネームプレート（木札・金箔など）', 'サイト全体のテーマ（桜・雪・黄金の浦賀）'],
             sakigake: ['明治プランの特典すべて', '毎月 +600 EXP（レベル）', '毎月、加入者限定の黒船の意匠（見た目だけ）', 'ランキングの名前の横に「⚔️ 魁」の印', '新しい要素を一足先に試せる（先行体験）',
-                       '自分の考えた実績やスキルの名前がゲームに入るかも', '殿堂に「シーズンを支えた人」として名前が残る', '開発に参加できる'],
+                       '自分の考えた実績やスキルの名前がゲームに入るかも', '殿堂に「シーズンを支えた人」として名前が残る'],
+            cho: ['魁プランの特典すべて', '毎月 Discord Nitro Basic をプレゼント（Discordのアカウントが必要。Discordは13歳から）', '毎月 +1500 EXP（レベル。魁の600の代わり）',
+                  'ソーシャルで画像を送れる（DM・談話室）', 'ランキングの名前の横に「👑 超魁」の印', '開発に参加できる'],
         };
         let h = '<div class="plan-wrap">'
             + '<div class="plan-head"><h2 class="serif-font">🎫 加入プラン</h2>'
             + '<p>' + (lv ? '<b>' + SUB_NAME[cur] + '</b> に加入中（' + untilText + ' まで）。いつも応援ありがとうございます！' : 'いまは加入していません。') + '</p></div>'
             + '<div class="plan-cards">';
-        ['edo', 'meiji', 'sakigake'].forEach(p => {
+        SUB_ON_SALE.forEach(p => {
             h += '<div class="plan-card plan-' + p + (cur === p ? ' current' : '') + '">'
-               + '<div class="pc-name">' + SUB_NAME[p] + '</div><div class="pc-price">月 <b>' + SUB_PRICE[p] + '</b> 円</div>'
+               + '<div class="pc-name">' + SUB_NAME[p] + '</div><div class="pc-price">月 <b>' + SUB_PRICE[p].toLocaleString() + '</b> 円</div>'
                + '<ul>' + perks[p].map(x => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul>'
                + (cur === p ? '<div class="pc-now">加入中</div>' : '') + '</div>';
         });
@@ -11413,11 +11432,87 @@ animation:facilitySweep 6s linear infinite;
         const sc = document.getElementById('screen-social');
         return !!(sc && sc.classList.contains('active')) && !document.hidden;
     }
+    // ---- 画像（超魁プラン） ----
+    // 端末の中で縮めて JPEG に描き直してから送る。描き直すので、写真に入っている位置情報（GPS）などは消える。
+    function socialImgUrl(id) { return getNetlifyFunctionUrl('social') + '?img=' + encodeURIComponent(id); }
+    function updateSocialImageButtons() {
+        const ok = subLevel() >= 4;
+        document.querySelectorAll('.soc-img-btn').forEach(b => { b.style.display = ok ? '' : 'none'; });
+    }
+    let socialImgTarget = null;
+    function pickSocialImage(where) {
+        if (subLevel() < 4) return alertSocial('画像を送れるのは超魁プランの人だけです');
+        socialImgTarget = where;
+        const f = document.getElementById('social-img-file');
+        f.value = ''; f.click();
+    }
+    function shrinkImage(file) {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                let side = 720, q = 0.78, out = '';
+                for (let i = 0; i < 8; i++) {
+                    const k = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+                    const c = document.createElement('canvas');
+                    c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k));
+                    const ctx = c.getContext('2d');
+                    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+                    ctx.drawImage(img, 0, 0, c.width, c.height);
+                    out = c.toDataURL('image/jpeg', q);
+                    if (out.length <= 200000) return resolve(out);
+                    if (q > 0.55) q -= 0.1; else side = Math.round(side * 0.8);
+                }
+                out.length <= 200000 ? resolve(out) : reject(new Error('big'));
+            };
+            img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('read')); };
+            img.src = url;
+        });
+    }
+    function onSocialImageChosen() {
+        const f = document.getElementById('social-img-file');
+        const file = f.files && f.files[0]; if (!file) return;
+        if (!/^image\//.test(file.type || 'image/')) return alertSocial('画像を選んでください');
+        shrinkImage(file).then(dataUrl => {
+            const where = socialImgTarget;
+            const bg = document.createElement('div'); bg.className = 'soc-img-preview'; bg.id = 'soc-img-preview';
+            bg.innerHTML = '<div class="sip-box"><img src="' + dataUrl + '" alt="送る画像"><div class="sip-note">'
+                + (where === 'lounge' ? '談話室に送ると、<b>誰でも</b>見られます。' : 'この画像をフレンドに送ります。')
+                + '<br>顔・名札・制服・家の近くなど、住んでいる場所や学校が分かる写真は送らないでね。</div>'
+                + '<div class="sip-btns"><button class="soc-btn" data-a="no">やめる</button><button class="soc-btn primary" data-a="yes">送る</button></div></div>';
+            bg.addEventListener('click', e => {
+                const b = e.target.closest('button');
+                if (e.target === bg || (b && b.dataset.a === 'no')) return bg.remove();
+                if (b && b.dataset.a === 'yes') { bg.remove(); sendSocialImage(where, dataUrl); }
+            });
+            document.body.appendChild(bg);
+        }).catch(() => alertSocial('この画像は読み込めませんでした'));
+    }
+    function sendSocialImage(where, dataUrl) {
+        const inp = document.getElementById(where === 'dm' ? 'social-dm-input' : 'social-lounge-input');
+        const text = (inp.value || '').trim();
+        const payload = where === 'dm' ? { code: socialState.dmWith, text, image: dataUrl } : { text, image: dataUrl };
+        if (where === 'dm' && !socialState.dmWith) return;
+        inp.value = '';
+        socialApi(where === 'dm' ? 'dm_send' : 'lounge_send', payload).then(d => {
+            if (!d.success) { inp.value = text; return alertSocial(d.error); }
+            where === 'dm' ? loadDm(true) : loadLounge(false);
+        }).catch(() => { inp.value = text; alertSocial('送れませんでした'); });
+    }
+    function openSocialImage(src) {
+        const bg = document.createElement('div'); bg.className = 'soc-img-full';
+        bg.innerHTML = '<img src="' + src + '" alt="画像">';
+        bg.addEventListener('click', () => bg.remove());
+        document.body.appendChild(bg);
+    }
+
     function openSocial(nav) {
         switchScreen('screen-social', nav || document.getElementById('nav-social'));
         showSocialError('');
         const nm = document.getElementById('social-myname'); if (nm) nm.textContent = playerName || '名無しの船長';
         updateLevelUi();
+        updateSocialImageButtons();
         socialTab(socialState.tab);
         loadSocialMe();
     }
@@ -11549,7 +11644,8 @@ animation:facilitySweep 6s linear infinite;
             ? '<div class="cm-who">' + nameHtml(m.name, m.style) + ' <span class="cm-lv">Lv.' + (m.lv || 1) + '</span></div>' : '';
         const menu = m.mine ? '' : '<button class="cm-menu" title="通報など" onclick="chatMenu(\'' + kind + '\', \'' + m.id + '\')">⋯</button>';
         return '<div class="cm ' + (m.mine ? 'mine' : 'theirs') + '">' + (m.mine ? '' : who)
-            + '<div class="cm-bubble">' + escapeHtml(m.x).replace(/\n/g, '<br>') + '</div>'
+            + '<div class="cm-bubble">' + (m.g ? '<img class="cm-img" src="' + socialImgUrl(m.g) + '" loading="lazy" alt="画像" onclick="openSocialImage(this.src)">' : '')
+            + (m.x ? '<div>' + escapeHtml(m.x).replace(/\n/g, '<br>') + '</div>' : '') + '</div>'
             + '<div class="cm-meta">' + timeText(m.t) + menu + '</div></div>';
     }
     function scrollChat(el, force) {
@@ -11665,6 +11761,8 @@ animation:facilitySweep 6s linear infinite;
                 if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); id === 'social-dm-input' ? sendDm() : sendLounge(); }
             });
         });
+        const imf = document.getElementById('social-img-file');
+        if (imf) imf.addEventListener('change', onSocialImageChosen);
         const add = document.getElementById('social-add-code');
         if (add) add.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) sendFriendRequest(); });
         setTimeout(pollSocialCounts, 4000);
@@ -13194,6 +13292,18 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v4.4",
+            title: "超魁プランを始めます／江戸プランは終了",
+            date: "2026-10-29",
+            content: [
+                "新しく「👑 超魁プラン」（月1,500円）を始めます。魁プランの特典すべてに加えて、毎月の Discord Nitro Basic のプレゼント、毎月 +1500 EXP（魁の600の代わり）、ソーシャルでの画像の投稿（DM・談話室）、ランキングの「👑 超魁」の印、開発への参加があります。",
+                "「開発に参加できる」は、魁プランから超魁プランの特典になりました。",
+                "江戸プランは終了しました。広告が出ないのは明治プランからです。",
+                "画像は、送る前に端末の中で小さく描き直すので、写真に入っている位置情報などは消えます。画像は30日で消えます。1日20枚まで。いやな画像は、ほかの発言と同じく「⋯」から通報できます。",
+                "Discord は13歳から使えるサービスです。超魁プランに申し込むときは、必ずおうちの人の了解をもらってください。"
+            ]
+        },
+        {
             version: "v4.3.2",
             title: "スマホは小さい広告に",
             date: "2026-10-29",
@@ -13839,7 +13949,7 @@ animation:facilitySweep 6s linear infinite;
         var adFree = false;
         try {
             var s = JSON.parse(localStorage.getItem('kurofuneSub') || 'null');
-            adFree = !!(s && s.until > Date.now() && { edo: 1, meiji: 1, sakigake: 1 }[s.plan]);
+            adFree = !!(s && s.until > Date.now() && { edo: 1, meiji: 1, sakigake: 1, cho: 1 }[s.plan]);
         } catch (e) {}
         if (adFree) return;
         var phone = false;

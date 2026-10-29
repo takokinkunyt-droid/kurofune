@@ -15,8 +15,10 @@ const { redisRequest, redisPipeline, parseBody, CORS } = require('./_redis');
 //  POST { secret, action:'revoke', playerId }               … 取り消し（管理）
 // =====================================================================
 
-const PLANS = { edo: 1, meiji: 2, sakigake: 3 };
-const PLAN_NAMES = { edo: '江戸プラン', meiji: '明治プラン', sakigake: '魁プラン' };
+// 江戸プランは廃止（新しくは登録できない。残っている記録を読むためだけに置いてある）
+const PLANS = { edo: 1, meiji: 2, sakigake: 3, cho: 4 };
+const PLAN_NAMES = { edo: '江戸プラン', meiji: '明治プラン', sakigake: '魁プラン', cho: '超魁プラン' };
+const GRANTABLE = { meiji: 1, sakigake: 1, cho: 1 };
 const MONTH_MS = 30 * 24 * 3600 * 1000;
 // 見た目は決まった選択肢だけ受け付ける（好きな文字列を入れられると、ランキングに何でも書けてしまう）
 const STYLE_CHOICES = {
@@ -91,7 +93,7 @@ module.exports = async (req, res) => {
 
       if (body.action === 'grant') {
         const plan = body.plan;
-        if (!PLANS[plan]) return res.status(400).json({ error: 'Bad plan' });
+        if (!GRANTABLE[plan]) return res.status(400).json({ error: 'Bad plan' });
         const months = Math.max(1, Math.min(12, parseInt(body.months, 10) || 1));
         const cur = await readSub(playerId);
         const now = Date.now();
@@ -107,7 +109,7 @@ module.exports = async (req, res) => {
           ['lpush', 'sub_log', JSON.stringify({ at: now, action: 'grant', playerId, name, plan, months, until: next.until })],
           ['ltrim', 'sub_log', 0, 999],
         ];
-        if (plan === 'sakigake' || keepPlan === 'sakigake') cmds.push(['sadd', 'sakigake_supporters', playerId]);
+        if (PLANS[plan] >= PLANS.sakigake || PLANS[keepPlan] >= PLANS.sakigake) cmds.push(['sadd', 'sakigake_supporters', playerId]);
         await redisPipeline(cmds);
         return res.status(200).json({ success: true, playerId, name, plan: next.plan, planName: PLAN_NAMES[next.plan],
                                       until: next.until, untilText: new Date(next.until).toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' }) });

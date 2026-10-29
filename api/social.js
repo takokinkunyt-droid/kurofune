@@ -28,6 +28,12 @@ const LV = require('./_level');
 //  admin_reports              … 通報の一覧
 //  admin_dm   { reportAt }    … 通報された会話だけ読める（通報されていない会話は読めない）
 //  admin_lounge_delete { msgId }
+//  admin_img_delete { imgId }  … 画像を消す（通報された画像など）
+//
+// 画像（超魁プランだけ。DM・談話室）
+//  dm_send / lounge_send に image（端末で縮めたJPEGの data URL）を付けると、画像つきで送れる。
+//  端末側で縮めて描き直すので、写真の位置情報（GPS）などは残らない。サーバーでも形式と大きさを確かめる。
+//  画像は30日で消える。1人1日20枚まで。見るときは GET ?img=<id>
 //  admin_mute / admin_unmute { playerId } … 話す機能（DM・談話室・申請）だけ止める。ゲームとセーブはそのまま
 //
 // 安全のための決まり
@@ -53,6 +59,7 @@ const NG_WORDS = ['死ね', 'しね', 'シネ', '氏ね', '殺す', 'ころす',
 module.exports = async (req, res) => {
   Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
   if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'GET' && req.query && req.query.img) return serveImage(String(req.query.img), res);
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
@@ -104,9 +111,9 @@ module.exports = async (req, res) => {
       case 'block':       return res.status(200).json(await doBlock(me, body.code));
       case 'unblock':     return res.status(200).json(await doUnblock(me, body.code));
       case 'dm_get':      return res.status(200).json(await dmGet(me, body.code));
-      case 'dm_send':     return res.status(200).json(await dmSend(me, myName, body.code, body.text, shadow));
+      case 'dm_send':     return res.status(200).json(await dmSend(me, myName, body.code, body.text, shadow, body.image));
       case 'lounge_get':  return res.status(200).json(await loungeGet(me, Number(body.since) || 0));
-      case 'lounge_send': return res.status(200).json(await loungeSend(me, myName, body.text, shadow));
+      case 'lounge_send': return res.status(200).json(await loungeSend(me, myName, body.text, shadow, body.image));
       case 'report':      return res.status(200).json(await doReport(me, body));
       default:            return res.status(400).json({ error: 'Unknown action' });
     }
@@ -331,28 +338,31 @@ async function dmGet(me, code) {
   for (const s of raw) {
     let m; try { m = JSON.parse(s); } catch (e) { continue; }
     if (m.sb && m.f !== me) continue;                 // シャドウBANの人の発言は本人にだけ
-    msgs.push({ id: m.i, mine: m.f === me, t: m.t, x: m.x });
+    msgs.push({ id: m.i, mine: m.f === me, t: m.t, x: m.x, g: m.g || null });
   }
   msgs.reverse();
   await redisRequest(['hset', `dm_read:${me}`, other, Date.now()]);
   return { success: true, messages: msgs };
 }
-async function dmSend(me, myName, code, text, shadow) {
+async function dmSend(me, myName, code, text, shadow, image) {
   const other = await idOfCode(code);
   if (!other) return { success: false, error: '見つかりませんでした' };
   const [isFriend, theyBlocked] = await redisPipeline([['sismember', `friends:${me}`, other], ['sismember', `blocks:${other}`, me]]);
   if (isFriend.result !== 1) return { success: false, error: 'フレンドとだけDMできます' };
   const x = cleanText(text);
-  if (!x) return { success: false, error: '何か書いてください' };
+  if (!x && !image) return { success: false, error: '何か書いてください' };
   if (!(await rateOk(me))) return { success: false, error: '送るのが速すぎます。少し待ってください' };
+  let g = null;
+  if (image) { const up = await storeImage(me, image); if (up.error) return { success: false, error: up.error }; g = up.id; }
   const now = Date.now();
   const m = { i: msgId(), f: me, t: now, x };
+  if (g) m.g = g;
   if (shadow || theyBlocked.result === 1) m.sb = 1;  // 相手には見えない
   const key = convoKey(me, other);
   const cmds = [['lpush', key, JSON.stringify(m)], ['ltrim', key, 0, DM_KEEP - 1], ['hset', `dm_read:${me}`, other, now]];
   if (!m.sb) cmds.push(['hset', `dm_last:${other}`, me, now], ['set', 'dml:' + key, now, 'EX', 90 * 86400]);
   await redisPipeline(cmds);
-  return { success: true, message: { id: m.i, mine: true, t: now, x } };
+  return { success: true, message: { id: m.i, mine: true, t: now, x, g } };
 }
 
 // ---------------------------------------------------------------- 談話室
@@ -365,23 +375,63 @@ async function loungeGet(me, since) {
     if (m.t <= since) continue;
     if (m.sb && m.f !== me) continue;
     if (blocked.has(m.f)) continue;
-    msgs.push({ id: m.i, mine: m.f === me, t: m.t, x: m.x, name: m.n, code: m.c ? showCode(m.c) : null, lv: m.lv || 1, style: m.s || null });
+    msgs.push({ id: m.i, mine: m.f === me, t: m.t, x: m.x, g: m.g || null, name: m.n, code: m.c ? showCode(m.c) : null, lv: m.lv || 1, style: m.s || null });
   }
   msgs.reverse();
   return { success: true, messages: msgs };
 }
-async function loungeSend(me, myName, text, shadow) {
+async function loungeSend(me, myName, text, shadow, image) {
   const x = cleanText(text);
-  if (!x) return { success: false, error: '何か書いてください' };
+  if (!x && !image) return { success: false, error: '何か書いてください' };
   if (!(await rateOk(me))) return { success: false, error: '送るのが速すぎます。少し待ってください' };
+  let g = null;
+  if (image) { const up = await storeImage(me, image); if (up.error) return { success: false, error: up.error }; g = up.id; }
   const [c, lv, sub] = await redisPipeline([['get', `fcode_of:${me}`], ['zscore', LV.LEVEL_KEY, me], ['get', `sub:${me}`]]);
   const m = { i: msgId(), f: me, t: Date.now(), x, n: cleanText(myName).slice(0, 20) || '名無しの船長', c: c.result || null,
               lv: LV.levelFromExp(Number(lv.result) || 0).level, s: styleOf(sub.result) };
+  if (g) m.g = g;
   if (shadow) m.sb = 1;
   const lc = [['lpush', 'lounge:s2', JSON.stringify(m)], ['ltrim', 'lounge:s2', 0, LOUNGE_KEEP - 1]];
   if (!shadow) lc.push(['set', 'lounge:s2:last', m.t]);
   await redisPipeline(lc);
-  return { success: true, message: { id: m.i, mine: true, t: m.t, x, name: m.n, code: m.c ? showCode(m.c) : null, lv: m.lv, style: m.s } };
+  return { success: true, message: { id: m.i, mine: true, t: m.t, x, g, name: m.n, code: m.c ? showCode(m.c) : null, lv: m.lv, style: m.s } };
+}
+
+// ---------------------------------------------------------------- 画像（超魁プラン）
+const IMG_MAX_BYTES = 160 * 1024;
+const IMG_PER_DAY = 20;
+const IMG_TTL = 30 * 86400;
+async function storeImage(me, dataUrl) {
+  const sub = await redisRequest(['get', `sub:${me}`]);
+  let sp = null; try { sp = JSON.parse(sub.result); } catch (e) {}
+  if (!sp || !(sp.until > Date.now()) || (PLAN_LEVEL[sp.plan] || 0) < 4) return { error: '画像を送れるのは超魁プランの人だけです' };
+  const mt = /^data:(image\/(?:jpeg|webp));base64,([A-Za-z0-9+/]+={0,2})$/.exec(String(dataUrl || ''));
+  if (!mt) return { error: '画像の形式が違います' };
+  const buf = Buffer.from(mt[2], 'base64');
+  if (!buf.length || buf.length > IMG_MAX_BYTES) return { error: '画像が大きすぎます' };
+  const isJpeg = buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF;
+  const isWebp = buf.slice(0, 4).toString('latin1') === 'RIFF' && buf.slice(8, 12).toString('latin1') === 'WEBP';
+  if (!(mt[1] === 'image/jpeg' ? isJpeg : isWebp)) return { error: '画像の形式が違います' };
+  const day = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+  const dk = `imgday:${me}:${day}`;
+  const c = Number((await redisRequest(['incr', dk])).result) || 0;
+  if (c === 1) await redisRequest(['expire', dk, 2 * 86400]);
+  if (c > IMG_PER_DAY) return { error: '画像は1日' + IMG_PER_DAY + '枚までです' };
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+  await redisRequest(['set', `img:${id}`, JSON.stringify({ t: mt[1], d: mt[2], f: me }), 'EX', IMG_TTL]);
+  return { id };
+}
+async function serveImage(id, res) {
+  if (!/^[a-z0-9]{8,24}$/.test(id)) return res.status(400).json({ error: 'Bad id' });
+  const r = await redisRequest(['get', `img:${id}`]);
+  let o = null; try { o = JSON.parse(r.result); } catch (e) {}
+  if (!o || !o.d) return res.status(404).json({ error: 'この画像は消えました' });
+  const buf = Buffer.from(o.d, 'base64');
+  res.setHeader('Content-Type', o.t === 'image/webp' ? 'image/webp' : 'image/jpeg');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.statusCode = 200;
+  return res.end(buf);
 }
 
 // ---------------------------------------------------------------- 通報
@@ -397,14 +447,14 @@ async function doReport(me, body) {
     const raw = (await redisRequest(['lrange', key, 0, DM_KEEP - 1])).result || [];
     let target = null;
     for (const s of raw) { try { const m = JSON.parse(s); if (m.i === body.msgId) { target = m; break; } } catch (e) {} }
-    entry = { at: now, kind, reporter: me, target: other, convo: key, msgId: body.msgId || null, text: target ? target.x : null, reason };
+    entry = { at: now, kind, reporter: me, target: other, convo: key, msgId: body.msgId || null, text: target ? target.x : null, img: target && target.g || null, reason };
     await redisRequest(['sadd', 'reported_convos', key]);
   } else {
     const raw = (await redisRequest(['lrange', 'lounge:s2', 0, LOUNGE_KEEP - 1])).result || [];
     let target = null;
     for (const s of raw) { try { const m = JSON.parse(s); if (m.i === body.msgId) { target = m; break; } } catch (e) {} }
     if (!target) return { success: false, error: 'その発言は見つかりませんでした' };
-    entry = { at: now, kind, reporter: me, target: target.f, msgId: target.i, text: target.x, name: target.n, reason };
+    entry = { at: now, kind, reporter: me, target: target.f, msgId: target.i, text: target.x, img: target.g || null, name: target.n, reason };
   }
   await redisPipeline([['lpush', 'social_reports', JSON.stringify(entry)], ['ltrim', 'social_reports', 0, 499]]);
   return { success: true };
@@ -432,13 +482,19 @@ async function admin(body, res) {
     const ids = [...new Set(msgs.map(m => m.f))];
     const names = ids.length ? await redisPipeline(ids.map(id => ['get', `sname:${id}`])) : [];
     const nameOf = {}; ids.forEach((id, i) => { nameOf[id] = names[i].result || id; });
-    return res.status(200).json({ success: true, messages: msgs.map(m => ({ from: m.f, name: nameOf[m.f], t: m.t, x: m.x, hidden: !!m.sb, id: m.i })) });
+    return res.status(200).json({ success: true, messages: msgs.map(m => ({ from: m.f, name: nameOf[m.f], t: m.t, x: m.x, g: m.g || null, hidden: !!m.sb, id: m.i })) });
   }
   if (body.action === 'admin_lounge_delete') {
     const raw = (await redisRequest(['lrange', 'lounge:s2', 0, LOUNGE_KEEP - 1])).result || [];
     const hit = raw.find(s => { try { return JSON.parse(s).i === body.msgId; } catch (e) { return false; } });
     if (!hit) return res.status(404).json({ error: 'Not found' });
     await redisRequest(['lrem', 'lounge:s2', 1, hit]);
+    return res.status(200).json({ success: true });
+  }
+  if (body.action === 'admin_img_delete') {
+    const id = String(body.imgId || '');
+    if (!/^[a-z0-9]{8,24}$/.test(id)) return res.status(400).json({ error: 'Bad id' });
+    await redisRequest(['del', `img:${id}`]);
     return res.status(200).json({ success: true });
   }
   if (body.action === 'admin_mute' || body.action === 'admin_unmute') {
@@ -451,7 +507,7 @@ async function admin(body, res) {
 }
 
 // 加入プラン（明治以上）の名前の色・フォント
-const PLAN_LEVEL = { edo: 1, meiji: 2, sakigake: 3 };
+const PLAN_LEVEL = { edo: 1, meiji: 2, sakigake: 3, cho: 4 };
 function styleOf(raw) {
   if (!raw) return null;
   let s; try { s = JSON.parse(raw); } catch (e) { return null; }

@@ -81,7 +81,7 @@ async function levelRanking(req, res, me) {
   return res.status(200).json({ data, count: data.length, success: true });
 }
 
-const PLAN_LEVEL = { edo: 1, meiji: 2, sakigake: 3 };
+const PLAN_LEVEL = { edo: 1, meiji: 2, sakigake: 3, cho: 4 };
 function subView(raw) {
   if (!raw) return null;
   let s; try { s = JSON.parse(raw); } catch (e) { return null; }
