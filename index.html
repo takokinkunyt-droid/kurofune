@@ -9562,9 +9562,12 @@ animation:facilitySweep 6s linear infinite;
         const reincBtn = document.getElementById('reincarnation-btn'), reincHint = document.getElementById('reincarnation-hint');
         const reincLabel = document.getElementById('reincarnation-btn-label');
         let pending = s2PendingFragments();
-
-        if (reincBtn) reincBtn.classList.toggle('super-mode', !!skills.ifSkill);
-        if (reincLabel) reincLabel.textContent = skills.ifSkill ? '超転生' : '輪廻転生';
+        // シーズン1の「もしもの話」（超転生）が残っているセーブがある。シーズン2には超転生は無いので、
+        // 見た目も数字も、必ずシーズン2の転生（実際にもらえるかけら）で出す。
+        // （以前はここで、シーズン1の式で数えた大きな数を出していて、実際にもらえる数と食い違っていた）
+        const oldSuper = !!skills.ifSkill && !S2_ON;
+        if (reincBtn) reincBtn.classList.toggle('super-mode', oldSuper);
+        if (reincLabel) reincLabel.textContent = oldSuper ? '超転生' : '輪廻転生';
 
         if (!REINCARNATION_ENABLED) {
             if (reincBtn) reincBtn.style.display = 'none';
@@ -9583,7 +9586,7 @@ animation:facilitySweep 6s linear infinite;
             }
             const btnDetail = document.getElementById('reincarnation-btn-detail');
             if (btnDetail) {
-                if (skills.ifSkill) {
+                if (oldSuper) {
                     let equivalentFragments = calcEquivalentNormalFragments(currentLifeScore);
                     btnDetail.textContent = `（鎖国のかけら +${getSuperShardGainPreview()} / 開国のかけら +${equivalentFragments}）`;
                 } else {
@@ -13388,6 +13391,15 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.5.1",
+            title: "転生ボタンのかけらの数の表示を修正",
+            date: "2026-10-29",
+            content: [
+                "一部の人で、転生ボタンに「超転生」「開国のかけら +25」のように、実際にもらえる数より多いかけらが表示されていたのを直しました。シーズン1の超転生の記録が残っているセーブで、シーズン1の数え方で表示されていたのが原因です。",
+                "実際にもらえるかけらの数は、これまでも転生の確認画面に出ている数のとおりで、変わっていません。ボタンの表示がそれとそろうようになりました。"
+            ]
+        },
         {
             version: "v4.5",
             title: "見た目の選択肢をプランごとに",
