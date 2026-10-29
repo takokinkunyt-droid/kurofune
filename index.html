@@ -3336,6 +3336,17 @@
             }
             #sidebar, #mobile-sidebar-backdrop { top: var(--admax-top, 0px) !important; }
         }
+        /* スマホ用の広告の枠：画面のいちばん下。メニューを開いても広告の上には重ねない */
+        #admax-sp {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 950;
+            display: flex; justify-content: center; align-items: center;
+            background: rgba(18, 9, 3, 0.94); line-height: 0;
+        }
+        #admax-sp:empty { display: none; }
+        body.menu-open #s2-drawer { visibility: hidden; }
+        @media (max-width: 900px) {
+            #sidebar, #mobile-sidebar-backdrop { bottom: var(--admax-h, 0px) !important; }
+        }
 
         /* ===== 気持ちよさの仕掛け ===== */
         #fest-combo.tier1 .fc-n { color: #ffe08a; }
@@ -6185,6 +6196,7 @@ animation:facilitySweep 6s linear infinite;
         const opening = !sb.classList.contains('mobile-open');
         sb.classList.toggle('mobile-open', opening);
         if (bd) bd.classList.toggle('show', opening);
+        document.body.classList.toggle('menu-open', opening);   // 開いている間は下の棚を隠す（メニューの下の方が隠れないように）
     }
 
     function closeMobileSidebar() {
@@ -6192,6 +6204,7 @@ animation:facilitySweep 6s linear infinite;
         const bd = document.getElementById('mobile-sidebar-backdrop');
         if (sb) sb.classList.remove('mobile-open');
         if (bd) bd.classList.remove('show');
+        document.body.classList.remove('menu-open');
     }
 
     // ==========================================
@@ -13181,6 +13194,15 @@ animation:facilitySweep 6s linear infinite;
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
         {
+            version: "v4.3.2",
+            title: "スマホは小さい広告に",
+            date: "2026-10-29",
+            content: [
+                "スマホでは、画面のいちばん下に小さい広告（横長の帯）が出るようになりました。これまでの大きい広告はPCだけです。施設・強化・生産の棚は、広告のすぐ上に来ます。",
+                "スマホでメニューを開いたとき、下の棚にメニューの下の方が隠れていたのを直しました。"
+            ]
+        },
+        {
             version: "v4.3.1",
             title: "超近代ドック拡張はバーストを覚えてから",
             date: "2026-10-29",
@@ -13801,7 +13823,10 @@ animation:facilitySweep 6s linear infinite;
 </script>
 
 <!-- ==========================================================
-     忍者admax（画面下に貼り付く形式 / 300x250 sticky.bottom）
+     忍者admax
+       PC   … 300x250（画面下に貼り付く形式 / sticky.bottom）
+       スマホ … スマホ用の小さい広告。画面のいちばん下に固定した枠の中に出す
+     どちらか片方だけを読み込む（スマホに大きい広告を出すと黒船の画面を半分覆うため）。
      document.write を使うため、読み込み中に実行される位置へ
      静的に置く必要がある。あとから JS で差し込むと
      ページ全体が上書きされて真っ白になる。
@@ -13816,7 +13841,16 @@ animation:facilitySweep 6s linear infinite;
             var s = JSON.parse(localStorage.getItem('kurofuneSub') || 'null');
             adFree = !!(s && s.until > Date.now() && { edo: 1, meiji: 1, sakigake: 1 }[s.plan]);
         } catch (e) {}
-        if (!adFree) document.write('<script src="https://adm.shinobi.jp/s/3be17414808f98f7b7b8aa2a50d609ac"><\/script>');
+        if (adFree) return;
+        var phone = false;
+        try { phone = window.matchMedia('(max-width: 900px), (pointer: coarse) and (max-height: 520px)').matches; } catch (e) {}
+        if (phone) {
+            // 枠は中身の高さぶんだけ。広告が出なければ高さ0で、何も見えない。
+            // 高さは watchAdHeight が測って、施設・強化・生産の棚をその上へ持ち上げる。
+            document.write('<div id="admax-sp"><script src="https://adm.shinobi.jp/s/2fe2b04a60235fe3f10a20b047761428"><\/script><\/div>');
+        } else {
+            document.write('<script src="https://adm.shinobi.jp/s/3be17414808f98f7b7b8aa2a50d609ac"><\/script>');
+        }
     })();
 </script>
 <!-- admax -->
