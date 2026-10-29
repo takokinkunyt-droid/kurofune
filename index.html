@@ -9250,12 +9250,15 @@ animation:facilitySweep 6s linear infinite;
         `;
         container.appendChild(clickCard);
 
+        // 超近代ドック拡張はバーストの倍率を上げるものなので、スキルの木の「💥 溜め撃ち」（バースト）を持つまで出さない
+        if (s2has('tamedachi')) {
         let superDockCard = document.createElement('div'); superDockCard.className = 'shop-card special-card'; superDockCard.id = 'up-superdock'; superDockCard.onclick = () => buySuperDock();
         superDockCard.innerHTML = `
             <div class="shop-info-left"><span class="shop-icon">🏗️</span><div class="shop-details"><h4>超近代ドック拡張</h4><p>最大バースト倍率を <strong>+1</strong>（いま ×<span id="up-superdock-max">${burstMaxMult()}</span>）</p></div></div>
             <div class="shop-info-right"><div class="shop-cost" id="up-superdock-cost">${formatNumber(upSuperDockCost)} 隻</div><div class="shop-count" id="up-superdock-level">Lv.${superDockLevel}</div></div>
         `;
         container.appendChild(superDockCard);
+        }
 
         if (s2has('jouki')) {
             const stCard = document.createElement('div'); stCard.className = 'shop-card special-card'; stCard.id = 'up-steam'; stCard.onclick = () => buySteam();
@@ -9647,7 +9650,7 @@ animation:facilitySweep 6s linear infinite;
     }
 
     function buySuperDock() {
-        if (clickerScore < upSuperDockCost) return;
+        if (!s2has('tamedachi') || clickerScore < upSuperDockCost) return;
         playSE('buy'); clickerScore -= upSuperDockCost; superDockLevel++;
         upSuperDockCost = Math.floor(upSuperDockCost * SUPER_DOCK_COST_GROWTH);
         updateClickerUI(); flashEffect('shop-area');
@@ -13177,6 +13180,15 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.3.1",
+            title: "超近代ドック拡張はバーストを覚えてから",
+            date: "2026-10-29",
+            content: [
+                "強化の「🏗️ 超近代ドック拡張」（最大バースト倍率 +1）は、スキルの木の「💥 溜め撃ち」でバーストが使えるようになってから棚に並ぶようにしました。バーストを持っていないのに買えてしまい、効果がなかったためです。",
+                "すでに上げていたレベルはそのまま残ります。"
+            ]
+        },
         {
             version: "v4.3",
             title: "ソーシャル（フレンド・DM・談話室）とレベルを追加",
