@@ -1,5 +1,6 @@
 const { redisRequest, redisPipeline, parseBody, CORS } = require('./_redis');
 const LV = require('./_level');
+const SS = require('./_substyle');
 
 // =====================================================================
 // ソーシャル：フレンド・DM・黒船談話室S2
@@ -512,6 +513,6 @@ function styleOf(raw) {
   if (!raw) return null;
   let s; try { s = JSON.parse(raw); } catch (e) { return null; }
   if (!s || !(s.until > Date.now()) || (PLAN_LEVEL[s.plan] || 0) < 2) return null;
-  const st = s.style || {};
-  return { plan: s.plan, color: st.color || 'default', font: st.font || 'default' };
+  const e = SS.effectiveStyle(s.style, s.plan);
+  return { plan: s.plan, color: e.color, font: e.font };
 }

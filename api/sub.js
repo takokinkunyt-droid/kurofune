@@ -1,4 +1,5 @@
 const { redisRequest, redisPipeline, parseBody, CORS } = require('./_redis');
+const SS = require('./_substyle');
 
 // =====================================================================
 // 加入プラン（江戸・明治・魁）
@@ -20,13 +21,8 @@ const PLANS = { edo: 1, meiji: 2, sakigake: 3, cho: 4 };
 const PLAN_NAMES = { edo: '江戸プラン', meiji: '明治プラン', sakigake: '魁プラン', cho: '超魁プラン' };
 const GRANTABLE = { meiji: 1, sakigake: 1, cho: 1 };
 const MONTH_MS = 30 * 24 * 3600 * 1000;
-// 見た目は決まった選択肢だけ受け付ける（好きな文字列を入れられると、ランキングに何でも書けてしまう）
-const STYLE_CHOICES = {
-  color: ['default', 'gold', 'red', 'blue', 'green', 'purple', 'pink', 'orange', 'teal'],
-  font:  ['default', 'mincho', 'dot', 'yusei', 'kurenaido'],
-  plate: ['none', 'wood', 'gold', 'scroll', 'lantern'],
-  theme: ['default', 'sakura', 'yuki', 'kogane'],
-};
+// 見た目は決まった選択肢だけ受け付ける（好きな文字列を入れられると、ランキングに何でも書けてしまう）。
+// どのプランから使えるかは _substyle.js にまとめてある。
 
 module.exports = async (req, res) => {
   Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
@@ -77,9 +73,10 @@ module.exports = async (req, res) => {
         if (!pv.plan || PLANS[pv.plan] < PLANS.meiji) return res.status(403).json({ error: 'Plan required', need: 'meiji' });
         const st = Object.assign({}, sub.style || {});
         const inStyle = body.style || {};
-        for (const k of Object.keys(STYLE_CHOICES)) {
+        for (const k of Object.keys(SS.STYLE_TIER)) {
           if (inStyle[k] != null) {
-            if (!STYLE_CHOICES[k].includes(inStyle[k])) return res.status(400).json({ error: 'Bad ' + k });
+            if (!SS.exists(k, inStyle[k])) return res.status(400).json({ error: 'Bad ' + k });
+            if (!SS.allowed(k, inStyle[k], PLANS[pv.plan])) return res.status(403).json({ error: 'このプランでは選べません', need: SS.STYLE_TIER[k][inStyle[k]] });
             st[k] = inStyle[k];
           }
         }

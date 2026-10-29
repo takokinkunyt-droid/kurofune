@@ -1,5 +1,6 @@
 const { redisRequest, redisPipeline, CORS } = require('./_redis');
 const LV = require('./_level');
+const SS = require('./_substyle');
 
 // ランキングの取得口。
 //
@@ -89,5 +90,6 @@ function subView(raw) {
   const st = s.style || {};
   // 見た目は明治から。江戸は印だけ返さない（広告が消えるだけのプラン）
   if (PLAN_LEVEL[s.plan] < 2) return null;
-  return { plan: s.plan, color: st.color || 'default', font: st.font || 'default', plate: st.plate || 'none' };
+  const e = SS.effectiveStyle(st, s.plan);   // 今のプランで使えない選択は「ふつう」で出す
+  return { plan: s.plan, color: e.color, font: e.font, plate: e.plate };
 }

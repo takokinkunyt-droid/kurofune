@@ -3764,6 +3764,27 @@
         .plate-scroll { background: linear-gradient(90deg, #8a5a2b 0 10px, #f7ecd0 10px calc(100% - 10px), #8a5a2b calc(100% - 10px)) !important; border: 1px solid #8a5a2b !important; }
         .plate-lantern { background: radial-gradient(ellipse at 50% 50%, #ff7a4a, #b0200e) !important; border: 2px solid #3b1606 !important; color: #fff3d6; }
         .plate-lantern div, .plate-lantern span:not([style*="color"]) { color: #fff3d6 !important; }
+        /* 超魁のネームプレート */
+        .plate-sakura { background: linear-gradient(135deg, #fff0f4, #ffc7d6 55%, #ffe3ec) !important; border: 2px solid #e58fa8 !important; }
+        .plate-wave { background: repeating-radial-gradient(circle at 0 120%, #d9f0ff 0 10px, #b7dcf5 10px 20px) !important; border: 2px solid #2f6fa8 !important; }
+        .plate-night { background: radial-gradient(1.5px 1.5px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 70% 60%, #fff, transparent),
+                       radial-gradient(1.5px 1.5px at 85% 25%, #fff8c0, transparent), linear-gradient(180deg, #1b1f4a, #0b0d24) !important; border: 2px solid #6a72d8 !important; color: #eef0ff; }
+        .plate-jade { background: linear-gradient(135deg, #d8f7e6, #7fd3a8 50%, #c6f1da) !important; border: 2px solid #1f6b47 !important; }
+        .plate-ruby { background: linear-gradient(135deg, #ff9aa8, #c4142f 55%, #ff7a8c) !important; border: 2px solid #6a0816 !important; color: #fff3f5; }
+        .plate-rainbow { background: linear-gradient(90deg, #ffd6d6, #ffe9c9, #fffbc9, #dcffd6, #d3ecff, #e6d6ff, #ffd6d6) !important; background-size: 300% 100% !important;
+                         border: 2px solid #c9a7ff !important; animation: plateRainbow 8s linear infinite; }
+        @keyframes plateRainbow { from { background-position: 0 0; } to { background-position: 300% 0; } }
+        body.lite-mode .plate-rainbow { animation: none; }
+        .plate-night div, .plate-night span:not([style*="color"]):not([class^="name-"]), .plate-ruby div, .plate-ruby span:not([style*="color"]):not([class^="name-"]) { color: #fff3f5 !important; }
+        /* 超魁の名前の色：虹・銀 */
+        .name-rainbow { background: linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #007aff, #af52de, #ff3b30); background-size: 200% auto;
+                        -webkit-background-clip: text; background-clip: text; color: transparent !important; animation: nameRainbow 4s linear infinite; }
+        @keyframes nameRainbow { from { background-position: 0 0; } to { background-position: 200% 0; } }
+        body.lite-mode .name-rainbow { animation: none; }
+        .name-silver { background: linear-gradient(180deg, #ffffff 0%, #b8bec4 45%, #6f767d 55%, #d9dde1 100%); -webkit-background-clip: text; background-clip: text;
+                       color: transparent !important; -webkit-text-stroke: 0.4px rgba(60, 64, 70, 0.6); }
+        .ps-opt.locked { opacity: 0.45; cursor: not-allowed; border-style: dashed; }
+        .ps-opt.locked small { margin-left: 4px; font-size: 0.65rem; color: #8a1a10; }
         .plate-wood div[style*="color:#888"], .plate-scroll div[style*="color:#888"] { color: #5a3a1a !important; }
         [class^="plate-"] span[style*="color"] { text-shadow: 0 0 2px #fff, 0 0 4px #fff; }
         #hall-supporters { margin: 18px auto 0; max-width: 760px; padding: 14px 18px; border-radius: 12px; background: rgba(138,26,16,0.06); border: 1px solid rgba(138,26,16,0.25); text-align: center; }
@@ -3784,6 +3805,25 @@
         body[data-theme="sakura"] #screen-tree { background: radial-gradient(circle at 50% 45%, #4a1c35 0%, #26101e 60%, #120610 100%); }
         body[data-theme="yuki"] #screen-tree   { background: radial-gradient(circle at 50% 45%, #2a4a70 0%, #14263e 60%, #08121f 100%); }
         body[data-theme="kogane"] #screen-tree { background: radial-gradient(circle at 50% 45%, #4a3a10 0%, #251b06 60%, #120c02 100%); }
+        /* 超魁のテーマ */
+        body[data-theme="momiji"] { --bg-color: #fbf0e6; --gold-color: #e07a3c; --accent-color: #b5381c; }
+        body[data-theme="umi"]    { --bg-color: #eaf6f8; --gold-color: #3fb0c9; --accent-color: #1b6f8a; }
+        body[data-theme="yoru"]   { --bg-color: #ecebf5; --gold-color: #a99bff; --accent-color: #5a46c8; }
+        body[data-theme="hanabi"] { --bg-color: #f7eef8; --gold-color: #ff6fae; --accent-color: #c2187a; }
+        body[data-theme="momiji"] #sidebar { background: linear-gradient(180deg, #5a2410, #2a0f06) !important; }
+        body[data-theme="umi"] #sidebar    { background: linear-gradient(180deg, #0f3a4a, #06202b) !important; }
+        body[data-theme="yoru"] #sidebar   { background: linear-gradient(180deg, #1d1a3a, #0b0a1c) !important; }
+        body[data-theme="hanabi"] #sidebar { background: linear-gradient(180deg, #2a0f2e, #12061a) !important; }
+        body[data-theme="momiji"] #s2-sky::after, body[data-theme="umi"] #s2-sky::after, body[data-theme="yoru"] #s2-sky::after, body[data-theme="hanabi"] #s2-sky::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+        body[data-theme="momiji"] #s2-sky::after { background: linear-gradient(180deg, rgba(255, 120, 60, 0.24), rgba(255, 170, 90, 0.08)); }
+        body[data-theme="umi"] #s2-sky::after    { background: linear-gradient(180deg, rgba(80, 200, 230, 0.22), rgba(40, 140, 200, 0.10)); }
+        body[data-theme="yoru"] #s2-sky::after   { background: linear-gradient(180deg, rgba(30, 20, 110, 0.32), rgba(60, 40, 140, 0.10)); }
+        body[data-theme="hanabi"] #s2-sky::after { background: linear-gradient(180deg, rgba(120, 20, 90, 0.26), rgba(255, 90, 170, 0.08)); }
+        body[data-theme="momiji"] #screen-tree { background: radial-gradient(circle at 50% 45%, #4a2010 0%, #26100a 60%, #120604 100%); }
+        body[data-theme="umi"] #screen-tree    { background: radial-gradient(circle at 50% 45%, #10485a 0%, #082632 60%, #03121a 100%); }
+        body[data-theme="yoru"] #screen-tree   { background: radial-gradient(circle at 50% 45%, #2a2460 0%, #141032 60%, #07061a 100%); }
+        body[data-theme="hanabi"] #screen-tree { background: radial-gradient(circle at 50% 45%, #4a1440 0%, #250a22 60%, #120410 100%); }
         #theme-fx { position: fixed; inset: 0; z-index: 54; pointer-events: none; overflow: hidden; }
         #theme-fx span { position: absolute; top: -30px; animation: festFall linear infinite; will-change: transform; }
         body.lite-mode #theme-fx { display: none; }
@@ -11179,13 +11219,41 @@ animation:facilitySweep 6s linear infinite;
     const SUB_PRICE = { edo: 10, meiji: 50, sakigake: 100, cho: 1500 };
     const SUB_ON_SALE = ['meiji', 'sakigake', 'cho'];
     const SUB_COLORS = { default: null, gold: '#d4af37', red: '#e74c3c', blue: '#2e86de', green: '#27ae60',
-                         purple: '#8e44ad', pink: '#e84393', orange: '#e67e22', teal: '#16a085' };
-    const SUB_COLOR_LABEL = { default: 'ふつう', gold: '金', red: '紅', blue: '藍', green: '若葉', purple: '紫', pink: '桃', orange: '橙', teal: '青緑' };
+                         purple: '#8e44ad', pink: '#e84393', orange: '#e67e22', teal: '#16a085',
+                         rainbow: '#ff6f61', silver: '#8f979e' };   // 虹・銀は文字に模様を付ける（下の name-rainbow / name-silver）
+    const SUB_COLOR_LABEL = { default: 'ふつう', gold: '金', red: '紅', blue: '藍', green: '若葉', purple: '紫', pink: '桃', orange: '橙', teal: '青緑',
+                              rainbow: '🌈 虹', silver: '🪙 銀' };
+    // gf：あとから読み込む Google Fonts の名前（超魁の書体は、使うときだけ読み込む）
     const SUB_FONTS = { default: { label: 'ふつう', css: '' }, mincho: { label: '明朝', css: "'Shippori Mincho', serif" },
                         dot: { label: 'ドット', css: "'DotGothic16', monospace" }, yusei: { label: 'マジック', css: "'Yusei Magic', sans-serif" },
-                        kurenaido: { label: '手書き', css: "'Zen Kurenaido', sans-serif" } };
-    const SUB_PLATES = { none: 'なし', wood: '木札', gold: '金箔', scroll: '巻物', lantern: '提灯' };
-    const SUB_THEMES = { default: 'いつもの浦賀', sakura: '🌸 桜の浦賀', yuki: '❄️ 雪の浦賀', kogane: '✨ 黄金の浦賀' };
+                        kurenaido: { label: '手書き', css: "'Zen Kurenaido', sans-serif" },
+                        dela: { label: '極太', css: "'Dela Gothic One', sans-serif", gf: 'Dela+Gothic+One' },
+                        hachimaru: { label: 'まるもじ', css: "'Hachi Maru Pop', sans-serif", gf: 'Hachi+Maru+Pop' },
+                        rampart: { label: '立体', css: "'Rampart One', sans-serif", gf: 'Rampart+One' },
+                        reggae: { label: '筆ポップ', css: "'Reggae One', sans-serif", gf: 'Reggae+One' },
+                        yuji: { label: '毛筆', css: "'Yuji Syuku', serif", gf: 'Yuji+Syuku' },
+                        train: { label: '電光', css: "'Train One', sans-serif", gf: 'Train+One' } };
+    const SUB_PLATES = { none: 'なし', wood: '木札', scroll: '巻物', lantern: '提灯', gold: '金箔',
+                         sakura: '🌸 桜', wave: '🌊 波', night: '🌙 星空', jade: '🍀 翡翠', ruby: '💎 紅玉', rainbow: '🌈 虹' };
+    const SUB_THEMES = { default: 'いつもの浦賀', sakura: '🌸 桜の浦賀', yuki: '❄️ 雪の浦賀', kogane: '✨ 黄金の浦賀',
+                         momiji: '🍁 紅葉の浦賀', umi: '🫧 蒼海の浦賀', yoru: '🌙 月夜の浦賀', hanabi: '🎆 花火の浦賀' };
+    // どのプランから使えるか（2＝明治・3＝魁・4＝超魁）。api/_substyle.js と同じにしておくこと。
+    // 明治は各3種類（テーマ2）、魁は今までの全部（色8・書体4・札4、テーマ3）、超魁は各10種類（テーマ7）。
+    const SUB_STYLE_TIER = {
+        color: { default: 2, gold: 2, red: 2, blue: 2, green: 3, purple: 3, pink: 3, orange: 3, teal: 3, rainbow: 4, silver: 4 },
+        font:  { default: 2, mincho: 2, dot: 2, yusei: 2, kurenaido: 3, dela: 4, hachimaru: 4, rampart: 4, reggae: 4, yuji: 4, train: 4 },
+        plate: { none: 2, wood: 2, scroll: 2, lantern: 2, gold: 3, sakura: 4, wave: 4, night: 4, jade: 4, ruby: 4, rainbow: 4 },
+        theme: { default: 2, sakura: 2, yuki: 2, kogane: 3, momiji: 4, umi: 4, yoru: 4, hanabi: 4 },
+    };
+    function subStyleOk(key, val, lvl) { const t = SUB_STYLE_TIER[key]; return !!(t && t[val] && lvl >= t[val]); }
+    const subFontLoaded = {};
+    function ensureSubFont(key) {
+        const f = SUB_FONTS[key]; if (!f || !f.gf || subFontLoaded[key]) return;
+        subFontLoaded[key] = true;
+        const l = document.createElement('link'); l.rel = 'stylesheet';
+        l.href = 'https://fonts.googleapis.com/css2?family=' + f.gf + '&display=swap';
+        document.head.appendChild(l);
+    }
     const MONTH_NAMES = ['睦月', '如月', '弥生', '卯月', '皐月', '水無月', '文月', '葉月', '長月', '神無月', '霜月', '師走'];
 
     // 魁プランの「毎月の限定意匠」（見た目だけ。強さは一切変わらない）。2026年10月から2年ぶん用意しておく
@@ -11223,7 +11291,7 @@ animation:facilitySweep 6s linear infinite;
     }
     function applySubPerks() {
         const lv = subLevel();
-        const theme = (lv >= 2 && mySub.style && SUB_THEMES[mySub.style.theme]) ? mySub.style.theme : 'default';
+        const theme = (lv >= 2 && mySub.style && SUB_THEMES[mySub.style.theme] && subStyleOk('theme', mySub.style.theme, lv)) ? mySub.style.theme : 'default';
         setSiteTheme(theme);
         // 魁：今月の限定意匠を受け取る
         if (lv >= 3) {
@@ -11244,7 +11312,7 @@ animation:facilitySweep 6s linear infinite;
     function setSiteTheme(theme) {
         if (theme === 'default') delete document.body.dataset.theme; else document.body.dataset.theme = theme;
         let fx = document.getElementById('theme-fx');
-        const glyph = { sakura: '🌸', yuki: '❄️', kogane: '✨' }[theme];
+        const glyph = { sakura: '🌸', yuki: '❄️', kogane: '✨', momiji: '🍁', umi: '🫧', yoru: '⭐', hanabi: '🎇' }[theme];
         if (!glyph || liteMode) { if (fx) fx.remove(); return; }
         if (fx && fx.dataset.theme === theme) return;
         if (fx) fx.remove();
@@ -11263,11 +11331,17 @@ animation:facilitySweep 6s linear infinite;
     function subNameHtml(name, sub) {
         const n = escapeHtml(name || '名無しの船長');
         if (!sub) return n;
-        const color = SUB_COLORS[sub.color] || '';
-        const font = (SUB_FONTS[sub.font] || SUB_FONTS.default).css;
+        // 今のプランで使えない選択（プランを下げた人など）は「ふつう」で出す
+        const lvp = SUB_LEVEL[sub.plan] || 0;
+        const ck = subStyleOk('color', sub.color, lvp) ? sub.color : 'default';
+        const fk = subStyleOk('font', sub.font, lvp) ? sub.font : 'default';
+        ensureSubFont(fk);
+        const fancy = ck === 'rainbow' || ck === 'silver';
+        const color = fancy ? '' : (SUB_COLORS[ck] || '');
+        const font = (SUB_FONTS[fk] || SUB_FONTS.default).css;
         const badge = sub.plan === 'cho' ? '<span class="sub-badge cho">👑 超魁</span>'
             : sub.plan === 'sakigake' ? '<span class="sub-badge sakigake">⚔️ 魁</span>' : '<span class="sub-badge meiji">🏯</span>';
-        return '<span style="' + (color ? 'color:' + color + ';' : '') + (font ? 'font-family:' + font + ';' : '') + '">' + n + '</span>' + badge;
+        return '<span' + (fancy ? ' class="name-' + ck + '"' : '') + ' style="' + (color ? 'color:' + color + ';' : '') + (font ? 'font-family:' + font + ';' : '') + '">' + n + '</span>' + badge;
     }
 
     // ---- 加入プランの画面 ----
@@ -11291,10 +11365,10 @@ animation:facilitySweep 6s linear infinite;
         const st = (mySub && mySub.style) || {};
         const untilText = lv ? new Date(mySub.until).toLocaleDateString('ja-JP') : '';
         const perks = {
-            meiji: ['広告が出なくなる', '毎月 +300 EXP（レベル）', 'ランキングの名前の色・フォントを変えられる', 'ランキングにネームプレート（木札・金箔など）', 'サイト全体のテーマ（桜・雪・黄金の浦賀）'],
-            sakigake: ['明治プランの特典すべて', '毎月 +600 EXP（レベル）', '毎月、加入者限定の黒船の意匠（見た目だけ）', 'ランキングの名前の横に「⚔️ 魁」の印', '新しい要素を一足先に試せる（先行体験）',
+            meiji: ['広告が出なくなる', '毎月 +300 EXP（レベル）', 'ランキングの名前の色・フォント・ネームプレートを各3種類から選べる', 'サイト全体のテーマ2種類（桜・雪の浦賀）'],
+            sakigake: ['明治プランの特典すべて', '毎月 +600 EXP（レベル）', '名前の色8・フォント4・ネームプレート4種類、テーマ3種類（黄金の浦賀も）', '毎月、加入者限定の黒船の意匠（見た目だけ）', 'ランキングの名前の横に「⚔️ 魁」の印', '新しい要素を一足先に試せる（先行体験）',
                        '自分の考えた実績やスキルの名前がゲームに入るかも', '殿堂に「シーズンを支えた人」として名前が残る'],
-            cho: ['魁プランの特典すべて', '毎月 Discord Nitro Basic をプレゼント（Discordのアカウントが必要。Discordは13歳から）', '毎月 +1500 EXP（レベル。魁の600の代わり）',
+            cho: ['魁プランの特典すべて', '名前の色・フォント・ネームプレートを各10種類（🌈虹色の名前・毛筆・星空の札など）、テーマ7種類', '毎月 Discord Nitro Basic をプレゼント（Discordのアカウントが必要。Discordは13歳から）', '毎月 +1500 EXP（レベル。魁の600の代わり）',
                   'ソーシャルで画像を送れる（DM・談話室）', 'ランキングの名前の横に「👑 超魁」の印', '開発に参加できる'],
         };
         let h = '<div class="plan-wrap">'
@@ -11314,13 +11388,19 @@ animation:facilitySweep 6s linear infinite;
            + '<p class="plan-fair">隻数・クリック・施設など、ゲームの強さと隻数のランキングには一切関係しません。レベルだけは、加入している月ごとに決まった量のEXPが入ります（たくさん払っても青天井にはなりません）。</p>'
            + '<div class="plan-id"><code id="plan-my-id">' + escapeHtml(playerId || '') + '</code><button id="plan-copy">コピー</button></div></div>';
         if (lv >= 2) {
-            const sw = (key, map, labels) => Object.keys(map).map(k =>
-                '<button class="ps-opt' + ((st[key] || (key === 'plate' ? 'none' : 'default')) === k ? ' on' : '') + '" data-k="' + key + '" data-v="' + k + '"'
-                + (key === 'color' && map[k] ? ' style="color:' + map[k] + ';border-color:' + map[k] + '"' : '')
-                + (key === 'font' && map[k].css ? ' style="font-family:' + map[k].css.replace(/"/g, '') + '"' : '')
-                + '>' + escapeHtml(labels ? labels[k] : (map[k].label || map[k])) + '</button>').join('');
+            const NEED = { 3: '魁', 4: '超魁' };
+            const sw = (key, map, labels) => Object.keys(map).map(k => {
+                const ok = subStyleOk(key, k, lv), need = SUB_STYLE_TIER[key][k];
+                if (key === 'font') ensureSubFont(k);
+                const cur = (subStyleOk(key, st[key], lv) ? st[key] : (key === 'plate' ? 'none' : 'default')) === k;
+                return '<button class="ps-opt' + (cur ? ' on' : '') + (ok ? '' : ' locked') + '" data-k="' + key + '" data-v="' + k + '"'
+                    + (ok ? '' : ' disabled title="' + NEED[need] + 'プランで使えます"')
+                    + (key === 'color' && map[k] ? ' style="color:' + map[k] + ';border-color:' + map[k] + '"' : '')
+                    + (key === 'font' && map[k].css ? ' style="font-family:' + map[k].css.replace(/"/g, '') + '"' : '')
+                    + '>' + (ok ? '' : '🔒 ') + escapeHtml(labels ? labels[k] : (map[k].label || map[k])) + (ok ? '' : '<small>' + NEED[need] + '</small>') + '</button>';
+            }).join('');
             h += '<div class="plan-style"><h3>見た目の設定</h3>'
-               + '<div class="ps-preview">ランキングでの見え方：<span class="ps-row plate-' + escapeHtml(st.plate || 'none') + '">'
+               + '<div class="ps-preview">ランキングでの見え方：<span class="ps-row plate-' + escapeHtml(subStyleOk('plate', st.plate, lv) ? st.plate : 'none') + '">'
                + subNameHtml(playerName, { plan: cur, color: st.color, font: st.font }) + '</span></div>'
                + '<div class="ps-group"><span>名前の色</span>' + sw('color', SUB_COLORS, SUB_COLOR_LABEL) + '</div>'
                + '<div class="ps-group"><span>フォント</span>' + sw('font', SUB_FONTS) + '</div>'
@@ -11337,7 +11417,7 @@ animation:facilitySweep 6s linear infinite;
         sc.innerHTML = h;
         const copy = document.getElementById('plan-copy');
         if (copy) copy.onclick = () => { try { navigator.clipboard.writeText(playerId); copy.textContent = 'コピーしました'; } catch (e) {} };
-        sc.querySelectorAll('.ps-opt').forEach(b => b.onclick = () => saveSubStyle(b.dataset.k, b.dataset.v));
+        sc.querySelectorAll('.ps-opt:not(.locked)').forEach(b => b.onclick = () => saveSubStyle(b.dataset.k, b.dataset.v));
     }
     async function saveSubStyle(k, v) {
         if (!mySub) return;
@@ -13308,6 +13388,18 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.5",
+            title: "見た目の選択肢をプランごとに",
+            date: "2026-10-29",
+            content: [
+                "ランキングの見た目（名前の色・フォント・ネームプレート）とテーマを、プランによって選べる数が変わるようにしました。",
+                "明治プラン：名前の色・フォント・ネームプレートを各3種類、テーマ2種類（桜・雪）。",
+                "魁プラン：今までどおり全部（色8・フォント4・ネームプレート4、テーマ3）。",
+                "超魁プラン：各10種類、テーマ7種類。新しく🌈虹色・🪙銀の名前、極太・まるもじ・立体・筆ポップ・毛筆・電光のフォント、🌸桜・🌊波・🌙星空・🍀翡翠・💎紅玉・🌈虹のネームプレート、🍁紅葉・🫧蒼海・🌙月夜・🎆花火の浦賀のテーマが加わりました。",
+                "今のプランで使えない見た目は、ランキングでは「ふつう」で表示されます（選んだ記録は残るので、プランを戻すと元に戻ります）。"
+            ]
+        },
         {
             version: "v4.4.1",
             title: "スマホでソーシャルの入力欄が広告に隠れるのを修正",
