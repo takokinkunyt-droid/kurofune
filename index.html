@@ -9582,7 +9582,8 @@ animation:facilitySweep 6s linear infinite;
             if (reincBtn) reincBtn.style.display = 'flex'; 
             if (reincHint) {
                 reincHint.style.display = 'block';
-                reincHint.innerHTML = `次のかけら（+${pending + 1}）まで あと ${formatNumber(s2NextFragmentRemaining())} 隻`;
+                // 「（+26）」と書くと「+26個もらえる」と読まれてしまったので、何の数かをはっきり書く
+                reincHint.innerHTML = `もらえるかけらが ${pending + 1}個 になるまで あと ${formatNumber(s2NextFragmentRemaining())} 隻`;
             }
             const btnDetail = document.getElementById('reincarnation-btn-detail');
             if (btnDetail) {
@@ -13391,6 +13392,15 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.5.2",
+            title: "転生ボタンの上の表示を分かりやすく",
+            date: "2026-10-29",
+            content: [
+                "転生ボタンの上に出ていた「次のかけら（+26）まで あと ◯隻」を、「もらえるかけらが 26個 になるまで あと ◯隻」に変えました。「+26」が、転生でもらえる数のように読めてしまっていたためです。",
+                "転生でもらえるかけらは、ボタンに出ている「◯個 獲得可能」の数で、1回の転生でまとめて受け取れます。"
+            ]
+        },
         {
             version: "v4.5.1",
             title: "転生ボタンのかけらの数の表示を修正",
