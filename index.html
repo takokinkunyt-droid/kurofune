@@ -3359,7 +3359,30 @@
             transform: translate(-50%, -50%); animation: comboTier 1.3s ease-out forwards;
         }
         .combo-tier-pop.tier2 { font-size: 3.1rem; }
-        .combo-tier-pop.tier3 { font-size: 3.6rem; color: #fff; text-shadow: 0 0 18px #ff3c1c, 0 0 36px #ffd36b, 0 3px 0 #6b0d04; }
+.combo-tier-pop.tier3 { font-size: 3.6rem; color: #fff; text-shadow: 0 0 18px #ff3c1c, 0 0 36px #ffd36b, 0 3px 0 #6b0d04; }
+        /* 500連打から：虹色に流れる。1万連打：金色に脈打つ */
+        .combo-tier-pop.tier-hi, #fest-combo.tier-hi .fc-n {
+            background: linear-gradient(90deg, #ff5a5a, #ffb13b, #fff36b, #6bff8f, #5ac8ff, #c77dff, #ff5a5a); background-size: 200% auto;
+            -webkit-background-clip: text; background-clip: text; color: transparent !important; animation-name: comboTier, comboRainbow;
+            animation-duration: 1.3s, 1.2s; animation-timing-function: ease-out, linear; animation-iteration-count: 1, infinite; animation-fill-mode: forwards, none;
+            text-shadow: none; filter: drop-shadow(0 0 10px rgba(255, 200, 80, 0.8)) drop-shadow(0 3px 0 #6b0d04);
+        }
+        #fest-combo.tier-hi .fc-n { animation: comboRainbow 1.2s linear infinite; font-size: 4.4rem; }
+        .combo-tier-pop.tier-hi { font-size: 4rem; }
+        .combo-tier-pop.tier-max { font-size: 4.6rem; }
+        /* スマホでは画面の幅に収める（大きな掛け声が左右にはみ出していた） */
+        @media (max-width: 900px) {
+            .combo-tier-pop { font-size: min(2.6rem, 9vw); }
+            .combo-tier-pop.tier2 { font-size: min(3.1rem, 9.5vw); }
+            .combo-tier-pop.tier3 { font-size: min(3.6rem, 10vw); }
+            .combo-tier-pop.tier-hi { font-size: min(4rem, 10.5vw); }
+            .combo-tier-pop.tier-max { font-size: min(4.6rem, 11vw); }
+        }
+        #fest-combo.tier-max .fc-n { background: linear-gradient(180deg, #fffbe0, #ffd36b 45%, #b8860b 55%, #fff1a6); -webkit-background-clip: text; background-clip: text;
+                                     animation: comboGold 0.8s ease-in-out infinite alternate; font-size: 4.8rem; }
+        @keyframes comboRainbow { from { background-position: 0 0; } to { background-position: 200% 0; } }
+        @keyframes comboGold { from { filter: drop-shadow(0 0 8px #ffd36b); } to { filter: drop-shadow(0 0 22px #fff3a0) drop-shadow(0 0 40px #ff9a3c); } }
+        body.lite-mode #fest-combo.tier-hi .fc-n, body.lite-mode #fest-combo.tier-max .fc-n { animation: none; }
         @keyframes comboTier {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
             15% { opacity: 1; transform: translate(-50%, -50%) scale(0.95); }
@@ -6098,6 +6121,7 @@ animation:facilitySweep 6s linear infinite;
         count10m:     { title:"世界を超えて",       icon:"🌍",  desc:"黒船の保有数が1000万を超える。",    flavor:"世界をも凌駕する。",        unlocked:false, isRare:false },
         count1t:      { title:"宇宙を超えて",       icon:"🌌",  desc:"黒船の保有数が1兆を超える。",       flavor:"宇宙をも凌駕する。",        unlocked:false, isRare:false },
         count1q:      { title:"次元を超えて",       icon:"🔮",  desc:"黒船の保有数が1京を超える。",       flavor:"次元をも凌駕する。",        unlocked:false, isRare:false },
+        combo500:     { title:"はじめの連打",       icon:"🥁",  desc:"500連打する。",                    flavor:"これは序の口。",            unlocked:false, isRare:false },
         noEasy:       { title:"楽はできません",     icon:"👊",  desc:"黒船を長押し(五秒間)する。",        flavor:"クリックだ。",             unlocked:false, isRare:true  },
         perryFan:     { title:"ペリーファン",       icon:"🎩",  desc:"黒船の名前を「ペリー」にする。",    flavor:"ペリー：ありがとう！",      unlocked:false, isRare:true  },
         perryAnti:    { title:"ペリーアンチ",       icon:"😤",  desc:"黒船の名前を「ペリーカツラハゲ」にする。", flavor:"ペリー：許さん。",   unlocked:false, isRare:true  },
@@ -10304,13 +10328,14 @@ animation:facilitySweep 6s linear infinite;
         if (!base) return;
         const fest = document.body.classList.contains('fever-fest');
         festComboCount++;
+        if (festComboCount >= 500) unlockAchievement('combo500');
         if (!burst) playComboTone(festComboCount);
         checkComboTier(base, festComboCount, fest);
         clearTimeout(festComboTimer);
         festComboTimer = setTimeout(() => {
             festComboCount = 0;
             comboTier = 0;
-            const cb = document.getElementById('fest-combo'); if (cb) cb.classList.remove('on', 'tier1', 'tier2', 'tier3');
+            const cb = document.getElementById('fest-combo'); if (cb) cb.classList.remove('on', ...COMBO_TIER_CLASSES);
         }, 1200);
         let cb = document.getElementById('fest-combo');
         if (!cb || cb.parentElement !== base) {
@@ -10323,8 +10348,10 @@ animation:facilitySweep 6s linear infinite;
             cb.classList.add('on');
             cb.querySelector('.fc-n').textContent = festComboCount;
             const bonus = festComboBonus();
+            const cm = comboClickMult();
             cb.querySelector('.fc-l').textContent = (COMBO_TIERS[comboTier - 1] ? COMBO_TIERS[comboTier - 1][fest ? 1 : 2] : (fest ? '🥁 連打' : '連打'))
-                + (fest && bonus > 1 ? ' ×' + bonus.toFixed(1) : '');
+                + (fest && bonus > 1 ? ' ×' + bonus.toFixed(1) : '')
+                + (cm > 1 ? '　クリック×' + cm.toFixed(1) : '');
             // 2つの同じアニメを交互に付け替えると、計算し直しなしで頭から再生される
             const b2 = cb.classList.contains('bump');
             cb.classList.toggle('bump', !b2); cb.classList.toggle('bump2', b2);
@@ -10364,10 +10391,31 @@ animation:facilitySweep 6s linear infinite;
     //  金船スロット・隻数のメーター回し・桁突破・順位を抜いた通知
     // ==========================================
     const COMBO_TIERS = [   // [必要な連打数, 祭り中の名前, ふだんの名前]
-        [10,  '🏮 祭',     '🔥 好調'],
-        [50,  '🎆 大祭',   '⚡ 絶好調'],
-        [100, '👑 天下祭', '👑 神業'],
+        [10,    '🏮 祭',       '🔥 好調'],
+        [50,    '🎆 大祭',     '⚡ 絶好調'],
+        [100,   '👑 天下祭',   '👑 神業'],
+        [200,   '🌪️ 疾風怒濤', '🌪️ 疾風怒濤'],
+        [300,   '🐉 昇り龍',   '🐉 昇り龍'],
+        [500,   '🌋 天変地異', '🌋 天変地異'],
+        [750,   '⚔️ 一騎当千', '⚔️ 一騎当千'],
+        [1000,  '🙏 千手観音', '🙏 千手観音'],
+        [1500,  '🚢 黒船来航', '🚢 黒船来航'],
+        [2000,  '🏯 天下統一', '🏯 天下統一'],
+        [3000,  '🌌 森羅万象', '🌌 森羅万象'],
+        [5000,  '🔱 前人未到', '🔱 前人未到'],
+        [7500,  '☄️ 神の領域', '☄️ 神の領域'],
+        [10000, '🗻 万里一空', '🗻 万里一空'],
     ];
+    // 見た目の段：1〜3 はこれまでどおり。300連打からは大きく、500からは虹色、1万で金色に光る
+    const COMBO_TIER_CLASSES = ['tier1', 'tier2', 'tier3', 'tier-hi', 'tier-max'];
+    function comboTierClasses(t) {
+        const c = ['tier' + Math.min(3, t)];
+        if (t >= 6) c.push('tier-hi');
+        if (t >= COMBO_TIERS.length) c.push('tier-max');
+        return c;
+    }
+    // 連打のごほうび：500連打ごとに、クリックでもらえる隻数 +0.1倍（1万連打で ×3.0 まで）
+    function comboClickMult() { return 1 + 0.1 * Math.floor(Math.min(festComboCount, 10000) / 500); }
     let comboTier = 0;
     function checkComboTier(base, n, fest) {
         let t = 0;
@@ -10375,11 +10423,11 @@ animation:facilitySweep 6s linear infinite;
         if (t <= comboTier) return;
         comboTier = t;
         const cb = document.getElementById('fest-combo');
-        if (cb) { cb.classList.remove('tier1', 'tier2', 'tier3'); cb.classList.add('tier' + t); }
+        if (cb) { cb.classList.remove(...COMBO_TIER_CLASSES); cb.classList.add(...comboTierClasses(t)); }
         burstSound('ping');
         if (liteMode) return;
         const el = document.createElement('div');
-        el.className = 'combo-tier-pop tier' + t;
+        el.className = 'combo-tier-pop ' + comboTierClasses(t).join(' ');
         el.textContent = COMBO_TIERS[t - 1][fest ? 1 : 2] + '！';
         base.appendChild(el);
         setTimeout(() => el.remove(), 1300);
@@ -12499,6 +12547,8 @@ animation:facilitySweep 6s linear infinite;
         if (isFeverFestActive()) currentClickPower = Math.floor(currentClickPower * festComboBonus());
         // 機関士：10連打ごとに +5%（最大 +50%）
         currentClickPower = Math.floor(currentClickPower * s2ComboBonus());
+        // 500連打ごとに +0.1倍（1万連打で ×3.0）
+        currentClickPower = Math.floor(currentClickPower * comboClickMult());
 
         clickerScore += currentClickPower; currentLifeScore += currentClickPower; 
         try { festOnClick(base, posX, posY, burst); } catch (e) {}
@@ -13392,6 +13442,16 @@ animation:facilitySweep 6s linear infinite;
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
     const changelogData = [
+        {
+            version: "v4.6",
+            title: "連打の掛け声を1万連打まで／連打でクリックが強く",
+            date: "2026-10-30",
+            content: [
+                "連打の掛け声を、100連打の「👑 神業」から先にも増やしました。200「🌪️ 疾風怒濤」、300「🐉 昇り龍」、500「🌋 天変地異」、750「⚔️ 一騎当千」、1000「🙏 千手観音」、1500「🚢 黒船来航」、2000「🏯 天下統一」、3000「🌌 森羅万象」、5000「🔱 前人未到」、7500「☄️ 神の領域」、そして10000連打で「🗻 万里一空」。500連打からは連打の数字が虹色に、1万連打で金色に光ります。",
+                "500連打するごとに、クリックでもらえる隻数が +0.1倍 になります（500連打で×1.1、1000連打で×1.2 … 1万連打で×3.0）。連打の数字の横に「クリック×◯」と出ます。手を止めて1.2秒たつと連打は0に戻ります。",
+                "新しい通常実績「🥁 はじめの連打」（500連打する。「これは序の口。」）を追加しました。"
+            ]
+        },
         {
             version: "v4.5.2",
             title: "転生ボタンの上の表示を分かりやすく",
