@@ -1,0 +1,8 @@
+{
+  "name": "kurofune-build-tools",
+  "private": true,
+  "description": "公開用 index.html を作る道具（src/index.html → index.html）。Vercel には送らない（.vercelignore）。",
+  "dependencies": {
+    "javascript-obfuscator": "4.1.1"
+  }
+}

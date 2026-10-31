@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ペリー来航メガパニック - 1853 Kurofune Experience -</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           基本設定・リセット
+           ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        
+        :root {
+            --primary-color: #1a1a1a;    /* 墨色 */
+            --secondary-color: #2c3e50;
+            --accent-color: #c0392b;     /* 漆赤 */
+            --bg-color: #f5f2eb;         /* 和紙風の落ち着いた白 */
+            --text-color: #333333;
+            --gold-color: #d4af37;       /* 控えめな金 */
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                linear-gradient(rgba(26, 26, 26, 0.95), rgba(26, 26, 26, 0.95)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0 50 Q 25 25 50 50 T 100 50" fill="none" stroke="%23333" stroke-width="0.5"/></svg>');
+        }
+
+        .serif-font {
+            font-family: 'Shippori Mincho', serif;
+        }
+
+        /* PC横画面用コンテナ */
+        #app-container {
+            width: 95vw;
+            max-width: 1380px;
+            height: 85vh;
+            min-height: 650px;
+            background-color: var(--bg-color);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.85);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            display: flex;
+            border: 1px solid #444;
+        }
+
+        /* サイドナビゲーション */
+        #sidebar {
+            width: 260px;
+            background-color: var(--primary-color);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid var(--gold-color);
+            z-index: 20;
+        }
+
+        .sidebar-header {
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .sidebar-header .date {
+            font-size: 0.85rem;
+            color: #888;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.6rem;
+            color: #fff;
+            line-height: 1.4;
+            letter-spacing: 3px;
+        }
+
+        .sidebar-header h1 span {
+            color: var(--accent-color);
+            font-size: 1.3rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 16px 30px;
+            color: #aaa;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .nav-item.active {
+            color: var(--gold-color);
+            background-color: rgba(212, 175, 55, 0.1);
+            border-left-color: var(--gold-color);
+            font-weight: bold;
+        }
+
+        .nav-icon { font-size: 1.5rem; opacity: 0.9; }
+
+        /* メインコンテンツエリア */
+        #main-content {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .screen.active {
+            display: block;
+            opacity: 1;
+            z-index: 10;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen-header {
+            padding: 40px 60px 20px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 30px;
+        }
+
+        .screen-header h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            letter-spacing: 2px;
+        }
+
+        /* ホーム画面 */
+        #screen-home {
+            background-image: linear-gradient(rgba(245, 242, 235, 0.9), rgba(245, 242, 235, 0.9)), url('http://googleusercontent.com/image_collection/image_retrieval/6122251497631706981');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .home-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 5.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            letter-spacing: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hero-subtitle {
+            font-size: 1.6rem;
+            color: var(--accent-color);
+            letter-spacing: 5px;
+            margin-bottom: 50px;
+        }
+
+        .start-prompt { font-size: 1.1rem; color: #666; animation: pulse 2s infinite; }
+
+        /* ガチャ画面 */
+        .gacha-layout {
+            display: flex;
+            height: calc(100% - 130px);
+            padding: 0 60px;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .gacha-machine-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gacha-box-img {
+            font-size: 11rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.2));
+            margin-bottom: 30px;
+        }
+        
+        .gacha-box-img:hover { transform: scale(1.05); }
+        .gacha-box-img.shake { animation: shakeGacha 0.5s; }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Noto Sans JP', sans-serif;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary:hover {
+            background-color: #444;
+            transform: translateY(-2px);
+        }
+
+        .gacha-result-area {
+            flex: 1;
+            height: 80%;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+            position: relative;
+        }
+
+        .gacha-result-content {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s;
+        }
+
+        .gacha-result-content.show { opacity: 1; transform: translateY(0); }
+        .res-icon { font-size: 6.5rem; margin-bottom: 20px; }
+        .res-rarity { font-size: 1.6rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; }
+        .res-text { font-size: 1.1rem; color: #555; line-height: 1.8; }
+
+        .color-SSR { color: #8e44ad; }
+        .color-SR { color: #d35400; }
+        .color-R { color: #2980b9; }
+        .color-N { color: #7f8c8d; }
+
+        /* ゲーム画面選択用ホーム */
+        .game-select-layout {
+            display: flex;
+            height: calc(100% - 130px);
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            padding: 0 60px;
+        }
+
+        .game-select-card {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            width: 320px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .game-select-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-color);
+            box-shadow: 0 15px 30px rgba(192, 57, 43, 0.15);
+        }
+
+        .game-select-icon { font-size: 5rem; margin-bottom: 20px; display: block;}
+        .game-select-title { font-size: 1.5rem; color: var(--primary-color); margin-bottom: 15px; font-weight: bold;}
+        .game-select-desc { font-size: 0.95rem; color: #666; line-height: 1.6; margin-bottom: 25px; }
+
+        /* ゲーム画面 */
+        #screen-game { display: flex; flex-direction: column; }
+        .game-ui-bar {
+            background-color: rgba(26, 26, 26, 0.95);
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            z-index: 15;
+            border-bottom: 1px solid var(--gold-color);
+        }
+
+        .score-display { font-size: 1.4rem; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: var(--gold-color); }
+        .game-instructions { font-size: 0.9rem; color: #ccc; letter-spacing: 1px; }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #101e2c, #070b10);
+            display: block;
+            cursor: none; 
+        }
+
+        .game-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 26, 26, 0.95);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 20px;
+        }
+
+        .game-overlay h3 { font-size: 3.5rem; color: var(--gold-color); margin-bottom: 25px; letter-spacing: 4px; }
+        .game-overlay p { font-size: 1.2rem; color: #ddd; margin-bottom: 30px; text-align: center; line-height: 1.8; letter-spacing: 1px;}
+        
+        .game-overlay .btn-primary { background-color: var(--accent-color); border: 1px solid var(--gold-color); }
+        .game-overlay .btn-primary:hover { background-color: #a02214; }
+
+        /* =========================================
+           新ゲーム: 黒船クリッカー画面
+           ========================================= */
+        .clicker-layout {
+            display: flex;
+            height: calc(100% - 130px);
+            padding: 0 40px;
+            gap: 30px;
+            align-items: stretch;
+        }
+
+        /* クリッカーの左画面（叩く黒船） */
+        .clicker-left {
+            flex: 1.2;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.01);
+        }
+
+        .clicker-score-board {
+            margin-bottom: 20px;
+        }
+
+        .kurofune-count-title {
+            font-size: 1rem;
+            color: #666;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .kurofune-count {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .kps-display {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        /* 叩く黒船ボタン本体 */
+        .kurofune-click-target {
+            font-size: 11rem;
+            cursor: pointer;
+            margin: 20px 0;
+            display: inline-block;
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.25));
+            transition: transform 0.05s ease;
+            position: relative;
+        }
+        
+        /* 叩かれた瞬間のちぢみ */
+        .kurofune-click-target:active {
+            transform: scale(0.9) translateY(10px);
+        }
+
+        /* 浮き出る文字（ポップ数字） */
+        .click-pop-num {
+            position: absolute;
+            color: var(--accent-color);
+            font-size: 2rem;
+            font-weight: 900;
+            pointer-events: none;
+            animation: popUpFloat 0.8s forwards ease-out;
+            text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff;
+            z-index: 100;
+        }
+
+        @keyframes popUpFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.3); }
+        }
+
+        /* クリッカーの右画面（アップグレード＆ショップ） */
+        .clicker-right {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .shop-section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            margin-bottom: 5px;
+        }
+
+        /* ショップカード */
+        .shop-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .shop-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .shop-card.disabled {
+            background-color: #eae6dd;
+            border-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .shop-card.disabled:hover {
+            transform: none;
+        }
+
+        .shop-info-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .shop-icon {
+            font-size: 2.2rem;
+        }
+
+        .shop-details h4 {
+            font-size: 1.05rem;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+
+        .shop-details p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .shop-info-right {
+            text-align: right;
+        }
+
+        .shop-cost {
+            font-weight: 800;
+            color: var(--accent-color);
+            font-size: 1.1rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .shop-count {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* 音楽室 */
+        .music-layout {
+            padding: 0 60px;
+            display: flex;
+            height: calc(100% - 130px);
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+        }
+
+        .vinyl-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vinyl {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #333 15%, #111 16%, #111 25%, #222 26%, #111 35%, #111 60%, #000 100%);
+            border-radius: 50%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #000;
+            animation: spin 6s linear infinite;
+            animation-play-state: paused;
+        }
+
+        .vinyl-label {
+            width: 100px;
+            height: 100px;
+            background-color: var(--accent-color);
+            border: 2px solid var(--gold-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .vinyl-center-hole {
+            width: 15px;
+            height: 15px;
+            background-color: var(--bg-color);
+            border-radius: 50%;
+            position: absolute;
+            z-index: 5;
+        }
+
+        .tonearm {
+            position: absolute;
+            top: -20px; right: 0px; width: 100px; height: 180px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="180" viewBox="0 0 100 180"><path d="M50 0 L50 20 L20 120 L25 150" fill="none" stroke="%23888" stroke-width="4" stroke-linecap="round"/><circle cx="50" cy="15" r="12" fill="%23444"/><rect x="18" y="145" width="14" height="25" rx="3" fill="%23c5a059"/></svg>');
+            background-repeat: no-repeat;
+            transform-origin: 50% 15px;
+            transform: rotate(-30deg);
+            transition: transform 0.5s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .music-info { flex-grow: 1; max-width: 500px; display: flex; flex-direction: column; gap: 20px;}
+        .track-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 5px; letter-spacing: 2px; }
+        .track-artist { font-size: 1.1rem; color: var(--accent-color); letter-spacing: 3px; }
+
+        .audio-error-msg {
+            font-size: 0.9rem; color: var(--accent-color); background-color: rgba(192, 57, 43, 0.1);
+            padding: 10px; border-radius: 5px; display: none; border: 1px solid var(--accent-color);
+        }
+
+        .audio-controls { display: flex; align-items: center; gap: 20px; }
+        .btn-circle {
+            width: 70px; height: 70px; border-radius: 50%; background-color: var(--primary-color);
+            color: white; border: 2px solid var(--gold-color); font-size: 2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.15); transition: all 0.3s;
+        }
+        .btn-circle:hover { transform: scale(1.08); background-color: #333; }
+        
+        .dj-controls {
+            background: rgba(44, 62, 80, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .control-label {
+            font-weight: bold;
+            color: var(--primary-color);
+            width: 120px;
+        }
+
+        .control-value {
+            width: 50px;
+            text-align: right;
+            font-family: monospace;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .visualizer-container { display: flex; align-items: flex-end; gap: 5px; height: 40px; margin-top: 10px;}
+        .bar { width: 8px; height: 5px; background-color: var(--accent-color); border-radius: 4px; transition: height 0.15s ease; }
+
+        /* 歴史資料室 */
+        .study-layout { padding: 0 60px 100px; display: flex; flex-direction: column; gap: 60px; }
+        .study-card {
+            background: white; padding: 40px; border-radius: 8px; border-top: 4px solid var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            opacity: 0; 
+            transform: translateY(50px) scale(0.95); 
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .study-card.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .study-card h3 { font-size: 1.8rem; color: var(--primary-color); margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        
+        .study-icon {
+            font-size: 3rem; background: var(--bg-color); width: 80px; height: 80px;
+            display: flex; justify-content: center; align-items: center; border-radius: 50%;
+            border: 2px solid var(--gold-color); position: absolute; top: -40px; right: -20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.5s ease;
+        }
+
+        .study-card:hover .study-icon { transform: rotate(15deg) scale(1.1); }
+        .study-card p { font-size: 1.1rem; color: #555; line-height: 1.8; }
+        
+        .study-card.boom { border-top-color: var(--accent-color); background: #fffafa; }
+        .study-card.boom h3 { color: var(--accent-color); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        @keyframes shakeGacha {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg) scale(1.05); }
+            50% { transform: rotate(5deg) scale(1.05); }
+            75% { transform: rotate(-5deg) scale(1.05); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+<audio id="bgm-player" src="れつごーぺりー.mp3" loop></audio>
+
+<div id="app-container">
+    
+    <!-- サイドナビゲーション -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <div class="date" id="date-display">2026.06.04</div>
+            <h1 class="serif-font">黒船来航<br><span>1853</span></h1>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="switchScreen('screen-home', this)">
+                <span class="nav-icon">⛩️</span> ホーム
+            </div>
+            <div class="nav-item" onclick="switchScreen('screen-gacha', this)">
+                <span class="nav-icon">📦</span> 貢ぎ物ガチャ
+            </div>
+            <div class="nav-item" onclick="switchScreen('screen-game-select', this)">
+                <span class="nav-icon">💥</span> 海軍演習 (ゲーム)
+            </div>
+            <div class="nav-item" onclick="switchScreen('screen-music', this)">
+                <span class="nav-icon">🎵</span> 音（音楽室）
+            </div>
+            <div class="nav-item" onclick="switchScreen('screen-study', this)">
+                <span class="nav-icon">📜</span> 歴史資料室
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div id="main-content">
+        
+        <!-- ホーム画面 -->
+        <div id="screen-home" class="screen active">
+            <div class="home-content">
+                <h1 class="hero-title serif-font">開国の衝撃</h1>
+                <p class="hero-subtitle">ペリーはなぜ日本へ来たのか</p>
+                <p class="start-prompt">左のメニューから体験を選択してください</p>
+            </div>
+        </div>
+
+        <!-- ガチャ画面 -->
+        <div id="screen-gacha" class="screen">
+            <div class="screen-header">
+                <h2 class="serif-font">貢ぎ物録 (ガチャ)</h2>
+            </div>
+            <div class="gacha-layout">
+                <div class="gacha-machine-area">
+                    <div class="gacha-box-img" id="gacha-machine" onclick="playGacha()">🎁</div>
+                    <button class="btn-primary" onclick="playGacha()">下賜品を開封する</button>
+                    <p style="margin-top: 20px; color: #888; font-size: 0.9rem;">※特定のSSRやSRを引くとゲーム内で超強化！</p>
+                </div>
+                <div class="gacha-result-area">
+                    <div class="gacha-result-content" id="gacha-result">
+                        <div class="res-icon" id="res-icon">✨</div>
+                        <div class="res-rarity serif-font" id="res-rarity"></div>
+                        <div class="res-text" id="res-text">箱を開封してください</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ゲーム選択画面 -->
+        <div id="screen-game-select" class="screen">
+            <div class="screen-header">
+                <h2 class="serif-font">海軍演習：ゲーム選択</h2>
+            </div>
+            <div class="game-select-layout">
+                <!-- シューティングへの入口 -->
+                <div class="game-select-card" onclick="goToGame('screen-game')">
+                    <span class="game-select-icon">💥</span>
+                    <h3 class="game-select-title serif-font">浦賀沖大砲戦 (改)</h3>
+                    <p class="game-select-desc">黒船を自由自在に操り、幕府の迎撃小舟を大砲で撃ち落とせ！30体撃破すると現れる巨大ボス要塞を攻略しろ！</p>
+                    <button class="btn-primary" style="padding: 10px 25px; font-size: 1rem;">出撃する</button>
+                </div>
+
+                <!-- クリッカーへの入口 -->
+                <div class="game-select-card" onclick="goToGame('screen-clicker')">
+                    <span class="game-select-icon">🚢</span>
+                    <h3 class="game-select-title serif-font">黒船クリッカー</h3>
+                    <p class="game-select-desc">黒船をひたすら連打して「黒船ポイント」を稼ごう！溜まった物資で設備や軍備を購入し、無限開国に挑め！</p>
+                    <button class="btn-primary" style="padding: 10px 25px; font-size: 1rem; background-color: var(--gold-color);">開発する</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- シューティングゲーム画面 -->
+        <div id="screen-game" class="screen">
+            <div class="game-ui-bar">
+                <div class="score-display">戦果: <span id="score-display">0</span> | 撃破数: <span id="kill-display">0</span>/30</div>
+                <div class="game-instructions">【操作方法】マウス移動：上下左右に移動 / 左クリック：大砲発射 ※BGM再生対応</div>
+            </div>
+            
+            <div class="game-overlay" id="game-start-overlay">
+                <h3 class="serif-font">浦賀沖大砲戦・改</h3>
+                <p>
+                    アメリカ東インド艦隊提督ペリーとなり、黒船（🚢）を縦横無尽に操れ！<br>
+                    幕府の防衛部隊を<strong>30体撃破</strong>すると、最奥からボスの<strong>「巨大城郭」</strong>が出現する！<br><br>
+                    <strong>【操作】マウス移動で上下左右に自由移動 / 左クリックで主砲発射</strong>
+                </p>
+                <p id="buff-status" style="color: var(--gold-color); font-weight: bold; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 4px; border: 1px dashed var(--gold-color); margin-bottom: 30px;"></p>
+                <button class="btn-primary" onclick="startGame()">演習開始</button>
+            </div>
+
+            <div class="game-overlay" id="game-over-overlay" style="display: none;">
+                <h3 class="serif-font" style="color: var(--accent-color);">作戦失敗</h3>
+                <p>幕府の強固な抵抗により、旗艦が損傷しました。<br>最終戦果: <span id="final-score" style="font-weight:bold; font-size:2rem; color:var(--gold-color);">0</span></p>
+                <button class="btn-primary" onclick="startGame()">再出航</button>
+            </div>
+
+            <div class="game-overlay" id="game-clear-overlay" style="display: none;">
+                <h3 class="serif-font" style="color: var(--gold-color);">泰平の眠りを覚ます開国</h3>
+                <p>見事、幕府の防衛線を突破しボスの巨大城郭を撃破した！<br>日本はついに長い鎖国を解き、近代化の道を歩み始める……。<br><br>最終戦果: <span id="clear-score" style="font-weight:bold; font-size:2rem; color:var(--gold-color);">0</span></p>
+                <button class="btn-primary" onclick="startGame()">新たなる航海へ</button>
+            </div>
+
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- ==================== 新ゲーム: 黒船クリッカー ==================== -->
+        <div id="screen-clicker" class="screen">
+            <div class="screen-header" style="padding-bottom: 10px; margin-bottom: 15px;">
+                <h2 class="serif-font">黒船クリッカー：泰平破りの開国ポチポチ</h2>
+            </div>
+            
+            <div class="clicker-layout">
+                <!-- クリッカー左側：クリックして貯める -->
+                <div class="clicker-left" id="clicker-base">
+                    <div class="clicker-score-board">
+                        <p class="kurofune-count-title serif-font">総黒船保有量</p>
+                        <div class="kurofune-count" id="clicker-total-score">0 隻</div>
+                        <div class="kps-display" id="clicker-kps">毎秒増加量(KPS): 0 隻</div>
+                    </div>
+                    
+                    <!-- 叩き対象（ボヨヨン跳ねる絵文字） -->
+                    <div class="kurofune-click-target" id="clicker-target" onclick="clickKurofune(event)">🚢</div>
+                    <p style="color: #888; font-size: 0.9rem;">※クリックするか、スペースキーで黒船を増殖！</p>
+                </div>
+
+                <!-- クリッカー右側：強化＆購入ショップ -->
+                <div class="clicker-right">
+                    <!-- アップグレード（クリック効率強化） -->
+                    <div class="shop-section-title serif-font">開国技術（クリック強化）</div>
+                    <div class="shop-card" id="up-click" onclick="buyUpgrade()">
+                        <div class="shop-info-left">
+                            <span class="shop-icon">🛠️</span>
+                            <div class="shop-details">
+                                <h4>近代ドック拡張</h4>
+                                <p>1クリックあたりの生産量を <strong id="up-click-benefit">+1</strong> する</p>
+                            </div>
+                        </div>
+                        <div class="shop-info-right">
+                            <div class="shop-cost" id="up-click-cost">15 隻</div>
+                            <div class="shop-count" id="up-click-level">Lv.1</div>
+                        </div>
+                    </div>
+
+                    <!-- 施設オート生産（大砲、旗、小舟、白船、日本軍） -->
+                    <div class="shop-section-title serif-font" style="margin-top: 10px;">植民補給拠点（自動生産）</div>
+                    
+                    <!-- 施設1: 大砲 -->
+                    <div class="shop-card" id="inst-cannon" onclick="buyFacility('cannon')">
+                        <div class="shop-info-left">
+                            <span class="shop-icon">💣</span>
+                            <div class="shop-details">
+                                <h4>威嚇用大砲</h4>
+                                <p>空砲をぶっ放し、自動で黒船を連れてくる（+0.2 KPS）</p>
+                            </div>
+                        </div>
+                        <div class="shop-info-right">
+                            <div class="shop-cost" id="cannon-cost">50 隻</div>
+                            <div class="shop-count" id="cannon-count">0 台</div>
+                        </div>
+                    </div>
+
+                    <!-- 施設2: 旗 -->
+                    <div class="shop-card" id="inst-flag" onclick="buyFacility('flag')">
+                        <div class="shop-info-left">
+                            <span class="shop-icon">🇺🇸</span>
+                            <div class="shop-details">
+                                <h4>合衆国の国旗</h4>
+                                <p>星条旗を掲げて自動で勢力をアピール（+1 KPS）</p>
+                            </div>
+                        </div>
+                        <div class="shop-info-right">
+                            <div class="shop-cost" id="flag-cost">250 隻</div>
+                            <div class="shop-count" id="flag-count">0 本</div>
+                        </div>
+                    </div>
+
+                    <!-- 施設3: 小舟 -->
+                    <div class="shop-card" id="inst-boat" onclick="buyFacility('boat')">
+                        <div class="shop-info-left">
+                            <span class="shop-icon">🛶</span>
+                            <div class="shop-details">
+                                <h4>浦賀の監視艇</h4>
+                                <p>地元小舟をチャーターして警備体制を拡大（+8 KPS）</p>
+                            </div>
+                        </div>
+                        <div class="shop-info-right">
+                            <div class="shop-cost" id="boat-cost">1,200 隻</div>
+                            <div class="shop-count" id="boat-count">0 艘</div>
+                        </div>
+                    </div>
+
+                    <!-- 施設4: 白船 -->
+                    <div class="shop-card" id="inst-wship" onclick="buyFacility('wship')">
+                        <div class="shop-info-left">
+                            <span class="shop-icon">🛳️</span>
+                            <div class="shop-details">
+                                <h4>新型蒸気白船</h4>
+                                <p>黒の対比として圧倒的なクリーンさで引き寄せる（+45 KPS）</p>
+                            </div>
+                        </div>
+                        <div class="shop-info-right">
+                            <div class="shop-cost" id="wship-cost">8,000 隻</div>
+                            <div class="shop-count" id="wship-count">0 隻</div>
+                        </div>
+                    </div>
+
+                    <!-- 施設5: 日本軍 -->
+                    <div class="shop-card" id="inst-army" onclick="buyFacility('army')">
+                        <div class="shop-info-left">
+                            <span class="shop-icon">⚔️</span>
+                            <div class="shop-details">
+                                <h4>幕府の帰順軍</h4>
+                                <p>開国を受け入れたサムライ達を自陣営に組織（+260 KPS）</p>
+                            </div>
+                        </div>
+                        <div class="shop-info-right">
+                            <div class="shop-cost" id="army-cost">50,000 隻</div>
+                            <div class="shop-count" id="army-count">0 軍</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 音楽室画面 -->
+        <div id="screen-music" class="screen">
+            <div class="screen-header">
+                <h2 class="serif-font">浦賀音楽堂 (DJ Perry Mode)</h2>
+            </div>
+            <div class="music-layout">
+                <div class="vinyl-container">
+                    <div class="vinyl" id="vinyl-disc">
+                        <div class="vinyl-label serif-font">黒船来航<br>BGM</div>
+                        <div class="vinyl-center-hole"></div>
+                    </div>
+                    <div class="tonearm" id="vinyl-arm"></div>
+                </div>
+                
+                <div class="music-info">
+                    <div>
+                        <h3 class="track-title serif-font">浦賀黒船顛末記</h3>
+                        <p class="track-artist serif-font">歌唱・演奏：レッツゴーペリー</p>
+                    </div>
+                    
+                    <div class="audio-error-msg" id="audio-error-box">
+                        ⚠️ 音楽ファイルの再生に失敗しました。<br>
+                        このアプリと同じフォルダに<strong>「れつごーぺりー.mp3」</strong>が置かれているか確認してね！
+                    </div>
+
+                    <div class="audio-controls">
+                        <button class="btn-circle" id="play-pause-btn" onclick="toggleAudio()">▶</button>
+                        <span id="playback-status" style="font-size: 1.1rem; font-weight: bold; color: #555;">停止中</span>
+                    </div>
+
+                    <div class="dj-controls">
+                        <div class="control-group">
+                            <span class="control-label">⚡ 速度 (Tempo)</span>
+                            <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+                            <span class="control-value" id="speed-val">x1.0</span>
+                        </div>
+                        <div class="control-group">
+                            <span class="control-label">🔊 低音 (Bass)</span>
+                            <input type="range" id="bass-slider" min="-10" max="20" step="1" value="0">
+                            <span class="control-value" id="bass-val">0dB</span>
+                        </div>
+                    </div>
+
+                    <div class="visualizer-container" id="music-visualizer">
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 歴史資料室 -->
+        <div id="screen-study" class="screen" onscroll="checkScroll()">
+            <div class="screen-header">
+                <h2 class="serif-font">歴史資料室：来航の真実</h2>
+                <p style="color: #888;">（下にスクロールしてね 👇）</p>
+            </div>
+            
+            <div class="study-layout">
+                <div class="study-card">
+                    <div class="study-icon">⛽</div>
+                    <h3 class="serif-font">1. 捕鯨船のガソリンスタンド</h3>
+                    <p>19世紀中頃、アメリカではランプの燃料や機械の潤滑油としてクジラの油（鯨油）が不可欠でした。北太平洋に進出した多数の捕鯨船や、新たに登場した蒸気船にとって、水・食料・石炭を補給できる「海のガソリンスタンド」が切実に必要だったのです。</p>
+                </div>
+                
+                <div class="study-card">
+                    <div class="study-icon">🗺️</div>
+                    <h3 class="serif-font">2. 中国市場へのサービスエリア</h3>
+                    <p>アメリカは巨大市場である清（中国）との貿易拡大を狙っていました。アメリカ西海岸から太平洋を横断して中国へ向かう最短ルート上にある日本は、長旅の疲れを癒やす「中継地点（サービスエリア）」として戦略的に極めて重要な位置にありました。</p>
+                </div>
+                
+                <div class="study-card">
+                    <div class="study-icon">⚓</div>
+                    <h3 class="serif-font">3. 遭難船員の駆け込み寺</h3>
+                    <p>当時、太平洋の荒波で遭難し、日本の海岸に漂着するアメリカ船員が後を絶ちませんでした。しかし、鎖国下の日本は彼らを厳しく扱い、長期間拘束することがありました。アメリカは自国民を保護するため、人道的な扱いを求める協定を結ぶ必要がありました。</p>
+                </div>
+                
+                <div class="study-card boom">
+                    <div class="study-icon">💥</div>
+                    <h3 class="serif-font">4. 砲艦外交（理不尽なプレッシャー）</h3>
+                    <p>ペリーは平和的な交渉を装いつつも、当時最新鋭の巨大な蒸気軍艦（黒船）を率い、多数の大砲を江戸湾に向けました。「要求を飲まなければ武力を行使する」という無言の圧倒的なプレッシャーにより、200年以上続いた日本の鎖国をこじ開けたのです。</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: var(--gold-color); font-weight: bold; font-size: 1.2rem;">〜 日本の夜明けぜよ 〜</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 共通＆グローバル状態管理
+    // ==========================================
+    const today = new Date();
+    document.getElementById('date-display').textContent = `${today.getFullYear()} . ${String(today.getMonth() + 1).padStart(2, '0')} . ${String(today.getDate()).padStart(2, '0')}`;
+
+    let ownedItems = { whiskey: false, train: false };
+
+    // 各画面への切り替え制御
+    function switchScreen(screenId, navElement) {
+        // ナビのクラス管理
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        if (navElement) navElement.classList.add('active');
+
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        const targetScreen = document.getElementById(screenId);
+        targetScreen.classList.add('active');
+
+        // 各ゲームのループなどを制御
+        if(screenId === 'screen-game') {
+            initGameCanvas();
+            document.getElementById('game-start-overlay').style.display = 'flex';
+            document.getElementById('game-over-overlay').style.display = 'none';
+            document.getElementById('game-clear-overlay').style.display = 'none';
+            updateBuffStatusUI();
+        } else {
+            stopGame();
+        }
+
+        if(screenId === 'screen-clicker') {
+            initClickerLoop();
+        } else {
+            stopClickerLoop();
+        }
+        
+        if(screenId === 'screen-study') {
+            document.getElementById('screen-study').scrollTop = 0;
+            checkScroll();
+        }
+    }
+
+    // ゲーム選択から特定のゲーム画面に入るショートカット
+    function goToGame(gameScreenId) {
+        switchScreen(gameScreenId, null);
+    }
+
+    function updateBuffStatusUI() {
+        const buffStatus = document.getElementById('buff-status');
+        let buffs = [];
+        if (ownedItems.whiskey) buffs.push("🥃 バーボン・ウイスキー（開幕10秒間、無敵＆体当たり撃破！）");
+        if (ownedItems.train) buffs.push("🚂 蒸気機関車 1/4模型（主砲が機関車になり威力3倍！）");
+        
+        buffStatus.innerHTML = buffs.length > 0 
+            ? "【適用中の下賜品バフ】<br>" + buffs.join("<br>") 
+            : "【適用中の下賜品バフ】なし (丸腰の黒船)";
+    }
+
+    // ==========================================
+    // 機能1：お土産ガチャ
+    // ==========================================
+    const gachaItems = [
+        { rarity: 'SSR', class: 'color-SSR', icon: '🚂', name: '蒸気機関車 1/4模型', text: '実際に石炭を燃やして走る模型。幕府の役人が大はしゃぎした最高級品。【ゲーム特典：主砲が機関車になり威力3倍！】' },
+        { rarity: 'SSR', class: 'color-SSR', icon: '📠', name: 'エンボス式電信機', text: '約1.6kmの電線を仮設し一瞬で通信。当時の日本人にとって魔法のように見えた。' },
+        { rarity: 'SR', class: 'color-SR', icon: '📸', name: 'ダゲレオタイプ（銀板写真）', text: '世界初の実用的な写真機。日本の風景や役人の姿が鮮明に記録された。' },
+        { rarity: 'SR', class: 'color-SR', icon: '🥃', name: 'バーボン・ウイスキー', text: '晩餐会で振る舞われた。日本の役人が泥酔しペリーの肩を抱いた逸話がある。【ゲーム特典：開幕10秒間、泥酔無敵！】' },
+        { rarity: 'R', class: 'color-R', icon: '🍷', name: 'シャンパンとワイン', text: '洋酒の文化を伝える品。多くの日本人がその味に驚嘆した。' },
+        { rarity: 'R', class: 'color-R', icon: '🔭', name: '航海用望遠鏡', text: '遠くの船や星を鮮明に捉える光学機器。西洋の科学技術力を誇示した。' },
+        { rarity: 'R', class: 'color-R', icon: '🏳️', name: '降伏用の白旗', text: '「戦争になって負けを認める時はこれを振れ」という、脅しと共に渡された品。' },
+        { rarity: 'N', class: 'color-N', icon: '📖', name: 'アメリカ合衆国史・図鑑', text: '自国の歴史、図解した書籍。文化水準の高さをアピールした。' },
+        { rarity: 'N', class: 'color-N', icon: '🌱', name: '各種の種子と農具', text: 'ジャガイモやキャベツの種。用途が分からず戸惑いを生んだ。' },
+        { rarity: 'N', class: 'color-N', icon: '🧼', name: '香水と高級石鹸', text: '衛生・生活文化を伝える日用品。強烈な香りは当時の日本人に衝撃を与えた。' }
+    ];
+
+    let isGachaPlaying = false;
+    function playGacha() {
+        if(isGachaPlaying) return;
+        isGachaPlaying = true;
+
+        const machine = document.getElementById('gacha-machine');
+        const resContent = document.getElementById('gacha-result');
+        const rIcon = document.getElementById('res-icon');
+        const rRarity = document.getElementById('res-rarity');
+        const rText = document.getElementById('res-text');
+
+        machine.classList.add('shake');
+        resContent.classList.remove('show');
+
+        setTimeout(() => {
+            machine.classList.remove('shake');
+            
+            const rand = Math.random();
+            let pool = [];
+            if(rand < 0.15) pool = gachaItems.filter(i => i.rarity === 'SSR');
+            else if(rand < 0.35) pool = gachaItems.filter(i => i.rarity === 'SR');
+            else if(rand < 0.65) pool = gachaItems.filter(i => i.rarity === 'R');
+            else pool = gachaItems.filter(i => i.rarity === 'N');
+
+            const item = pool[Math.floor(Math.random() * pool.length)];
+
+            if (item.name === 'バーボン・ウイスキー') ownedItems.whiskey = true;
+            if (item.name === '蒸気機関車 1/4模型') ownedItems.train = true;
+
+            rIcon.textContent = item.icon;
+            rRarity.textContent = `【${item.rarity}】 ${item.name}`;
+            rRarity.className = `res-rarity serif-font ${item.class}`;
+            rText.textContent = item.text;
+
+            resContent.classList.add('show');
+            isGachaPlaying = false;
+        }, 600);
+    }
+
+    // ==========================================
+    // 機能2：黒船シューティング（縦横無尽＆ボス）
+    // ==========================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let gameReq;
+    let isPlaying = false;
+    
+    let cw, ch;
+    let player = { x: 0, y: 0, size: 55, emoji: '🚢', bulletEmoji: '💣', bulletPower: 1 };
+    let bullets = [];      
+    let enemies = [];      
+    let explosions = [];   
+    let boss = null;       
+    
+    let score = 0;
+    let enemiesDefeated = 0; 
+    let frameCount = 0;
+    
+    let isInvincible = false;     
+    let invincibilityTimer = 0;   
+
+    function initGameCanvas() {
+        const container = document.getElementById('screen-game');
+        cw = container.clientWidth;
+        ch = container.clientHeight;
+        canvas.width = cw;
+        canvas.height = ch;
+        player.x = cw / 2;
+        player.y = ch - 120;
+    }
+
+    function startGame() {
+        document.getElementById('game-start-overlay').style.display = 'none';
+        document.getElementById('game-over-overlay').style.display = 'none';
+        document.getElementById('game-clear-overlay').style.display = 'none';
+        
+        player.x = cw / 2;
+        player.y = ch - 120;
+        bullets = [];
+        enemies = [];
+        explosions = [];
+        boss = null;
+        score = 0;
+        enemiesDefeated = 0;
+        frameCount = 0;
+        
+        if (ownedItems.whiskey) {
+            isInvincible = true;
+            invincibilityTimer = 600; 
+        } else {
+            isInvincible = false;
+            invincibilityTimer = 0;
+        }
+
+        player.bulletEmoji = ownedItems.train ? '🚂' : '💣';
+        player.bulletPower = ownedItems.train ? 3 : 1; 
+
+        isPlaying = true;
+        document.getElementById('score-display').textContent = score;
+        document.getElementById('kill-display').textContent = enemiesDefeated;
+        gameLoop();
+    }
+
+    function stopGame() {
+        isPlaying = false;
+        if(gameReq) cancelAnimationFrame(gameReq);
+    }
+
+    function gameOver() {
+        isPlaying = false;
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('game-over-overlay').style.display = 'flex';
+    }
+
+    function gameClear() {
+        isPlaying = false;
+        document.getElementById('clear-score').textContent = score;
+        document.getElementById('game-clear-overlay').style.display = 'flex';
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+        if(!isPlaying) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        player.x = Math.max(40, Math.min(mouseX, cw - 40));
+        player.y = Math.max(ch * 0.3, Math.min(mouseY, ch - 40));
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+        if(!isPlaying) return;
+        bullets.push({
+            x: player.x,
+            y: player.y - 25,
+            speedY: -11,
+            size: ownedItems.train ? 40 : 20, 
+            emoji: player.bulletEmoji,
+            power: player.bulletPower
+        });
+    });
+
+    const enemyTypes = [
+        { emoji: '🛶', points: 10, size: 35, speedBonus: 0 },   
+        { emoji: '🏮', points: 15, size: 35, speedBonus: 1 },   
+        { emoji: '⚔️', points: 25, size: 40, speedBonus: -1 }
+    ];
+
+    function gameLoop() {
+        if(!isPlaying) return;
+        ctx.clearRect(0, 0, cw, ch);
+        frameCount++;
+
+        if (isInvincible && invincibilityTimer > 0) {
+            invincibilityTimer--;
+            if (invincibilityTimer <= 0) isInvincible = false;
+        }
+
+        if (enemiesDefeated < 30) {
+            let spawnRate = Math.max(15, 45 - Math.floor(score / 60));
+            if(frameCount % spawnRate === 0) {
+                const proto = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                enemies.push({
+                    x: Math.random() * (cw - 80) + 40,
+                    y: -50,
+                    size: proto.size,
+                    speedY: 2.5 + Math.random() * 3 + proto.speedBonus + (score * 0.005),
+                    emoji: proto.emoji,
+                    points: proto.points
+                });
+            }
+        } else if (!boss && enemies.length === 0 && isPlaying) {
+            boss = {
+                x: cw / 2,
+                y: 120,
+                size: 110,
+                emoji: '🏯', 
+                hp: 35,
+                maxHp: 35,
+                speedX: 4,
+                direction: 1
+            };
+        }
+
+        for(let i = bullets.length - 1; i >= 0; i--) {
+            let b = bullets[i];
+            b.y += b.speedY;
+            ctx.font = `${b.size}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(b.emoji, b.x, b.y);
+            if(b.y < 0) bullets.splice(i, 1);
+        }
+
+        if (isInvincible && frameCount % 4 < 2) {
+            // 無敵点滅
+        } else {
+            ctx.font = `${player.size}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(player.emoji, player.x, player.y);
+        }
+        
+        if (isInvincible) {
+            ctx.font = "bold 16px sans-serif";
+            ctx.fillStyle = '#f39c12';
+            ctx.fillText(`🥃 泥酔無敵中 (${Math.ceil(invincibilityTimer/60)}s)`, player.x, player.y - 45);
+        }
+
+        for(let i = enemies.length - 1; i >= 0; i--) {
+            let e = enemies[i];
+            e.y += e.speedY;
+
+            ctx.font = `${e.size}px Arial`;
+            ctx.fillText(e.emoji, e.x, e.y);
+
+            let dxPlayer = player.x - e.x;
+            let dyPlayer = player.y - e.y;
+            let distPlayer = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
+            
+            if(distPlayer < (player.size/2 + e.size/2 - 12)) {
+                if (isInvincible) {
+                    explosions.push({ x: e.x, y: e.y, size: e.size * 1.5, life: 12, emoji: '💥' });
+                    score += e.points;
+                    enemiesDefeated++;
+                    document.getElementById('score-display').textContent = score;
+                    document.getElementById('kill-display').textContent = Math.min(30, enemiesDefeated);
+                    enemies.splice(i, 1);
+                    continue;
+                } else {
+                    gameOver();
+                    return;
+                }
+            }
+
+            for(let j = bullets.length - 1; j >= 0; j--) {
+                let b = bullets[j];
+                let dxBullet = e.x - b.x;
+                let dyBullet = e.y - b.y;
+                let distBullet = Math.sqrt(dxBullet * dxBullet + dyBullet * dyBullet);
+
+                if(distBullet < (e.size/2 + b.size/2)) {
+                    explosions.push({ x: e.x, y: e.y, size: e.size * 1.5, life: 15, emoji: '💥' });
+                    score += e.points;
+                    enemiesDefeated++;
+                    
+                    document.getElementById('score-display').textContent = score;
+                    document.getElementById('kill-display').textContent = Math.min(30, enemiesDefeated);
+
+                    enemies.splice(i, 1);
+                    bullets.splice(j, 1);
+                    break;
+                }
+            }
+
+            if(e.y > ch + 50) enemies.splice(i, 1);
+        }
+
+        if (boss) {
+            boss.x += boss.speedX * boss.direction;
+            if (boss.x > cw - 80 || boss.x < 80) boss.direction *= -1;
+
+            ctx.font = `${boss.size}px Arial`;
+            ctx.fillText(boss.emoji, boss.x, boss.y);
+
+            const barW = 140;
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fillRect(boss.x - barW/2, boss.y - 75, barW, 10);
+            ctx.fillStyle = '#c0392b';
+            const currentBarW = (boss.hp / boss.maxHp) * barW;
+            ctx.fillRect(boss.x - barW/2, boss.y - 75, currentBarW, 10);
+            
+            ctx.font = "bold 14px sans-serif";
+            ctx.fillStyle = '#fff';
+            ctx.fillText("幕府総力要塞", boss.x, boss.y - 90);
+
+            let dxB = player.x - boss.x;
+            let dyB = player.y - boss.y;
+            let distB = Math.sqrt(dxB * dxB + dyB * dyB);
+            if (distB < (player.size/2 + boss.size/2 - 25) && !isInvincible) {
+                gameOver();
+                return;
+            }
+
+            for(let j = bullets.length - 1; j >= 0; j--) {
+                let b = bullets[j];
+                let bdx = boss.x - b.x;
+                let bdy = boss.y - b.y;
+                let bdist = Math.sqrt(bdx * bdx + bdy * bdy);
+
+                if(bdist < (boss.size/2 + b.size/2)) {
+                    boss.hp -= b.power; 
+                    explosions.push({ x: b.x, y: b.y, size: 45, life: 10, emoji: '⚡' });
+                    bullets.splice(j, 1);
+
+                    if(boss.hp <= 0) {
+                        explosions.push({ x: boss.x, y: boss.y, size: 160, life: 35, emoji: '🎉' });
+                        score += 1000;
+                        boss = null;
+                        setTimeout(gameClear, 1200);
+                    }
+                    break;
+                }
+            }
+        }
+
+        for(let i = explosions.length - 1; i >= 0; i--) {
+            let exp = explosions[i];
+            ctx.font = `${exp.size}px Arial`;
+            ctx.fillText(exp.emoji, exp.x, exp.y);
+            exp.life--;
+            if(exp.life <= 0) explosions.splice(i, 1);
+        }
+
+        if(isPlaying) gameReq = requestAnimationFrame(gameLoop);
+    }
+
+    // ==========================================
+    // 新ゲーム: 黒船クリッカーのロジック
+    // ==========================================
+    let clickerScore = 0;          // 現在貯まっている黒船ポイント（隻）
+    let clickPower = 1;            // 1クリックの獲得量
+    let clickerInterval = null;    // 自動生産ループ用のタイマー
+
+    // アップグレード（クリック能力）のコスト＆レベル
+    let upClickCost = 15;
+    let upClickLevel = 1;
+
+    // オート施設データ（KPS=毎秒増加量）
+    let facilities = {
+        cannon: { count: 0, cost: 50, kps: 0.2, baseCost: 50 },
+        flag:   { count: 0, cost: 250, kps: 1.0, baseCost: 250 },
+        boat:   { count: 0, cost: 1200, kps: 8.0, baseCost: 1200 },
+        wship:  { count: 0, cost: 8000, kps: 45.0, baseCost: 8000 },
+        army:   { count: 0, cost: 50000, kps: 260.0, baseCost: 50000 }
+    };
+
+    // クリッカー用の自動増加ループを始動
+    function initClickerLoop() {
+        if (clickerInterval) clearInterval(clickerInterval);
+        
+        // スペースキーでも連打できるようにイベント設定
+        window.addEventListener('keydown', handleSpaceBarClick);
+
+        clickerInterval = setInterval(() => {
+            let totalKps = getKPS();
+            clickerScore += totalKps / 10; // 0.1秒ごとに加算
+            updateClickerUI();
+        }, 100);
+    }
+
+    function stopClickerLoop() {
+        if (clickerInterval) clearInterval(clickerInterval);
+        window.removeEventListener('keydown', handleSpaceBarClick);
+    }
+
+    // スペースキー連打の処理
+    function handleSpaceBarClick(e) {
+        if (e.code === "Space" && document.getElementById('screen-clicker').classList.contains('active')) {
+            e.preventDefault(); // スクロール暴走防止
+            
+            // クリック対象を取得してボヨヨンエフェクトと加算を実行
+            const target = document.getElementById('clicker-target');
+            clickKurofuneDirect(target, window.innerWidth / 3, window.innerHeight / 2);
+        }
+    }
+
+    // 全体のオート増加量 (KPS) を計算
+    function getKPS() {
+        let sum = 0;
+        for (let key in facilities) {
+            sum += facilities[key].count * facilities[key].kps;
+        }
+        return sum;
+    }
+
+    // 連打したときの処理
+    function clickKurofune(e) {
+        const target = e.target;
+        // マウスのクリック座標
+        const x = e.clientX;
+        const y = e.clientY;
+        clickKurofuneDirect(target, x, y);
+    }
+
+    function clickKurofuneDirect(target, posX, posY) {
+        // スコア加算
+        clickerScore += clickPower;
+
+        // ボヨヨン・ちぢみ演出
+        target.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            target.style.transform = 'scale(1)';
+        }, 50);
+
+        // 数字がフワッと浮かび上がるポップアニメーション
+        const pop = document.createElement('div');
+        pop.className = 'click-pop-num';
+        pop.textContent = `+${clickPower}`;
+        pop.style.left = `${posX - 20}px`;
+        pop.style.top = `${posY - 40}px`;
+        document.body.appendChild(pop);
+
+        // アニメーション完了後に削除
+        setTimeout(() => {
+            pop.remove();
+        }, 800);
+
+        updateClickerUI();
+    }
+
+    // クリック強化（アップグレード）購入
+    function buyUpgrade() {
+        if (clickerScore >= upClickCost) {
+            clickerScore -= upClickCost;
+            clickPower += 1;
+            upClickLevel++;
+            upClickCost = Math.floor(upClickCost * 1.8); // 次回コスト1.8倍に
+            
+            updateClickerUI();
+        }
+    }
+
+    // オート施設購入
+    function buyFacility(key) {
+        let fac = facilities[key];
+        if (clickerScore >= fac.cost) {
+            clickerScore -= fac.cost;
+            fac.count++;
+            fac.cost = Math.floor(fac.baseCost * Math.pow(1.15, fac.count)); // コスト15%ずつ増加
+            
+            updateClickerUI();
+        }
+    }
+
+    // クリッカー画面のUIを最新状態に更新
+    function updateClickerUI() {
+        // スコアと毎秒増加量
+        document.getElementById('clicker-total-score').textContent = `${Math.floor(clickerScore).toLocaleString()} 隻`;
+        document.getElementById('clicker-kps').textContent = `毎秒増加量(KPS): ${getKPS().toFixed(1)} 隻`;
+
+        // クリック強化のコスト・レベル表示
+        document.getElementById('up-click-cost').textContent = `${upClickCost.toLocaleString()} 隻`;
+        document.getElementById('up-click-level').textContent = `Lv.${upClickLevel}`;
+        
+        // クリック強化カードのアクティブ化チェック
+        const upCard = document.getElementById('up-click');
+        if (clickerScore >= upClickCost) {
+            upCard.classList.remove('disabled');
+        } else {
+            upCard.classList.add('disabled');
+        }
+
+        // 各施設のアクティブ化チェックとコスト・購入数表示
+        for (let key in facilities) {
+            let fac = facilities[key];
+            const card = document.getElementById(`inst-${key}`);
+            
+            document.getElementById(`${key}-cost`).textContent = `${fac.cost.toLocaleString()} 隻`;
+            
+            // 単位のローカライズ表示
+            let unit = "台";
+            if (key === 'flag') unit = "本";
+            if (key === 'boat') unit = "艘";
+            if (key === 'wship') unit = "隻";
+            if (key === 'army') unit = "軍";
+            document.getElementById(`${key}-count`).textContent = `${fac.count} ${unit}`;
+
+            if (clickerScore >= fac.cost) {
+                card.classList.remove('disabled');
+            } else {
+                card.classList.add('disabled');
+            }
+        }
+    }
+
+
+    // ==========================================
+    // 機能3：オーディオ＆DJモード (Web Audio API)
+    // ==========================================
+    const audio = document.getElementById('bgm-player');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const playbackStatus = document.getElementById('playback-status');
+    const vinylDisc = document.getElementById('vinyl-disc');
+    const vinylArm = document.getElementById('vinyl-arm');
+    const visualizerBars = document.querySelectorAll('#music-visualizer .bar');
+    const audioErrorBox = document.getElementById('audio-error-box');
+    
+    const speedSlider = document.getElementById('speed-slider');
+    const speedVal = document.getElementById('speed-val');
+    const bassSlider = document.getElementById('bass-slider');
+    const bassVal = document.getElementById('bass-val');
+
+    let visualizerInterval;
+    
+    let audioContext;
+    let sourceNode;
+    let bassEQ;
+
+    audio.addEventListener('error', (e) => {
+        console.warn("Audio loading error handled:", e);
+        showAudioError();
+    });
+
+    function showAudioError() {
+        audioErrorBox.style.display = 'block';
+        playbackStatus.textContent = '再生エラー';
+        playPauseBtn.textContent = '▶';
+        vinylDisc.style.animationPlayState = 'paused';
+        vinylArm.style.transform = 'rotate(-30deg)';
+        stopVisualizer();
+    }
+
+    function initAudioEffects() {
+        if (audioContext) return; 
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            sourceNode = audioContext.createMediaElementSource(audio);
+            
+            bassEQ = audioContext.createBiquadFilter();
+            bassEQ.type = 'lowshelf'; 
+            bassEQ.frequency.value = 150; 
+            bassEQ.gain.value = parseInt(bassSlider.value); 
+
+            sourceNode.connect(bassEQ);
+            bassEQ.connect(audioContext.destination);
+        } catch(e) {
+            console.error("Web Audio API not supported or error:", e);
+        }
+    }
+
+    function toggleAudio() {
+        if (audio.paused) {
+            if (audio.error) { showAudioError(); return; }
+            
+            initAudioEffects();
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            audio.play().then(() => {
+                audioErrorBox.style.display = 'none';
+                playPauseBtn.textContent = '⏸';
+                playbackStatus.textContent = '演奏中';
+                vinylDisc.style.animationPlayState = 'running';
+                vinylArm.style.transform = 'rotate(0deg)';
+                startVisualizer();
+            }).catch(err => {
+                console.warn("Play rejected:", err);
+                showAudioError();
+            });
+        } else {
+            audio.pause();
+            playPauseBtn.textContent = '▶';
+            playbackStatus.textContent = '停止中';
+            vinylDisc.style.animationPlayState = 'paused';
+            vinylArm.style.transform = 'rotate(-30deg)';
+            stopVisualizer();
+        }
+    }
+
+    speedSlider.addEventListener('input', (e) => {
+        const rate = parseFloat(e.target.value);
+        audio.playbackRate = rate;
+        speedVal.textContent = `x${rate.toFixed(1)}`;
+        vinylDisc.style.animationDuration = `${6 / rate}s`; 
+    });
+
+    bassSlider.addEventListener('input', (e) => {
+        const gain = parseInt(e.target.value);
+        if (bassEQ) {
+            bassEQ.gain.value = gain; 
+        }
+        bassVal.textContent = gain > 0 ? `+${gain}dB` : `${gain}dB`;
+    });
+
+    function startVisualizer() {
+        if(visualizerInterval) clearInterval(visualizerInterval);
+        visualizerInterval = setInterval(() => {
+            visualizerBars.forEach(bar => {
+                let bassEffect = (parseInt(bassSlider.value) > 0) ? parseInt(bassSlider.value) : 0;
+                let height = Math.floor(Math.random() * (45 + bassEffect)) + 5; 
+                bar.style.height = `${height}px`;
+            });
+        }, 120 / audio.playbackRate); 
+    }
+
+    function stopVisualizer() {
+        clearInterval(visualizerInterval);
+        visualizerBars.forEach(bar => { bar.style.height = '5px'; });
+    }
+
+    // ==========================================
+    // 新機能4：歴史資料室のスクロールアニメーション
+    // ==========================================
+    function checkScroll() {
+        const studyScreen = document.getElementById('screen-study');
+        const cards = document.querySelectorAll('.study-card');
+        
+        const triggerBottom = studyScreen.clientHeight * 0.85;
+
+        cards.forEach(card => {
+            const cardTop = card.getBoundingClientRect().top - studyScreen.getBoundingClientRect().top;
+
+            if(cardTop < triggerBottom) {
+                card.classList.add('visible');
+            } else {
+                card.classList.remove('visible'); 
+            }
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        if(document.getElementById('screen-game').classList.contains('active')) {
+            initGameCanvas();
+        }
+    });
+
+</script>
+</body>
+</html>

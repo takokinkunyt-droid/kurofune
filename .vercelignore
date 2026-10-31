@@ -1,0 +1,13 @@
+# サイトとして配らないもの（読みやすい元のプログラム・道具・開発用のメモやファイル）
+# 公開されるのは scripts/build.js で作った index.html。src/ は直す用で、配らない。
+src
+scripts
+docs
+README.md
+CLAUDE.md
+RESTORE-HOWTO.md
+restore-payload.json
+compensate.ps1
+rescue-mysave.js
+diagnose-save.js
+recover-step2.js
