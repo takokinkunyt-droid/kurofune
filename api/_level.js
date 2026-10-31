@@ -18,7 +18,8 @@ const SUBEXP_PREFIX = 'subexp:s2:';
 const PLAN_MONTHLY_EXP = { edo: 100, meiji: 300, sakigake: 600, cho: 1500 };   // 江戸は廃止（残っている記録のためだけに置いてある）
 
 const RARE_ACH = new Set(['music', 'noEasy', 'perryFan', 'perryAnti', 'classicShip', 'fastClick', 'deleteSave',
-  'combo10000', 'clickLover', 'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
+  'combo10000', 'clickLover', 'click1k', 'click10k', 'click100k', 'click1m', 'click10m', 'click100m',
+  'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
 
 function n(v, max) {
   const x = Math.floor(Number(v));

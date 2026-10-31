@@ -3538,7 +3538,7 @@
             body.s2ui #screen-clicker { background: none !important; }
             body.s2ui #screen-clicker::before, body.s2ui #screen-clicker::after,
             body.s2ui .clicker-scene-bg, body.s2ui #mobile-tab-bar,
-            body.s2ui .clicker-news, body.s2ui .clicker-title-ribbon, body.s2ui .ship-name-input,
+            body.s2ui .clicker-news, body.s2ui .clicker-title-ribbon,
             body.s2ui .ship-hint, body.s2ui #clicker-sunburst,
             body.s2ui .clicker-col-center, body.s2ui .clicker-col-right { display: none !important; }
             body.s2ui #screen-clicker { padding-bottom: calc(58px + var(--admax-h, 0px)) !important; }
@@ -4839,6 +4839,18 @@ animation:facilitySweep 6s linear infinite;
 
         .plan-fair { font-size: 0.82rem; color: #7a6a4a; background: rgba(212,175,55,0.1); border-radius: 10px; padding: 10px 12px; line-height: 1.7; }
 
+        /* ---------- シーズン2：黒船の名前（隻数の上） ---------- */
+        body.s2ui .clicker-score-board .ship-name-input {
+            display: block !important; width: auto; min-width: 9em; max-width: min(320px, 80%); margin: 0 auto 2px;
+            padding: 3px 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 800; letter-spacing: 0.05em;
+            background: rgba(10, 20, 40, 0.30); border: 1px dashed rgba(255, 255, 255, 0.35); color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6); box-shadow: none; backdrop-filter: none; field-sizing: content;
+        }
+        body.s2ui .clicker-score-board .ship-name-input::placeholder { color: rgba(255, 255, 255, 0.6); font-weight: 700; }
+        body.s2ui .clicker-score-board .ship-name-input:not(:placeholder-shown) { border-style: solid; border-color: transparent; background: transparent; }
+        body.s2ui .clicker-score-board .ship-name-input:focus { border: 1px solid rgba(255, 211, 107, 0.8); background: rgba(10, 20, 40, 0.6); box-shadow: none; }
+        @media (max-width: 900px) { body.s2ui .clicker-score-board .ship-name-input { font-size: 16px; } }   /* 16px未満だと iPhone が拡大してしまう */
+
         /* ---------- ランキングの種類 ---------- */
         .rank-tabs-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
         .rank-tabs { display: inline-flex; background: rgba(0,0,0,0.06); border-radius: 12px; padding: 4px; gap: 4px; }
@@ -5086,7 +5098,7 @@ animation:facilitySweep 6s linear infinite;
                     </div>
 
                     <div class="top-ui-wrapper">
-                        <input type="text" class="ship-name-input" id="ship-name" placeholder="黒船に名前を付ける..." oninput="if(this.value!=='') unlockAchievement('name'); if(this.value==='ペリー') unlockAchievement('perryFan'); if(this.value==='ペリーカツラハゲ') unlockAchievement('perryAnti'); if(this.value==='TheBlackboatandship00981') unlockClassicMenu();">
+                        <input type="text" class="ship-name-input" id="ship-name" maxlength="24" placeholder="黒船に名前を付ける..." autocomplete="off" oninput="onShipNameInput(this)" onchange="onShipNameInput(this, true)">
                         <div class="clicker-score-board">
                             <p class="kurofune-count-title serif-font">現在の黒船保有量</p>
                             <div class="kurofune-count-wrap"><div class="kurofune-count" id="clicker-total-score">0 隻</div></div>
@@ -5944,6 +5956,19 @@ animation:facilitySweep 6s linear infinite;
     let s2Ach = {};                   // このシーズンに条件を満たした実績（海水）
     // レベル（EXP）用の、このシーズンの記録
     let s2Clicks = 0, s2GachaPulls = 0, s2PlayDays = 0, s2LastPlayDay = '';
+    // 黒船の名前（セーブに入れるので、ページを閉じても残る。シーズン1では保存していなかった）
+    let shipName = '';
+    let shipNameSaveTimer = 0;
+    function onShipNameInput(el, now) {
+        const v = String(el.value || '').slice(0, 24);
+        if (v !== '') unlockAchievement('name');
+        if (v === 'ペリー') unlockAchievement('perryFan');
+        if (v === 'ペリーカツラハゲ') unlockAchievement('perryAnti');
+        if (v === 'TheBlackboatandship00981') unlockClassicMenu();
+        shipName = v;
+        clearTimeout(shipNameSaveTimer);
+        if (now) saveGame(); else shipNameSaveTimer = setTimeout(saveGame, 600);
+    }
     let serverSubExp = 0;             // 加入プランの毎月のEXP（サーバーが数えた分）
     const S2_SEA_EXCLUDE = ['lastVoyage', 'feverFestival'];   // シーズン1のイベント限定は海水に数えない
     let superDockLevel = 0, upSuperDockCost = SUPER_DOCK_BASE_COST; // 超近代ドック拡張（最大バースト倍率 +1/Lv）
@@ -6136,6 +6161,12 @@ animation:facilitySweep 6s linear infinite;
         // 新規特殊実績
         combo10000:   { title:"連打の王",           icon:"👑",  desc:"10000連打する。",                  flavor:"RENDA KING!",               unlocked:false, isRare:true  },
         clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船の効果なしで、1回のクリックで100隻以上の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
+        click1k:      { title:"クリックが超大好き！！", icon:"💘", desc:"金船の効果なしで、1回のクリックで1,000隻以上の船を生成する。", flavor:"クリック重視。", unlocked:false, isRare:true },
+        click10k:     { title:"No Click No Life.",  icon:"🖤",  desc:"金船の効果なしで、1回のクリックで1万隻以上の船を生成する。", flavor:"クリックが命。", unlocked:false, isRare:true },
+        click100k:    { title:"Click In My Life.",  icon:"🫀",  desc:"金船の効果なしで、1回のクリックで10万隻以上の船を生成する。", flavor:"私にとっての命。", unlocked:false, isRare:true },
+        click1m:      { title:"クリックが足りない…", icon:"😵‍💫", desc:"金船の効果なしで、1回のクリックで100万隻以上の船を生成する。", flavor:"もっと私にクリックを。", unlocked:false, isRare:true },
+        click10m:     { title:"もっとくれ",         icon:"🤲",  desc:"金船の効果なしで、1回のクリックで1000万隻以上の船を生成する。", flavor:"いくらあっても足りない。", unlocked:false, isRare:true },
+        click100m:    { title:"This is my The END", icon:"🏥",  desc:"金船の効果なしで、1回のクリックで1億隻以上の船を生成する。", flavor:"クリック中毒改善センター", unlocked:false, isRare:true },
         kaikokuFinal: { title:"開国",               icon:"🔴",  desc:"日米修好通商条約を締結し、ペリーを帰国させる。", flavor:"さようなら、ペリー", unlocked:false, isRare:false, isFinal:true },
         superCritBurst:{ title:"超会心",           icon:"🌟",  desc:"会心のバーストが、まれに「超会心」になる。それを引き当てる。", flavor:"二十に一つの、本物の一撃。", unlocked:false, isRare:true  },
         criticalBurst:{ title:"会心のバースト",     icon:"💥",  desc:"最大まで溜めた直後に離して、会心のバーストを放つ。", flavor:"狙って撃つ。それが船乗りの流儀。", unlocked:false, isRare:true  },
@@ -8557,7 +8588,7 @@ animation:facilitySweep 6s linear infinite;
             clickerScore, currentLifeScore, clickPower, upClickCost, upClickLevel,
             superDockLevel, upSuperDockCost,
             s2tree, pastLivesEarned, fragmentsEarnedTotal, steamLevel, s2Ach, sailorLevel,
-            s2Clicks, s2GachaPulls, s2PlayDays, s2LastPlayDay,
+            s2Clicks, s2GachaPulls, s2PlayDays, s2LastPlayDay, shipName,
             reincarnationCount, fragments, skills, achievements,
             facilities, availableFacilityUpgrades,
             wrenchLevel, upWrenchCost, combatTechPurchased,
@@ -9095,6 +9126,7 @@ animation:facilitySweep 6s linear infinite;
         if (save.s2Ach && typeof save.s2Ach === 'object') { for (const k in save.s2Ach) { if (save.s2Ach[k] && achievements[k]) s2Ach[k] = true; } }
         s2Clicks = Math.floor(sanitizeNum(save.s2Clicks, 0)); s2GachaPulls = Math.floor(sanitizeNum(save.s2GachaPulls, 0));
         s2PlayDays = Math.floor(sanitizeNum(save.s2PlayDays, 0)); s2LastPlayDay = typeof save.s2LastPlayDay === 'string' ? save.s2LastPlayDay.slice(0, 10) : '';
+        shipName = typeof save.shipName === 'string' ? save.shipName.slice(0, 24) : '';
         reincarnationCount = sanitizeNum(save.reincarnationCount, 0); fragments = sanitizeNum(save.fragments, 0);
         sakokuShards = sanitizeNum(save.sakokuShards, 0); superReincarnationCount = sanitizeNum(save.superReincarnationCount, 0); buyQuantity = sanitizeNum(save.buyQuantity, 1);
         superSkills = { ...superSkills, ...(save.superSkills || {}) };
@@ -9216,6 +9248,7 @@ animation:facilitySweep 6s linear infinite;
             initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); updateAscensionUI(); updateSuperAscensionUI(); updateCenterView(); updateAchievementsModal();
             applyShipSkin();
             try { checkTreeAchievements(); } catch (e) {}
+            const sn = document.getElementById('ship-name'); if (sn && document.activeElement !== sn) sn.value = shipName || '';
         };
 
         if (netlifyEnabled) {
@@ -10717,6 +10750,12 @@ animation:facilitySweep 6s linear infinite;
 
         // 1クリックの値
         const board = base.querySelector('.clicker-score-board');
+        // 黒船の名前：隻数のすぐ上に小さく置く
+        const nameIn = document.getElementById('ship-name');
+        if (board && nameIn && nameIn.parentElement !== board) {
+            nameIn.placeholder = '✏️ 黒船に名前を付ける';
+            board.insertBefore(nameIn, board.firstChild);
+        }
         if (board && !document.getElementById('s2-perclick')) {
             const pc = document.createElement('div'); pc.id = 's2-perclick';
             board.appendChild(pc);
@@ -11521,7 +11560,8 @@ animation:facilitySweep 6s linear infinite;
     // 式は api/_level.js と同じにしておくこと（ランキングはサーバーが数え直す）。
     // ==========================================
     const LEVEL_RARE_ACH = new Set(['music', 'noEasy', 'perryFan', 'perryAnti', 'classicShip', 'fastClick', 'deleteSave',
-        'combo10000', 'clickLover', 'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
+        'combo10000', 'clickLover', 'click1k', 'click10k', 'click100k', 'click1m', 'click10m', 'click100m',
+        'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
     function computeExpFromPlay() {
         let exp = Math.floor(Math.min(s2Clicks, 5e7) / 100) + Math.min(s2GachaPulls, 1e6) * 5;
         for (const k in s2Ach) if (s2Ach[k]) exp += LEVEL_RARE_ACH.has(k) ? 50 : 20;
@@ -12614,7 +12654,15 @@ animation:facilitySweep 6s linear infinite;
         if (clickerScore >= 1e16) unlockAchievement('count1q');
         // 1回のクリックで100隻以上（金船の黄金時代・777倍の間は数えない）。
         // 以前は「近代ドック拡張の基本値」だけを見ていて、シーズン2のクリックの強さと合っていなかった
-        if (currentClickPower >= 100 && !(frenzyTimer > 0 && frenzyClickMult > 1)) unlockAchievement('clickLover');
+        if (!(frenzyTimer > 0 && frenzyClickMult > 1)) {
+            if (currentClickPower >= 100) unlockAchievement('clickLover');
+            if (currentClickPower >= 1e3) unlockAchievement('click1k');
+            if (currentClickPower >= 1e4) unlockAchievement('click10k');
+            if (currentClickPower >= 1e5) unlockAchievement('click100k');
+            if (currentClickPower >= 1e6) unlockAchievement('click1m');
+            if (currentClickPower >= 1e7) unlockAchievement('click10m');
+            if (currentClickPower >= 1e8) unlockAchievement('click100m');
+        }
 
         // updateClickerUI は1回 6ms 前後かかる。連打中にクリックごとに
         // 呼ぶと、それだけで処理時間を食い潰す。
@@ -13465,6 +13513,16 @@ animation:facilitySweep 6s linear infinite;
     // ※ 実績の中身（名前・条件・フレーバーテキスト）はここに書かない。探す楽しみのネタばれになるため。
     //   「実績を追加しました」のように、増えたこと・直したことだけを書く。
     const changelogData = [
+        {
+            version: "v4.6.2",
+            title: "黒船にまた名前を付けられるように",
+            date: "2026-10-31",
+            content: [
+                "シーズン2の画面になってから付けられなくなっていた黒船の名前を、また付けられるようにしました。隻数のすぐ上の「✏️ 黒船に名前を付ける」を押して入力してください。",
+                "付けた名前はセーブに入るので、ページを閉じても、ほかの端末で開いても残ります（シーズン1では、閉じると消えていました）。",
+                "実績をいくつか追加しました。"
+            ]
+        },
         {
             version: "v4.6.1",
             title: "実績の追加と見直し",
