@@ -37,6 +37,10 @@ const SS = require('./_substyle');
 //  画像は30日で消える。1人1日20枚まで。見るときは GET ?img=<id>
 //  admin_mute / admin_unmute { playerId } … 話す機能（DM・談話室・申請）だけ止める。ゲームとセーブはそのまま
 //
+// 引き継ぎ（ほかの端末や、iPhone のホーム画面のアプリへ。iPhone はホーム画面のアプリと Safari でデータが別々になる）
+//  xfer_make                  … 引き継ぎコードを作る（10分だけ有効・1回きり）。本人確認が必要
+//  xfer_use  { code }         … コードを入れると、その船長の ID と鍵が返る（新しい端末はそれを使って読み込み直す）
+//
 // 目安箱（開発者にだけ届く。ほかのプレイヤーには見えない）
 //  idea_send { kind:'want'|'fix'|'other', text } … 1通500文字まで。1分に1通、1日5通まで
 //  idea_mine                  … 自分が送ったもの（読んだ・やった！などの状態と、開発者からの返事つき）
@@ -83,6 +87,8 @@ module.exports = async (req, res) => {
     // 「最後の発言の時刻」だけを見て、増えていなければ本人確認もせずに「変わりなし」と返す。
     // 浦賀沖大砲戦の対戦中のやりとり（1秒に1回）。本人確認の代わりに、対戦ごとの秘密の鍵で書き込む
     if (action === 'cbt_sync') return res.status(200).json(await cbSync(body));
+    // 引き継ぎコードを使う側は、まだ別の（新しい）ID なので、本人確認の前に受け付ける
+    if (action === 'xfer_use') return res.status(200).json(await xferUse(body.code, req));
 
     if (action === 'lounge_get' && Number(body.since) > 0) {
       const last = Number((await redisRequest(['get', 'lounge:s2:last'])).result) || 0;
@@ -126,6 +132,7 @@ module.exports = async (req, res) => {
       case 'lounge_get':  return res.status(200).json(await loungeGet(me, Number(body.since) || 0));
       case 'lounge_send': return res.status(200).json(await loungeSend(me, myName, body.text, shadow, body.image));
       case 'report':      return res.status(200).json(await doReport(me, body));
+      case 'xfer_make':   return res.status(200).json(await xferMake(me, body.saveToken, myName));
       case 'idea_send':   return res.status(200).json(await ideaSend(me, myName, body.kind, body.text));
       case 'idea_mine':   return res.status(200).json(await ideaMine(me));
       case 'cbt_find':    return res.status(200).json(await cbFind(me, body.ticket));
@@ -619,6 +626,33 @@ async function cbSync(body) {
                t: cbClamp(s.t, 0, 600), alive: s.alive !== false, done: !!s.done, at: now };
   const [, o] = await redisPipeline([['set', `cbs:${matchId}:${key}`, JSON.stringify(st), 'EX', 900], ['get', `cbs:${matchId}:${opp}`]]);
   return { success: true, opp: jparse(o && o.result), now };
+}
+
+// ---------------------------------------------------------------- 引き継ぎ
+const XFER_TTL = 600;
+function xferNorm(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }   // 文字は ALPH（まぎらわしい O・0・I・1 は使わない）
+async function xferMake(me, tok, myName) {
+  const [n] = await redisPipeline([['incr', `xfer_n:${me}`], ['expire', `xfer_n:${me}`, 3600]]);
+  if (Number(n.result) > 6) return { success: false, error: 'コードの作りすぎです。1時間たってからもう一度どうぞ' };
+  const bytes = crypto.randomBytes(10);
+  let raw = ''; for (const b of bytes) raw += ALPH[b % ALPH.length];
+  const code = raw;
+  await redisRequest(['set', `xfer:${code}`, JSON.stringify({ id: me, tok, name: cleanName(myName) }), 'EX', XFER_TTL]);
+  return { success: true, code: code.slice(0, 5) + '-' + code.slice(5), expiresIn: XFER_TTL };
+}
+async function xferUse(codeIn, req) {
+  const code = xferNorm(codeIn);
+  if (code.length !== 10) return { success: false, error: 'コードは10文字です（例：AB3CD-EF4GH）' };
+  // 当てずっぽうで試されないよう、同じ回線からは10分に20回まで（数えるためだけに使い、残さない）
+  const ip = String((req.headers && (req.headers['x-forwarded-for'] || req.headers['x-real-ip'])) || 'unknown').split(',')[0].trim().slice(0, 64);
+  const [t] = await redisPipeline([['incr', `xfer_try:${ip}`], ['expire', `xfer_try:${ip}`, 600]]);
+  if (Number(t.result) > 20) return { success: false, error: '試しすぎです。10分たってからもう一度どうぞ' };
+  const o = jparse((await redisRequest(['get', `xfer:${code}`])).result);
+  if (!o) return { success: false, error: 'コードが違うか、期限（10分）が切れています' };
+  const ban = await redisRequest(['sismember', 'banned_players', o.id]);
+  if (ban.result === 1) return { success: false, error: 'このデータは引き継げません' };
+  await redisRequest(['del', `xfer:${code}`]);   // 1回きり
+  return { success: true, playerId: o.id, saveToken: o.tok, name: o.name };
 }
 
 // ---------------------------------------------------------------- 目安箱

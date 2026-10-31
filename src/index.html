@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>日本史演習 － 近世から近代へ</title>
     <link rel="icon" type="image/png" href="/kurofune.png">
+    <!-- ホーム画面に追加（PWA） -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="黒船">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;800&family=Noto+Sans+JP:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&family=DotGothic16&family=Yusei+Magic&family=Zen+Kurenaido&display=swap" rel="stylesheet">
@@ -961,6 +968,47 @@
         .cb-how { margin-top: 18px; font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.8; text-align: left; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 12px; }
 
 
+
+        /* ---------- 📲 ホーム画面に追加・引き継ぎ ---------- */
+        body.pwa-standalone #nav-pwa { display: none !important; }
+        .pwa-bg { position: fixed; inset: 0; z-index: 100020; background: rgba(10, 5, 2, 0.6); display: flex; align-items: center; justify-content: center;
+                  padding: 16px; box-sizing: border-box; overflow-y: auto; }
+        .pwa-card { background: #fffaf0; color: #2a1408; width: min(440px, 100%); max-height: calc(100% - 8px); overflow-y: auto; border-radius: 16px; padding: 18px 18px 14px;
+                    box-sizing: border-box; box-shadow: 0 20px 60px rgba(0,0,0,0.5); font-family: 'Noto Sans JP', sans-serif; position: relative; margin: auto; }
+        .pwa-card h3 { margin: 0 0 6px; font-family: 'Shippori Mincho', serif; font-size: 1.35rem; color: #5a1a0a; padding-right: 32px; }
+        .pwa-x { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); font-size: 1rem; cursor: pointer; color: #5a3415; }
+        .pwa-lead { font-size: 0.86rem; color: #6b5a3a; line-height: 1.7; margin: 0 0 10px; }
+        .pwa-steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+        .pwa-steps li { counter-increment: s; position: relative; padding: 8px 0 8px 36px; font-size: 0.9rem; line-height: 1.6; border-top: 1px solid rgba(0,0,0,0.06); }
+        .pwa-steps li:first-child { border-top: none; }
+        .pwa-steps li::before { content: counter(s); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; border-radius: 50%; background: #8a1a10; color: #fff3d6;
+                                font-weight: 900; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+        .pwa-share { display: inline-block; border: 1.5px solid #1f6fd6; color: #1f6fd6; border-radius: 4px; padding: 0 4px; font-size: 0.8rem; font-weight: 800; line-height: 1.4; }
+        .pwa-sec { margin-top: 14px; background: #fff; border: 1px solid #ecdcbc; border-radius: 12px; padding: 12px; }
+        .pwa-sec h4 { margin: 0 0 6px; font-size: 0.95rem; color: #5a3415; }
+        .pwa-sec p { margin: 0 0 8px; font-size: 0.8rem; color: #7a6a4a; line-height: 1.6; }
+        .pwa-btn { border: 1px solid #c9a35a; background: #fff8e6; color: #5a3415; border-radius: 10px; padding: 10px 14px; font-weight: 800; font-size: 0.92rem; cursor: pointer;
+                   font-family: 'Noto Sans JP', sans-serif; }
+        .pwa-btn.primary { background: #8a1a10; border-color: #8a1a10; color: #fff3d6; }
+        .pwa-btn.wide { width: 100%; }
+        .pwa-btn:disabled { opacity: 0.5; cursor: default; }
+        .pwa-code { font-family: 'DotGothic16', monospace; font-size: 1.9rem; letter-spacing: 0.12em; text-align: center; color: #2a1408; background: #fff3d6; border-radius: 10px;
+                    padding: 8px 4px; margin: 8px 0 4px; user-select: all; -webkit-user-select: all; }
+        .pwa-row { display: flex; gap: 8px; }
+        .pwa-row input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.08em;
+                         font-family: 'DotGothic16', monospace; }
+        .pwa-msg { font-size: 0.82rem; color: #8a1a10; margin-top: 6px; min-height: 1em; line-height: 1.6; }
+        .pwa-note { font-size: 0.75rem; color: #9a8a6a; margin-top: 10px; line-height: 1.6; }
+        .pwa-promo { position: fixed; left: 12px; right: 12px; bottom: calc(76px + var(--admax-h, 0px)); z-index: 100005; max-width: 440px; margin: 0 auto;
+                     background: rgba(30, 14, 6, 0.96); color: #fff3d6; border: 1px solid rgba(255, 211, 107, 0.6); border-radius: 14px; padding: 10px 12px;
+                     display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); font-family: 'Noto Sans JP', sans-serif; font-size: 0.85rem; line-height: 1.5;
+                     animation: pwaIn .35s cubic-bezier(.2, 1.4, .4, 1) both; }
+        .pwa-promo img { width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0; }
+        .pwa-promo .pwa-btn { padding: 7px 10px; font-size: 0.8rem; flex-shrink: 0; }
+        .pwa-promo .pwa-px { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1rem; cursor: pointer; padding: 4px; flex-shrink: 0; }
+        @keyframes pwaIn { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+        .pwa-set-btn { width: 100%; margin-bottom: 8px; padding: 10px; border-radius: 8px; border: 1px solid #c9a35a; background: #fff8e6; color: #5a3415; font-weight: 800; cursor: pointer;
+                       font-family: 'Noto Sans JP', sans-serif; font-size: 0.9rem; }
         /* ---------- 📮 目安箱 ---------- */
         .idea-kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
         .idea-kinds button { border: 1px solid #e2d3b5; background: #fffaf0; color: #6b5a3a; border-radius: 10px; padding: 10px 4px; font-weight: 800; font-size: 0.86rem;
@@ -5145,6 +5193,7 @@ animation:facilitySweep 6s linear infinite;
             <div class="nav-item" id="nav-classic" style="display:none;" onclick="openClassicMenu(this)"><span class="nav-icon">📼</span><span class="nav-text">Classic</span></div>
             <div style="margin-top: auto; display: flex; flex-direction: column;">
                 <div class="nav-item" onclick="toggleSidebar()" style="border-top: 1px solid #3a2a18; color: #998877;"><span class="nav-icon" id="sidebar-toggle-icon">◀</span><span class="nav-text">メニューを畳む</span></div>
+                <div class="nav-item" id="nav-pwa" onclick="openPwaSheet()" style="border-top: 1px solid #3a2a18; color: var(--gold-color);"><span class="nav-icon">📲</span><span class="nav-text">ホーム画面に追加</span></div>
                 <div class="nav-item" onclick="toggleFullscreen()" style="border-top: 1px solid #3a2a18; color: var(--gold-color);"><span class="nav-icon">📺</span><span class="nav-text">全画面切り替え</span></div>
             </div>
         </div>
@@ -6157,6 +6206,7 @@ animation:facilitySweep 6s linear infinite;
 
     </div>
 
+    <button class="pwa-set-btn" onclick="document.getElementById('settings-modal').style.display='none'; openPwaSheet()">📲 ホーム画面に追加・ほかの端末へ引き継ぎ</button>
     <button class="close-btn" onclick="document.getElementById('settings-modal').style.display='none'">閉じる</button>
     <button class="danger-btn" onclick="resetSaveData()">💀 セーブデータを全消去する</button>
 </div>
@@ -8879,6 +8929,7 @@ animation:facilitySweep 6s linear infinite;
     const SAVE_DATA_VERSION = 4;
 
     function saveGame() {
+        if (window.kfXferLock) return;   // 引き継ぎで読み込み直す直前。いまのデータで上書きしない
         const saveData = {
             saveVersion: SAVE_DATA_VERSION,
             clickerScore, currentLifeScore, clickPower, upClickCost, upClickLevel,
@@ -9197,6 +9248,12 @@ animation:facilitySweep 6s linear infinite;
         bar.style.cssText = 'position:fixed; top:0; left:0; right:0; z-index:100010;' +
             'background:#c0392b; color:#fff; padding:12px 16px; text-align:center;' +
             'font-size:0.85rem; line-height:1.6; box-shadow:0 4px 14px rgba(0,0,0,0.4);';
+        if (navigator.onLine === false) {   // 電波が無いだけのとき（ホーム画面から開いたときなど）
+            bar.innerHTML = '📡 <b>電波がつながっていません。</b><br>データを守るため、保存を止めています。電波のあるところで再読み込みしてね。' +
+                '<button onclick="location.reload()" style="margin-left:12px; padding:5px 14px; border:none; border-radius:5px; background:#fff; color:#c0392b; font-weight:bold; cursor:pointer;">再読み込み</button>';
+            document.body.appendChild(bar);
+            return;
+        }
         bar.innerHTML = '⚠️ <b>セーブデータの読み込みに失敗しました。</b>（通信エラー）<br>' +
             'データを守るため、保存を一時停止しています。<b>このまま遊ばず</b>、ページを再読み込みしてください。' +
             '<button onclick="location.reload()" style="margin-left:12px; padding:5px 14px; border:none; border-radius:5px; background:#fff; color:#c0392b; font-weight:bold; cursor:pointer;">再読み込み</button>';
@@ -13484,6 +13541,148 @@ animation:facilitySweep 6s linear infinite;
         } catch (e) {}
     }
 
+    // ==========================================
+    // 📲 ホーム画面に追加（PWA）と、引き継ぎコード
+    // ・manifest.webmanifest と sw.js（ルート）でアプリのように開ける。sw.js はページをいつもネットから先に取る
+    // ・iPhone は「ホーム画面の黒船」と「Safari の黒船」でデータ（localStorage）が別々になる。
+    //   だから引き継ぎコード（api/social.js の xfer_make / xfer_use）で、船長の ID と鍵を新しい方へ渡す
+    // ==========================================
+    const PWA = { deferred: null };
+    function pwaLS(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
+    function pwaStandalone() { try { return matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true; } catch (e) { return false; } }
+    function pwaIsIOS() { const ua = navigator.userAgent || ''; return /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+    function pwaIsAndroid() { return /Android/i.test(navigator.userAgent || ''); }
+    function pwaInApp() { return /\bLine\/|FBAN|FBAV|Instagram|Twitter|TikTok/i.test(navigator.userAgent || ''); }
+    function kfApi(action, extra) {   // 失敗しても投げない（{ success:false, error } を返す）
+        return fetch(getNetlifyFunctionUrl('social'), {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({ playerId, saveToken: saveToken || getOrCreateSaveToken(), playerName, action }, extra || {})),
+        }).then(r => r.json()).catch(() => ({ success: false, error: '通信できませんでした。電波のいいところで、もう一度どうぞ' }));
+    }
+    function initPwa() {
+        if ('serviceWorker' in navigator && window.isSecureContext) setTimeout(() => { navigator.serviceWorker.register('/sw.js').catch(() => {}); }, 3000);
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); PWA.deferred = e; });
+        window.addEventListener('appinstalled', () => { PWA.deferred = null; pwaLS('kurofunePwaAdded', '1'); const p = document.getElementById('pwa-promo'); if (p) p.remove(); });
+        if (pwaStandalone()) { document.body.classList.add('pwa-standalone'); setTimeout(pwaFirstRun, 2500); }
+        else setTimeout(pwaPromo, 25000);
+    }
+    function pwaClose() { const b = document.getElementById('pwa-sheet'); if (b) b.remove(); }
+    function pwaSheet(html) {
+        pwaClose();
+        const bg = document.createElement('div'); bg.className = 'pwa-bg'; bg.id = 'pwa-sheet';
+        bg.innerHTML = '<div class="pwa-card"><button class="pwa-x" onclick="pwaClose()" aria-label="閉じる">✕</button>' + html + '</div>';
+        bg.addEventListener('click', (e) => { if (e.target === bg) pwaClose(); });
+        document.body.appendChild(bg);
+        return bg;
+    }
+    const PWA_XFER_OUT = '<div class="pwa-sec"><h4>📤 引き継ぎコードを出す</h4><p>いまの端末で押してね。出たコードを、10分以内に新しい方で入れます（1回きり）。引き継いだあとは、新しい方で遊んでね（両方で遊ぶと、あとから保存した方が残ります）。</p>'
+        + '<button class="pwa-btn primary wide" id="pwa-make" onclick="pwaMakeCode()">引き継ぎコードを出す</button><div id="pwa-code-out"></div></div>';
+    const PWA_XFER_IN = '<div class="pwa-sec"><h4>📥 コードを入れて引き継ぐ</h4><p>新しい方（ホーム画面の黒船など）で入れてね。<b>この端末でいま遊んでいるデータは、引き継いだデータに置きかわります。</b></p>'
+        + '<div class="pwa-row"><input id="pwa-code-in" maxlength="11" placeholder="XXXXX-XXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="pwa-btn primary" onclick="pwaRedeem()">引き継ぐ</button></div>'
+        + '<div class="pwa-msg" id="pwa-in-msg"></div></div>';
+    function openPwaSheet() {
+        try { closeMobileSidebar(); } catch (e) {}
+        let html;
+        if (pwaStandalone()) {
+            html = '<h3>📲 引き継ぎ</h3><p class="pwa-lead">ほかの端末とデータを行き来させたいときに使います。</p>' + PWA_XFER_OUT + PWA_XFER_IN;
+        } else if (pwaInApp()) {
+            html = '<h3>📲 ホーム画面に追加</h3><p class="pwa-lead">LINE などのアプリの中で開いていると、ホーム画面に追加できません。<b>Safari（Android は Chrome）で開き直してね。</b></p>'
+                + '<button class="pwa-btn primary wide" onclick="pwaCopyUrl(this)">このページの住所をコピー</button>' + PWA_XFER_OUT;
+        } else if (pwaIsIOS()) {
+            const chrome = /CriOS|EdgiOS|FxiOS/.test(navigator.userAgent || '');
+            html = '<h3>📲 ホーム画面に追加</h3><p class="pwa-lead">追加すると、アイコンから一発で開けて、上下のバーが消えた全画面で遊べます。</p>'
+                + '<ol class="pwa-steps">'
+                + '<li><b>先に、下の「引き継ぎコードを出す」を押して、コードをメモ</b>（スクショでもOK）。iPhone では、ホーム画面の黒船と Safari の黒船でデータが別々になるからです。</li>'
+                + '<li>' + (chrome ? '右上の' : '画面下（または上）の') + ' <span class="pwa-share">共有 ⬆︎</span> ボタンを押す</li>'
+                + '<li>下へスクロールして「<b>ホーム画面に追加</b>」→ 右上の「<b>追加</b>」</li>'
+                + '<li>ホーム画面の黒船を開くと「引き継ぎ」が出るので、コードを入れる</li></ol>'
+                + PWA_XFER_OUT;
+        } else if (pwaIsAndroid()) {
+            html = '<h3>📲 ホーム画面に追加</h3><p class="pwa-lead">追加すると、アイコンから一発で開けて、全画面で遊べます。Android はデータがそのまま使えるので、引き継ぎはいりません。</p>'
+                + (PWA.deferred ? '<button class="pwa-btn primary wide" onclick="pwaInstall()">📲 ホーム画面に追加する</button>'
+                                : '<ol class="pwa-steps"><li>Chrome の右上の <b>︙</b> を押す</li><li>「<b>ホーム画面に追加</b>」か「<b>アプリをインストール</b>」を押す</li></ol>')
+                + '<p class="pwa-note">ほかの端末へ移るときは、下のコードを使ってね。</p>' + PWA_XFER_OUT;
+        } else {
+            html = '<h3>📲 アプリとして追加</h3><p class="pwa-lead">パソコンの Chrome や Edge なら、アプリとして入れられます（データはそのまま）。</p>'
+                + (PWA.deferred ? '<button class="pwa-btn primary wide" onclick="pwaInstall()">📲 インストールする</button>'
+                                : '<ol class="pwa-steps"><li>アドレスバーの右はしにある「インストール」のマーク（画面に↓）を押す</li><li>見つからなければ、メニュー（︙ や …）→「アプリ」→「インストール」</li></ol>')
+                + '<p class="pwa-note">スマホへ移るときは、下のコードを出して、スマホで入れてね。</p>' + PWA_XFER_OUT + PWA_XFER_IN;
+        }
+        pwaSheet(html);
+    }
+    async function pwaInstall() {
+        if (!PWA.deferred) return openPwaSheet();
+        const ev = PWA.deferred; PWA.deferred = null;
+        try { ev.prompt(); const r = await ev.userChoice; if (r && r.outcome === 'accepted') { pwaLS('kurofunePwaAdded', '1'); pwaClose(); } } catch (e) {}
+    }
+    function pwaCopyUrl(btn) {
+        const url = location.origin + '/';
+        const done = () => { btn.textContent = 'コピーしました！ Safari に貼りつけて開いてね'; };
+        try { navigator.clipboard.writeText(url).then(done, () => { prompt('この住所をコピーしてね', url); }); } catch (e) { prompt('この住所をコピーしてね', url); }
+    }
+    async function pwaMakeCode() {
+        const btn = document.getElementById('pwa-make'), out = document.getElementById('pwa-code-out'); if (!btn || !out) return;
+        btn.disabled = true; out.innerHTML = '<div class="pwa-msg">作っています…</div>';
+        // いまの続きをすぐクラウドへ送る（ふだんの保存は間をおいて送るので、そのままだと少し前のデータが引き継がれる）
+        try {
+            saveGame(); clearTimeout(cloudSyncTimer); cloudSyncTimer = null;
+            const d = JSON.parse(localStorage.getItem('kurofuneSaveData') || 'null'); if (d) syncToCloud(d);
+        } catch (e) {}
+        await new Promise(r => setTimeout(r, 800));
+        const r = await kfApi('xfer_make');
+        btn.disabled = false;
+        if (!r || !r.success) { out.innerHTML = '<div class="pwa-msg">⚠️ ' + escapeHtml((r && r.error) || '作れませんでした') + '</div>'; return; }
+        btn.textContent = 'もう一度作る';
+        const until = new Date(Date.now() + (r.expiresIn || 600) * 1000);
+        out.innerHTML = '<div class="pwa-code">' + escapeHtml(r.code) + '</div><div class="pwa-note" style="margin-top:4px;text-align:center;">'
+            + until.getHours() + ':' + String(until.getMinutes()).padStart(2, '0') + ' まで有効・1回きり。ほかの人には教えないでね（あなたのデータを持っていかれます）</div>';
+    }
+    async function pwaRedeem() {
+        const inp = document.getElementById('pwa-code-in'), msg = document.getElementById('pwa-in-msg'); if (!inp || !msg) return;
+        const code = inp.value.trim();
+        if (code.replace(/[^0-9A-Za-z]/g, '').length !== 10) { msg.textContent = 'コードは10文字です（例：AB3CD-EF4GH）'; return; }
+        if (!confirm('この端末で遊んでいるデータは、引き継いだデータに置きかわります。\nよろしいですか？')) return;
+        msg.textContent = '引き継いでいます…';
+        const r = await kfApi('xfer_use', { code });
+        if (!r || !r.success) { msg.textContent = '⚠️ ' + ((r && r.error) || '引き継げませんでした'); return; }
+        if (r.playerId === playerId) { msg.textContent = 'これは、いまと同じデータのコードです。'; return; }
+        window.kfXferLock = true;
+        try { clearTimeout(cloudSyncTimer); } catch (e) {}
+        try {
+            localStorage.setItem('kurofunePlayerId', r.playerId);
+            localStorage.setItem('kurofuneSaveToken', r.saveToken);
+            if (r.name) localStorage.setItem('kurofunePlayerName', r.name);
+            localStorage.removeItem('kurofuneSaveData');
+        } catch (e) { window.kfXferLock = false; msg.textContent = '⚠️ この端末に書き込めませんでした'; return; }
+        pwaLS('kurofuneXferAsked', '1');
+        msg.textContent = '✅ 「' + (r.name || '名無しの船長') + '」のデータを引き継ぎました。読み込み直します…';
+        setTimeout(() => location.reload(), 900);
+    }
+    // ホーム画面から初めて開いたとき（iPhone）：Safari のデータを引き継ぐか聞く
+    function pwaFirstRun() {
+        if (pwaLS('kurofuneXferAsked') || !pwaIsIOS()) return;
+        const fresh = (Number(clickerScore) || 0) < 5000 && !(reincarnationCount > 0);
+        if (!fresh) { pwaLS('kurofuneXferAsked', '1'); return; }
+        pwaSheet('<h3>⚓ ホーム画面の黒船へ、ようこそ</h3><p class="pwa-lead">Safari で遊んでいた人は、そこで出した<b>引き継ぎコード</b>を入れると、続きから遊べます。</p>'
+            + PWA_XFER_IN.replace('<b>この端末でいま遊んでいるデータは、引き継いだデータに置きかわります。</b>', '')
+            + '<p class="pwa-note">コードは、Safari の黒船のメニュー →「📲 ホーム画面に追加」→「引き継ぎコードを出す」で出せます。</p>'
+            + '<button class="pwa-btn wide" style="margin-top:8px" onclick="pwaLS(\'kurofuneXferAsked\',\'1\'); pwaClose();">はじめから遊ぶ（あとで「⚙️ 設定」からも引き継げます）</button>');
+    }
+    // スマホで遊んでいる人に、ときどき（1週間に1回・3回まで）おすすめする
+    function pwaPromo() {
+        if (pwaStandalone() || pwaLS('kurofunePwaAdded') || pwaInApp()) return;
+        try { if (!matchMedia('(pointer: coarse)').matches) return; } catch (e) { return; }
+        const n = Number(pwaLS('kurofunePwaPromoN')) || 0, last = Number(pwaLS('kurofunePwaPromoAt')) || 0;
+        if (n >= 3 || Date.now() - last < 7 * 86400e3) return;
+        if (document.body.classList.contains('rt-playing') || document.body.classList.contains('cb-on') || document.getElementById('pwa-sheet')) { setTimeout(pwaPromo, 60000); return; }
+        pwaLS('kurofunePwaPromoN', String(n + 1)); pwaLS('kurofunePwaPromoAt', String(Date.now()));
+        const el = document.createElement('div'); el.className = 'pwa-promo'; el.id = 'pwa-promo';
+        el.innerHTML = '<img src="/icons/icon-192.png" alt=""><div style="flex:1;min-width:0"><b>黒船をホーム画面に追加</b><br><span style="opacity:.8">アプリみたいに全画面で遊べます</span></div>'
+            + '<button class="pwa-btn primary" onclick="document.getElementById(\'pwa-promo\').remove(); openPwaSheet();">やり方</button><button class="pwa-px" aria-label="閉じる" onclick="document.getElementById(\'pwa-promo\').remove()">✕</button>';
+        document.body.appendChild(el);
+        setTimeout(() => { if (el.parentNode) el.remove(); }, 20000);
+    }
+
     let pageVersionTag = null;
     async function checkForNewVersion() {
         if (location.protocol === 'file:') return;
@@ -15024,6 +15223,17 @@ animation:facilitySweep 6s linear infinite;
     //   「実績を追加しました」のように、増えたこと・直したことだけを書く。
     const changelogData = [
         {
+            version: "v4.9.1",
+            title: "📲 ホーム画面に追加できるように",
+            date: "2026-10-31",
+            content: [
+                "黒船クリッカーを、スマホのホーム画面に追加できるようになりました。アイコンから一発で開けて、上下のバーが消えた全画面で遊べます。",
+                "やり方は、メニューのいちばん下の「📲 ホーム画面に追加」にあります。",
+                "⚠️ iPhone では、ホーム画面の黒船と Safari の黒船でデータが別々になります。追加する前に、Safari の黒船で「引き継ぎコード」を出して、ホーム画面の黒船で入れてね（10分以内・1回きり）。",
+                "引き継ぎコードは、機種変更などで、ほかの端末へデータを移すときにも使えます（⚙️ 設定からも出せます）。"
+            ]
+        },
+        {
             version: "v4.9",
             title: "📮 目安箱を設置",
             date: "2026-10-31",
@@ -15759,6 +15969,7 @@ animation:facilitySweep 6s linear infinite;
         try { initSocial(); } catch (e) { console.error('social', e); }
         try { rtInitNav(); } catch (e) { console.error('ranto', e); }
         setTimeout(() => { try { ideaCheckReplies(); } catch (e) {} }, 6000);
+        try { initPwa(); } catch (e) { console.error('pwa', e); }
         try { touchPlayDay(); updateLevelUi(); setInterval(() => { touchPlayDay(); updateLevelUi(); }, 5000); } catch (e) { console.error('level', e); }
 
         // 告知バーはどの画面にいても動かす
