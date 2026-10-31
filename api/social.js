@@ -74,6 +74,9 @@ module.exports = async (req, res) => {
 
     // 新しい発言があるかの確認は、5秒おきに来る。データベースの回数を節約するため、
     // 「最後の発言の時刻」だけを見て、増えていなければ本人確認もせずに「変わりなし」と返す。
+    // 浦賀沖大砲戦の対戦中のやりとり（1秒に1回）。本人確認の代わりに、対戦ごとの秘密の鍵で書き込む
+    if (action === 'cbt_sync') return res.status(200).json(await cbSync(body));
+
     if (action === 'lounge_get' && Number(body.since) > 0) {
       const last = Number((await redisRequest(['get', 'lounge:s2:last'])).result) || 0;
       if (last <= Number(body.since)) return res.status(200).json({ success: true, messages: [], unchanged: true });
@@ -97,7 +100,7 @@ module.exports = async (req, res) => {
       if (muted.result === 1) return res.status(200).json({ success: false, error: '管理人により、話す機能が止められています' });
       shadow = sb.result === 1;
     }
-    if (action === 'me' || action === 'poll') {
+    if (action === 'me' || action === 'poll' || action.startsWith('cbt_')) {
       // 最後に見かけた時刻（フレンドの一覧の「オンライン」用）と、名前の控え
       await redisPipeline([['set', `seen:${me}`, Date.now(), 'EX', 30 * 86400], ['set', `sname:${me}`, myName, 'EX', 120 * 86400]]);
     }
@@ -116,6 +119,12 @@ module.exports = async (req, res) => {
       case 'lounge_get':  return res.status(200).json(await loungeGet(me, Number(body.since) || 0));
       case 'lounge_send': return res.status(200).json(await loungeSend(me, myName, body.text, shadow, body.image));
       case 'report':      return res.status(200).json(await doReport(me, body));
+      case 'cbt_find':    return res.status(200).json(await cbFind(me, body.ticket));
+      case 'cbt_cancel':  return res.status(200).json(await cbCancel(me, body));
+      case 'cbt_invite':  return res.status(200).json(await cbInvite(me, myName, body.code));
+      case 'cbt_invite_poll': return res.status(200).json(await cbInvitePoll(me, body.inviteId));
+      case 'cbt_incoming': return res.status(200).json({ success: true, invite: await cbIncoming(me) });
+      case 'cbt_answer':  return res.status(200).json(await cbAnswer(me, body.inviteId, !!body.accept));
       default:            return res.status(400).json({ error: 'Unknown action' });
     }
   } catch (e) {
@@ -232,7 +241,7 @@ async function pollView(me) {
   const toObj = a => { const o = {}; const x = a || []; for (let i = 0; i + 1 < x.length; i += 2) o[x[i]] = Number(x[i + 1]) || 0; return o; };
   const L = toObj(last.result), R = toObj(read.result), F = new Set(fr.result || []);
   const unreadDm = Object.keys(L).filter(id => F.has(id) && L[id] > (R[id] || 0)).length;
-  return { incoming: Number(inn.result) || 0, unreadDm };
+  return { incoming: Number(inn.result) || 0, unreadDm, cbInvite: await cbIncoming(me) };
 }
 
 // ---------------------------------------------------------------- フレンド操作
@@ -459,6 +468,148 @@ async function doReport(me, body) {
   }
   await redisPipeline([['lpush', 'social_reports', JSON.stringify(entry)], ['ltrim', 'social_reports', 0, 499]]);
   return { success: true };
+}
+
+// ---------------------------------------------------------------- 浦賀沖大砲戦（オンライン対戦・1対1）
+// 形：おたがい自分の海で戦い、敵を倒すと相手の海に「おじゃま小舟」を送り込める。先に沈んだ方が負け。
+//  cbt_find   { ticket? }        … 誰かと対戦。待っている人がいればその場で対戦、いなければ待つ（1.5秒おきに呼び直す）
+//  cbt_cancel { ticket?, inviteId? }
+//  cbt_invite { code }           … フレンドを誘う（フレンドどうしだけ。3分で消える）
+//  cbt_invite_poll { inviteId }  … 誘った側：相手が受けたか
+//  cbt_incoming                  … 誘われているか（poll にも入っている）
+//  cbt_answer { inviteId, accept }
+//  cbt_sync   { matchId, key, opp, state } … 対戦中。自分の様子を書いて、相手の様子を読む
+// 勝ち負けは見た目と実績だけに使う（隻数は動かない）ので、細かい不正対策はしていない。
+const crypto = require('crypto');
+const CB_HEX = /^[0-9a-f]{16}$/;
+function rid() { return crypto.randomBytes(8).toString('hex'); }
+async function cbProfile(id) {
+  const [nm, lv] = await redisPipeline([['get', `sname:${id}`], ['zscore', LV.LEVEL_KEY, id]]);
+  return { name: nm.result || '名無しの船長', lv: LV.levelFromExp(Number(lv.result) || 0).level };
+}
+async function cbCreate(aId, bId) {
+  const matchId = rid(), ka = rid(), kb = rid(), seed = crypto.randomBytes(4).readUInt32BE(0);
+  const [pa, pb] = await Promise.all([cbProfile(aId), cbProfile(bId)]);
+  const startAt = Date.now() + 5000;     // 5秒後に一斉に始める
+  return {
+    a: { matchId, key: ka, opp: kb, oppName: pb.name, oppLv: pb.lv, seed, startAt },
+    b: { matchId, key: kb, opp: ka, oppName: pa.name, oppLv: pa.lv, seed, startAt },
+  };
+}
+async function cbBlocked(a, b) {
+  const [x, y] = await redisPipeline([['sismember', `blocks:${a}`, b], ['sismember', `blocks:${b}`, a]]);
+  return x.result === 1 || y.result === 1;
+}
+function jparse(s) { try { return JSON.parse(s); } catch (e) { return null; } }
+
+async function cbFind(me, ticket) {
+  if (ticket && !CB_HEX.test(ticket)) ticket = null;
+  if (ticket) {
+    const mine = jparse((await redisRequest(['get', `cbt:tk:${ticket}`])).result);
+    if (mine && mine.pid === me && mine.match) {
+      await redisRequest(['del', `cbt:tk:${ticket}`]);
+      return { success: true, status: 'matched', match: mine.match, now: Date.now() };
+    }
+  }
+  // 組み合わせは同時に1人だけが行う（2人が同時に探して食い違わないように）
+  const lock = await redisRequest(['set', 'cbt:lock', me, 'NX', 'PX', 2000]);
+  if (!lock.result) return { success: true, status: 'waiting', ticket: ticket || null, now: Date.now() };
+  try {
+    const w = (await redisRequest(['get', 'cbt:wait'])).result;
+    if (w && w !== ticket) {
+      const other = jparse((await redisRequest(['get', `cbt:tk:${w}`])).result);
+      if (other && other.pid && other.pid !== me && !other.match && !(await cbBlocked(me, other.pid))) {
+        const m = await cbCreate(other.pid, me);
+        const cmds = [['set', `cbt:tk:${w}`, JSON.stringify({ pid: other.pid, match: m.a }), 'EX', 60], ['del', 'cbt:wait']];
+        if (ticket) cmds.push(['del', `cbt:tk:${ticket}`]);
+        await redisPipeline(cmds);
+        return { success: true, status: 'matched', match: m.b, now: Date.now() };
+      }
+      if (other && other.pid && other.pid !== me && !other.match) {
+        // ブロックし合っている相手とは組まない。順番を待つ
+        return { success: true, status: 'waiting', ticket: ticket || null, now: Date.now() };
+      }
+    }
+    const t = ticket || rid();
+    await redisPipeline([['set', `cbt:tk:${t}`, JSON.stringify({ pid: me }), 'EX', 15], ['set', 'cbt:wait', t, 'EX', 15]]);
+    return { success: true, status: 'waiting', ticket: t, now: Date.now() };
+  } finally {
+    await redisRequest(['del', 'cbt:lock']);
+  }
+}
+async function cbCancel(me, body) {
+  const cmds = [];
+  if (body.ticket && CB_HEX.test(body.ticket)) {
+    const w = (await redisRequest(['get', 'cbt:wait'])).result;
+    if (w === body.ticket) cmds.push(['del', 'cbt:wait']);
+    cmds.push(['del', `cbt:tk:${body.ticket}`]);
+  }
+  if (body.inviteId && CB_HEX.test(body.inviteId)) {
+    const inv = jparse((await redisRequest(['get', `cbt:inv:${body.inviteId}`])).result);
+    if (inv && inv.from === me) cmds.push(['del', `cbt:inv:${body.inviteId}`], ['del', `cbt:invto:${inv.to}`]);
+  }
+  if (cmds.length) await redisPipeline(cmds);
+  return { success: true };
+}
+async function cbInvite(me, myName, code) {
+  const other = await idOfCode(code);
+  if (!other || other === me) return { success: false, error: '見つかりませんでした' };
+  const fr = await redisRequest(['sismember', `friends:${me}`, other]);
+  if (fr.result !== 1) return { success: false, error: 'フレンドだけ誘えます' };
+  if (await cbBlocked(me, other)) return { success: false, error: '誘えませんでした' };
+  const id = rid(), now = Date.now();
+  const inv = { from: me, to: other, fromName: cleanName(myName), at: now };
+  const key = convoKey(me, other);
+  const note = { i: msgId(), f: me, t: now, x: '⚔️ 浦賀沖大砲戦に誘っています！3分以内にメニューの「💥 浦賀沖大砲戦」を開いてね。' };
+  await redisPipeline([
+    ['set', `cbt:inv:${id}`, JSON.stringify(inv), 'EX', 180],
+    ['set', `cbt:invto:${other}`, id, 'EX', 180],
+    // 気づいてもらえるように、DMにも一言残す
+    ['lpush', key, JSON.stringify(note)], ['ltrim', key, 0, DM_KEEP - 1],
+    ['hset', `dm_last:${other}`, me, now], ['hset', `dm_read:${me}`, other, now], ['set', 'dml:' + key, now, 'EX', 90 * 86400],
+  ]);
+  return { success: true, inviteId: id };
+}
+async function cbInvitePoll(me, id) {
+  if (!id || !CB_HEX.test(id)) return { success: false, error: 'Bad id' };
+  const inv = jparse((await redisRequest(['get', `cbt:inv:${id}`])).result);
+  if (!inv) return { success: true, status: 'expired' };
+  if (inv.from !== me) return { success: false, error: 'Forbidden' };
+  if (inv.match) { await redisRequest(['del', `cbt:inv:${id}`]); return { success: true, status: 'matched', match: inv.match, now: Date.now() }; }
+  if (inv.declined) { await redisRequest(['del', `cbt:inv:${id}`]); return { success: true, status: 'declined' }; }
+  return { success: true, status: 'waiting' };
+}
+async function cbIncoming(me) {
+  const id = (await redisRequest(['get', `cbt:invto:${me}`])).result;
+  if (!id) return null;
+  const inv = jparse((await redisRequest(['get', `cbt:inv:${id}`])).result);
+  if (!inv || inv.to !== me || inv.match || inv.declined) return null;
+  return { id, fromName: inv.fromName, at: inv.at };
+}
+async function cbAnswer(me, id, accept) {
+  if (!id || !CB_HEX.test(id)) return { success: false, error: 'Bad id' };
+  const inv = jparse((await redisRequest(['get', `cbt:inv:${id}`])).result);
+  if (!inv || inv.to !== me || inv.match || inv.declined) return { success: false, error: 'この誘いはもう終わっています' };
+  if (!accept) {
+    inv.declined = true;
+    await redisPipeline([['set', `cbt:inv:${id}`, JSON.stringify(inv), 'EX', 60], ['del', `cbt:invto:${me}`]]);
+    return { success: true, status: 'declined' };
+  }
+  const m = await cbCreate(inv.from, me);
+  inv.match = m.a;
+  await redisPipeline([['set', `cbt:inv:${id}`, JSON.stringify(inv), 'EX', 60], ['del', `cbt:invto:${me}`]]);
+  return { success: true, status: 'matched', match: m.b, now: Date.now() };
+}
+function cbClamp(v, lo, hi) { const n = Math.floor(Number(v)); return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : lo; }
+async function cbSync(body) {
+  const { matchId, key, opp } = body;
+  if (![matchId, key, opp].every(x => typeof x === 'string' && CB_HEX.test(x)) || key === opp) return { success: false, error: 'Bad keys' };
+  const s = body.state || {};
+  const now = Date.now();
+  const st = { hp: cbClamp(s.hp, 0, 10), score: cbClamp(s.score, 0, 1e7), kills: cbClamp(s.kills, 0, 1e5), sent: cbClamp(s.sent, 0, 1e4),
+               t: cbClamp(s.t, 0, 600), alive: s.alive !== false, done: !!s.done, at: now };
+  const [, o] = await redisPipeline([['set', `cbs:${matchId}:${key}`, JSON.stringify(st), 'EX', 900], ['get', `cbs:${matchId}:${opp}`]]);
+  return { success: true, opp: jparse(o && o.result), now };
 }
 
 // ---------------------------------------------------------------- 管理

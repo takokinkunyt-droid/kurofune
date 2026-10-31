@@ -918,7 +918,52 @@
         .game-ui-bar { background-color: rgba(26, 26, 26, 0.95); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: absolute; top: 0; left: 0; width: 100%; z-index: 15; border-bottom: 1px solid var(--gold-color); }
         .score-display { font-size: 1.4rem; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: var(--gold-color); }
         .game-instructions { font-size: 0.9rem; color: #ccc; letter-spacing: 1px; }
-        #gameCanvas { width: 100%; height: 100%; background: linear-gradient(to bottom, #101e2c, #070b10); display: block; cursor: none; }
+        #gameCanvas { width: 100%; height: 100%; background: linear-gradient(to bottom, #101e2c, #070b10); display: block; cursor: none; touch-action: none; }
+        /* 浦賀沖大砲戦 */
+        #screen-game { overflow: hidden !important; }
+        #cb-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; user-select: none; -webkit-user-select: none; }
+        #cb-hud { position: absolute; top: 10px; left: 72px; right: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; z-index: 5; pointer-events: none;
+                  color: #fff; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.7); }
+        #cb-hud .cb-me { display: flex; flex-direction: column; gap: 2px; font-size: 0.95rem; }
+        #cb-hp, #cb-opp-hp { letter-spacing: -1px; }
+        #cb-score { font-size: 1.4rem; color: #ffd36b; font-family: 'Shippori Mincho', serif; }
+        #cb-sub { font-size: 0.8rem; color: #cfe3f3; }
+        #cb-hud .cb-opp { text-align: right; background: rgba(10, 20, 40, 0.55); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 6px 10px; font-size: 0.85rem; }
+        .cb-opp-name { color: #ffb4a8; max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #cb-warn { position: absolute; left: 50%; top: 58px; transform: translateX(-50%); z-index: 5; pointer-events: none; color: #fff; background: rgba(180, 20, 10, 0.85);
+                   border-radius: 14px; padding: 3px 12px; font-weight: 900; font-size: 0.85rem; display: none; }
+        #cb-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 6; pointer-events: none; text-align: center; white-space: nowrap;
+                     color: #fff3c4; font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 3rem; text-shadow: 0 0 18px #ff8a1c, 0 3px 0 #6b0d04; }
+        #cb-toast { position: absolute; left: 50%; bottom: 18%; transform: translateX(-50%); z-index: 6; pointer-events: none; color: #fff; font-weight: 900; font-size: 1rem;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.8); opacity: 0; transition: opacity .2s; white-space: nowrap; }
+        #cb-toast.on { opacity: 1; }
+        #screen-game .game-overlay { overflow-y: auto; justify-content: flex-start; padding: 70px 16px calc(24px + var(--admax-h, 0px)); background: rgba(10, 16, 26, 0.94); }
+        #screen-game .cb-box { width: min(520px, 100%); margin: auto; text-align: center; }
+        #screen-game .game-overlay h3 { font-size: clamp(2rem, 8vw, 3rem); margin-bottom: 8px; }
+        #screen-game .game-overlay p { font-size: 1rem; margin-bottom: 14px; }
+        .cb-record { color: #ffd36b; font-weight: 800; margin-bottom: 14px; font-size: 0.95rem; }
+        .cb-btns { display: flex; flex-direction: column; gap: 10px; }
+        .cb-btn { border: 1px solid rgba(255, 211, 107, 0.6); background: rgba(255,255,255,0.06); color: #fff; border-radius: 14px; padding: 14px 16px; font-size: 1.1rem;
+                  font-weight: 900; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .cb-btn small { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.65); }
+        .cb-btn.solo { background: linear-gradient(180deg, #2b4a6b, #1a2f47); }
+        .cb-btn.vs { background: linear-gradient(180deg, #8a1a10, #5a0f08); }
+        .cb-btn.friend { background: linear-gradient(180deg, #6b4a12, #3f2b08); }
+        .cb-btn:disabled { opacity: 0.5; cursor: default; }
+        .cb-status { margin-top: 12px; min-height: 1.2em; color: #ffe3a0; font-weight: 700; line-height: 1.7; }
+        .cb-status button, .cb-friends button, .cb-invite button { margin: 6px 4px 0; border-radius: 10px; border: 1px solid #c9a35a; background: #fff8e6; color: #5a3415; font-weight: 800;
+                             padding: 6px 14px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; }
+        .cb-status button.yes, .cb-invite button.yes { background: #8a1a10; color: #fff3d6; border-color: #8a1a10; }
+        .cb-friends { margin-top: 8px; text-align: left; }
+        .cb-friends .cbf { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .cb-friends .cbf small { color: #9fd8a8; margin-left: 6px; }
+        .cb-friends .cbf small.off { color: #999; }
+        .cb-how { margin-top: 18px; font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.8; text-align: left; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 12px; }
+        /* 大砲戦の間は、実績の知らせを下に出す（上の船体や点数を隠さない） */
+        body.cb-on #achievement-toast-container { top: auto !important; bottom: calc(16px + var(--admax-h, 0px)) !important; }
+        .cb-invite { position: fixed; left: 50%; top: calc(14px + var(--admax-top, 0px)); transform: translateX(-50%); z-index: 99997; width: min(420px, calc(100vw - 24px));
+                     background: rgba(30, 12, 6, 0.96); color: #fff3d6; border: 2px solid #ffd36b; border-radius: 14px; padding: 12px 14px; text-align: center;
+                     box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 700; }
         .game-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 26, 26, 0.95); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20; padding: 20px; }
         .game-overlay h3 { font-size: 3.5rem; color: var(--gold-color); margin-bottom: 25px; letter-spacing: 4px; }
         .game-overlay p { font-size: 1.2rem; color: #ddd; margin-bottom: 30px; text-align: center; line-height: 1.8; letter-spacing: 1px;}
@@ -4977,6 +5022,7 @@ animation:facilitySweep 6s linear infinite;
             <div class="nav-item" onclick="switchScreen('screen-home', null)"><span class="nav-icon">⛩️</span><span class="nav-text">ホームに戻る</span></div>
             <div class="nav-item" onclick="switchScreen('screen-music', this)"><span class="nav-icon">🎵</span><span class="nav-text">音（音楽室）</span></div>
             <div class="nav-item" onclick="openShipGachaScreen(this)"><span class="nav-icon">🎁</span><span class="nav-text">貢ぎ物の蔵（ガチャ）</span></div>
+            <div class="nav-item" id="nav-cannon" onclick="switchScreen('screen-game', this)"><span class="nav-icon">💥</span><span class="nav-text">浦賀沖大砲戦</span></div>
             <div class="nav-item" id="nav-social" onclick="openSocial(this)"><span class="nav-icon">👥</span><span class="nav-text">ソーシャル</span></div>
             <div class="nav-item" id="nav-changelog" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
             <div class="nav-item" onclick="switchScreen('screen-ranking', this); refreshRanking();"><span class="nav-icon">🏆</span><span class="nav-text">世界ランキング</span></div>
@@ -5054,11 +5100,47 @@ animation:facilitySweep 6s linear infinite;
 
         <!-- シューティング -->
         <div id="screen-game" class="screen">
-            <div class="game-ui-bar"><div class="score-display">戦果: <span id="score-display">0</span> | 撃破数: <span id="kill-display">0</span>/30</div><div class="game-instructions">【操作方法】マウス移動：上下左右に移動 / 左クリック：大砲発射 ※BGM再生対応</div></div>
-            <div class="game-overlay" id="game-start-overlay"><h3 class="serif-font">浦賀沖大砲戦・改</h3><p>アメリカ東インド艦隊提督ペリーとなり、黒船（🚢）を縦横無尽に操れ！<br>幕府の防衛部隊を<strong>30体撃破</strong>すると、最奥からボスの<strong>「巨大城郭」</strong>が出現する！</p><p id="buff-status" style="color: var(--gold-color); font-weight: bold; background: rgba(0,0,0,0.4); padding: 10px 20px; border-radius: 4px; border: 1px dashed var(--gold-color); margin-bottom: 30px;"></p><button class="btn-primary" onclick="startGame()">演習開始</button></div>
-            <div class="game-overlay" id="game-over-overlay" style="display: none;"><h3 class="serif-font" style="color: var(--accent-color);">作戦失敗</h3><p>最終戦果: <span id="final-score" style="font-weight:bold; font-size:2rem; color:var(--gold-color);">0</span></p><button class="btn-primary" onclick="startGame()">再出航</button></div>
-            <div class="game-overlay" id="game-clear-overlay" style="display: none;"><h3 class="serif-font" style="color: var(--gold-color);">泰平の眠りを覚ます開国</h3><p>最終戦果: <span id="clear-score" style="font-weight:bold; font-size:2rem; color:var(--gold-color);">0</span></p><button class="btn-primary" onclick="startGame()">新たなる航海へ</button></div>
-            <canvas id="gameCanvas"></canvas>
+            <div id="cb-stage">
+                <canvas id="gameCanvas"></canvas>
+                <div id="cb-hud">
+                    <div class="cb-me"><span id="cb-hp"></span><span id="cb-score">0</span><span id="cb-sub"></span></div>
+                    <div class="cb-opp" id="cb-opp" style="display:none;">
+                        <div class="cb-opp-name" id="cb-opp-name"></div>
+                        <div><span id="cb-opp-hp"></span> <span id="cb-opp-score"></span></div>
+                    </div>
+                </div>
+                <div id="cb-warn"></div>
+                <div id="cb-banner"></div>
+                <div id="cb-toast"></div>
+            </div>
+            <div class="game-overlay" id="cb-menu">
+                <div class="cb-box">
+                    <h3 class="serif-font">浦賀沖大砲戦</h3>
+                    <p class="cb-lead">黒船を操り、幕府の小舟を大砲で撃ち落とせ。</p>
+                    <div class="cb-record" id="cb-record"></div>
+                    <div class="cb-btns">
+                        <button class="cb-btn solo" onclick="cbStartSolo()">⚓ ひとりで出撃<small>30隻倒すと巨大城郭が現れる</small></button>
+                        <button class="cb-btn vs" onclick="cbFindRandom()">⚔️ 誰かと対戦<small>待っている人とすぐ対戦</small></button>
+                        <button class="cb-btn friend" onclick="cbShowFriends()">👥 フレンドと対戦<small>フレンドを誘う</small></button>
+                    </div>
+                    <div id="cb-status" class="cb-status"></div>
+                    <div id="cb-friends" class="cb-friends"></div>
+                    <div class="cb-how">
+                        <b>対戦のルール</b>：おたがい自分の海で戦う。敵を倒すと、相手の海に「おじゃま小舟」（🚣・3発で沈む）を送り込める。敵にぶつかる・おじゃま小舟に抜けられると船体が1つ減り、先に沈んだ方が負け（3分で決着しなければ、残りの船体、次に戦果で勝負）。<br>
+                        <b>操作</b>：スマホは指でなぞって動かし、触っている間は撃ち続ける。PCはマウスで動かし、押している間撃つ（矢印キー＋スペースでも）。
+                    </div>
+                </div>
+            </div>
+            <div class="game-overlay" id="cb-result" style="display: none;">
+                <div class="cb-box">
+                    <h3 class="serif-font" id="cb-result-title">作戦終了</h3>
+                    <p id="cb-result-text"></p>
+                    <div class="cb-btns">
+                        <button class="cb-btn vs" id="cb-again" onclick="cbAgain()">もう一度</button>
+                        <button class="cb-btn" onclick="cbShowMenu()">メニューへ</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         
@@ -6157,6 +6239,10 @@ animation:facilitySweep 6s linear infinite;
         count1t:      { title:"宇宙を超えて",       icon:"🌌",  desc:"黒船の保有数が1兆を超える。",       flavor:"宇宙をも凌駕する。",        unlocked:false, isRare:false },
         count1q:      { title:"次元を超えて",       icon:"🔮",  desc:"黒船の保有数が1京を超える。",       flavor:"次元をも凌駕する。",        unlocked:false, isRare:false },
         combo500:     { title:"はじめの連打",       icon:"🥁",  desc:"500連打する。",                    flavor:"これは序の口。",            unlocked:false, isRare:false },
+        cannonFirst:  { title:"初陣",               icon:"💣",  desc:"浦賀沖大砲戦に出撃する。",           flavor:"撃ち方はじめ！",            unlocked:false, isRare:false },
+        cannonBoss:   { title:"城攻め",             icon:"🏯",  desc:"浦賀沖大砲戦で巨大城郭を落とす。",   flavor:"泰平の眠りを覚ます",        unlocked:false, isRare:false },
+        cannonWin:    { title:"海戦の勝者",         icon:"⚔️",  desc:"浦賀沖大砲戦の対戦で勝つ。",         flavor:"浦賀の海は我がもの。",      unlocked:false, isRare:false },
+        cannonWin10:  { title:"海の覇者",           icon:"🌊",  desc:"浦賀沖大砲戦の対戦で10勝する。",     flavor:"向かうところ敵なし。",      unlocked:false, isRare:false },
         combo1000:    { title:"指の筋トレ",         icon:"💪",  desc:"1000連打する。",                   flavor:"マッスル！",                unlocked:false, isRare:false },
         treeSuifu:    { title:"働け水夫の海",       icon:"🌊",  desc:"スキルの木で「水夫」を解放する。",  flavor:"はた海",                    unlocked:false, isRare:false },
         treeBurst:    { title:"暴発",               icon:"💥",  desc:"スキルの木で「溜め撃ち」（バースト）を解放する。", flavor:"溜めて打て",        unlocked:false, isRare:false },
@@ -6432,7 +6518,7 @@ animation:facilitySweep 6s linear infinite;
         const sidebarEl = document.getElementById('sidebar');
         if (sidebarEl) sidebarEl.style.display = (screenId === 'screen-home') ? 'none' : 'flex';
 
-        if(screenId === 'screen-game') { initGameCanvas(); document.getElementById('game-start-overlay').style.display = 'flex'; document.getElementById('game-over-overlay').style.display = 'none'; document.getElementById('game-clear-overlay').style.display = 'none'; updateBuffStatusUI(); } else { stopGame(); }
+        if (screenId === 'screen-game') cbEnter(); else cbLeave();
         if(screenId === 'screen-clicker') { initClickerLoop(); } else { stopClickerLoop(); }
         if(screenId === 'screen-study') { document.getElementById('screen-study').scrollTop = 0; checkScroll(); }
         // 音楽室を開いたとき、現在の曲の位置にスライドを合わせ直す
@@ -8612,6 +8698,7 @@ animation:facilitySweep 6s linear infinite;
             superDockLevel, upSuperDockCost,
             s2tree, pastLivesEarned, fragmentsEarnedTotal, steamLevel, s2Ach, sailorLevel,
             s2Clicks, s2GachaPulls, s2PlayDays, s2LastPlayDay, shipName,
+            cannonWins, cannonLosses, cannonPlays, cannonBest,
             reincarnationCount, fragments, skills, achievements,
             facilities, availableFacilityUpgrades,
             wrenchLevel, upWrenchCost, combatTechPurchased,
@@ -9150,6 +9237,8 @@ animation:facilitySweep 6s linear infinite;
         s2Clicks = Math.floor(sanitizeNum(save.s2Clicks, 0)); s2GachaPulls = Math.floor(sanitizeNum(save.s2GachaPulls, 0));
         s2PlayDays = Math.floor(sanitizeNum(save.s2PlayDays, 0)); s2LastPlayDay = typeof save.s2LastPlayDay === 'string' ? save.s2LastPlayDay.slice(0, 10) : '';
         shipName = typeof save.shipName === 'string' ? save.shipName.slice(0, 24) : '';
+        cannonWins = Math.floor(sanitizeNum(save.cannonWins, 0)); cannonLosses = Math.floor(sanitizeNum(save.cannonLosses, 0));
+        cannonPlays = Math.floor(sanitizeNum(save.cannonPlays, 0)); cannonBest = Math.floor(sanitizeNum(save.cannonBest, 0));
         reincarnationCount = sanitizeNum(save.reincarnationCount, 0); fragments = sanitizeNum(save.fragments, 0);
         sakokuShards = sanitizeNum(save.sakokuShards, 0); superReincarnationCount = sanitizeNum(save.superReincarnationCount, 0); buyQuantity = sanitizeNum(save.buyQuantity, 1);
         superSkills = { ...superSkills, ...(save.superSkills || {}) };
@@ -9340,48 +9429,6 @@ animation:facilitySweep 6s linear infinite;
             document.getElementById('gacha-result').classList.add('show'); isGachaPlaying = false;
         }, 600);
     }
-    function updateBuffStatusUI() {
-        let buffs = []; if (ownedItems.whiskey) buffs.push("🥃 無敵＆体当たり撃破！"); if (ownedItems.train) buffs.push("🚂 威力3倍！");
-        const bs = document.getElementById('buff-status');
-        if(bs) bs.innerHTML = buffs.length > 0 ? "【適用中の下賜品バフ】<br>" + buffs.join("<br>") : "【適用中の下賜品バフ】なし (丸腰の黒船)";
-    }
-
-    function initGameCanvas() { 
-        cw = document.getElementById('screen-game').clientWidth; ch = document.getElementById('screen-game').clientHeight; 
-        if(canvas) { canvas.width = cw; canvas.height = ch; } 
-        player.x = cw / 2; player.y = ch - 120; 
-    }
-    function startGame() { 
-        document.getElementById('game-start-overlay').style.display = 'none'; document.getElementById('game-over-overlay').style.display = 'none'; document.getElementById('game-clear-overlay').style.display = 'none'; 
-        player.x = cw/2; player.y = ch-120; bullets=[]; enemies=[]; explosions=[]; boss=null; score=0; enemiesDefeated=0; frameCount=0; 
-        if(ownedItems.whiskey){isInvincible=true;invincibilityTimer=600;}else{isInvincible=false;invincibilityTimer=0;} 
-        player.bulletEmoji=ownedItems.train?'🚂':'💣'; player.bulletPower=ownedItems.train?3:1; isPlaying=true; gameLoop(); 
-    }
-    function stopGame() { 
-        isPlaying = false; 
-        if (typeof gameReq !== 'undefined' && gameReq) { cancelAnimationFrame(gameReq); gameReq = null; }
-    }
-    function gameOver() { isPlaying = false; document.getElementById('final-score').textContent = score; document.getElementById('game-over-overlay').style.display = 'flex'; }
-    function gameClear() { isPlaying = false; document.getElementById('clear-score').textContent = score; document.getElementById('game-clear-overlay').style.display = 'flex'; }
-    
-    function gameLoop() {
-        if(!isPlaying || !ctx) return; ctx.clearRect(0,0,cw,ch); frameCount++;
-        if(isInvincible && invincibilityTimer>0){invincibilityTimer--; if(invincibilityTimer<=0)isInvincible=false;}
-        if(enemiesDefeated<30){ if(frameCount%Math.max(15,45-Math.floor(score/60))===0) enemies.push({x:Math.random()*(cw-80)+40,y:-50,size:35,speedY:3+Math.random()*3,emoji:'🛶',points:10}); } else if(!boss && enemies.length===0){ boss={x:cw/2,y:120,size:110,emoji:'🏯',hp:35,maxHp:35,speedX:4,direction:1}; }
-        for(let i=bullets.length-1;i>=0;i--){ let b=bullets[i]; b.y+=b.speedY; ctx.font=`${b.size}px Arial`; ctx.fillText(b.emoji,b.x,b.y); if(b.y<0) bullets.splice(i,1); }
-        if(!(isInvincible&&frameCount%4<2)){ ctx.font=`${player.size}px Arial`; ctx.save(); ctx.filter='grayscale(1) brightness(0.55) contrast(1.2)'; ctx.fillText(player.emoji,player.x,player.y); ctx.restore(); }
-        for(let i=enemies.length-1;i>=0;i--){ let e=enemies[i]; e.y+=e.speedY; ctx.font=`${e.size}px Arial`; ctx.fillText(e.emoji,e.x,e.y);
-            if(Math.sqrt(Math.pow(player.x-e.x,2)+Math.pow(player.y-e.y,2))<(player.size/2+e.size/2-12)){ if(isInvincible){ explosions.push({x:e.x,y:e.y,size:e.size*1.5,life:12,emoji:'💥'}); score+=e.points; enemiesDefeated++; document.getElementById('score-display').textContent=score; enemies.splice(i,1); continue; }else{ gameOver(); return; } }
-            for(let j=bullets.length-1;j>=0;j--){ let b=bullets[j]; if(Math.sqrt(Math.pow(e.x-b.x,2)+Math.pow(e.y-b.y,2))<(e.size/2+b.size/2)){ explosions.push({x:e.x,y:e.y,size:e.size*1.5,life:15,emoji:'💥'}); score+=e.points; enemiesDefeated++; document.getElementById('score-display').textContent=score; enemies.splice(i,1); bullets.splice(j,1); break; } }
-            if(e.y>ch+50) enemies.splice(i,1);
-        }
-        if(boss){ boss.x+=boss.speedX*boss.direction; if(boss.x>cw-80||boss.x<80) boss.direction*=-1; ctx.font=`${boss.size}px Arial`; ctx.fillText(boss.emoji,boss.x,boss.y); if(Math.sqrt(Math.pow(player.x-boss.x,2)+Math.pow(player.y-boss.y,2))<(player.size/2+boss.size/2-25)&&!isInvincible){ gameOver(); return; }
-            for(let j=bullets.length-1;j>=0;j--){ let b=bullets[j]; if(Math.sqrt(Math.pow(boss.x-b.x,2)+Math.pow(boss.y-b.y,2))<(boss.size/2+b.size/2)){ boss.hp-=b.power; explosions.push({x:b.x,y:b.y,size:45,life:10,emoji:'⚡'}); bullets.splice(j,1); if(boss.hp<=0){ score+=1000; boss=null; setTimeout(gameClear,1200); } break; } }
-        }
-        for(let i=explosions.length-1;i>=0;i--){ let ex=explosions[i]; ctx.font=`${ex.size}px Arial`; ctx.fillText(ex.emoji,ex.x,ex.y); ex.life--; if(ex.life<=0) explosions.splice(i,1); }
-        if(isPlaying) gameReq = requestAnimationFrame(gameLoop);
-    }
-
     function flashEffect(elementId) {
         const el = document.getElementById(elementId);
         if(el) { let flash = document.createElement('div'); flash.className = 'flash-overlay'; el.appendChild(flash); setTimeout(() => flash.remove(), 300); }
@@ -11967,6 +12014,7 @@ animation:facilitySweep 6s linear infinite;
             if (!d.success) return;
             socialState.counts = { incoming: d.incoming || 0, unreadDm: d.unreadDm || 0 };
             updateSocialBadges();
+            if (typeof cbShowInvite === 'function') cbShowInvite(d.cbInvite || null);
         }).catch(() => {});
     }
     let socialTickN = 0;
@@ -11995,6 +12043,533 @@ animation:facilitySweep 6s linear infinite;
         if (add) add.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) sendFriendRequest(); });
         setTimeout(pollSocialCounts, 4000);
         setInterval(socialTick, 5000);
+    }
+
+    // ==========================================
+    // 💥 浦賀沖大砲戦（ひとりで出撃／オンライン対戦）
+    //
+    // ひとり：小舟を30隻倒すと巨大城郭（ボス）が現れる。城は火の玉を撃ってくる。船体3。
+    // 対戦：1対1。おたがい自分の海で戦い、敵を倒すと相手の海に「おじゃま小舟」を送る。
+    //       自分が送るときに相手からのおじゃまが届く予定なら、先に打ち消す。
+    //       敵に当たる・おじゃま小舟を逃がすと船体 -1（5まで）。先に沈んだ方が負け。3分たったら船体、次に戦果で勝負。
+    //       敵の出方は2人とも同じ（同じ種から作る）。1秒に1回サーバーで様子を交換する（api/social.js の cbt_sync）。
+    // ごほうびは実績と戦績だけ（隻数は動かない）。
+    // ==========================================
+    let cannonWins = 0, cannonLosses = 0, cannonPlays = 0, cannonBest = 0;
+    const CB = { el: null, cx: null, w: 0, h: 0, dpr: 1, raf: 0, last: 0, sprites: {}, bg: null,
+                 ptr: { down: false, type: '', x: 0, y: 0, lx: 0, ly: 0 }, keys: new Set(),
+                 vs: null, find: null, invite: null, poll: 0, toastT: 0, bannerT: 0, lastHud: 0, lastMode: 'solo' };
+    let G = null;
+    const CB_VS_TIME = 180, CB_VS_HP = 5, CB_SOLO_HP = 3, CB_SEND_EVERY = 4;
+    const CB_FOES = {
+        boat:  { e: '🛶', size: 34, hp: 1, v: [150, 230], pts: 10 },
+        sail:  { e: '⛵', size: 40, hp: 2, v: [100, 140], pts: 20, sway: 60 },
+        fast:  { e: '🚤', size: 34, hp: 1, v: [300, 360], pts: 15 },
+        ojama: { e: '🚣', size: 42, hp: 3, v: [125, 155], pts: 30, sway: 90, ojama: true },
+    };
+    function cbRng(seed) {
+        let a = seed >>> 0;
+        return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    }
+    function cbNow() { return Date.now() + (CB.vs ? CB.vs.offset : 0); }
+
+    // ---- 絵：絵文字は1回だけ小さな画像に描いておき、毎回はそれを貼る（毎回文字を描くより軽い） ----
+    function cbSprite(emoji, size, gray) {
+        const k = emoji + '|' + size + '|' + (gray ? 1 : 0) + '|' + CB.dpr;
+        if (CB.sprites[k]) return CB.sprites[k];
+        const s = Math.ceil(size * 1.35), d = CB.dpr;
+        const c = document.createElement('canvas'); c.width = c.height = Math.ceil(s * d);
+        const x = c.getContext('2d'); x.scale(d, d);
+        x.font = size + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+        x.textAlign = 'center'; x.textBaseline = 'middle';
+        x.fillText(emoji, s / 2, s / 2 + size * 0.06);
+        if (gray) {   // 黒船らしく黒く（どのブラウザでも同じになるよう、色は自分で変える）
+            try {
+                const im = x.getImageData(0, 0, c.width, c.height), p = im.data;
+                for (let i = 0; i < p.length; i += 4) {
+                    const l = (0.3 * p[i] + 0.59 * p[i + 1] + 0.11 * p[i + 2]) * 0.55;
+                    const v = Math.max(0, Math.min(255, (l - 128) * 1.2 + 128 - 30));
+                    p[i] = p[i + 1] = p[i + 2] = v;
+                }
+                x.putImageData(im, 0, 0);
+            } catch (e) {}
+        }
+        return (CB.sprites[k] = { c, s });
+    }
+    function cbDraw(emoji, size, x, y, gray, alpha) {
+        const sp = cbSprite(emoji, size, gray), cx = CB.cx;
+        if (alpha != null) cx.globalAlpha = alpha;
+        cx.drawImage(sp.c, x - sp.s / 2, y - sp.s / 2, sp.s, sp.s);
+        if (alpha != null) cx.globalAlpha = 1;
+    }
+
+    function cbResize() {
+        const stage = document.getElementById('cb-stage'); if (!stage) return;
+        CB.el = document.getElementById('gameCanvas'); if (!CB.el) return;
+        CB.cx = CB.el.getContext('2d');
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        if (dpr !== CB.dpr) CB.sprites = {};
+        CB.dpr = dpr;
+        CB.w = Math.max(200, stage.clientWidth); CB.h = Math.max(200, stage.clientHeight);
+        CB.el.width = Math.round(CB.w * dpr); CB.el.height = Math.round(CB.h * dpr);
+        CB.cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const g = CB.cx.createLinearGradient(0, 0, 0, CB.h); g.addColorStop(0, '#0d2034'); g.addColorStop(1, '#06101b'); CB.bg = g;
+        if (G) { G.ship.x = Math.min(G.ship.x, CB.w - 24); G.ship.y = Math.min(G.ship.y, CB.h - 30); }
+        if (!G) cbRender();
+    }
+
+    // ---- 操作 ----
+    function cbInitInput() {
+        const el = document.getElementById('gameCanvas'); if (!el || el.dataset.cb) return;
+        el.dataset.cb = '1';
+        const pos = (e) => { const r = el.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+        el.addEventListener('pointerdown', (e) => {
+            const p = pos(e); CB.ptr.down = true; CB.ptr.type = e.pointerType; CB.ptr.x = CB.ptr.lx = p.x; CB.ptr.y = CB.ptr.ly = p.y;
+            try { el.setPointerCapture(e.pointerId); } catch (err) {}
+            e.preventDefault();
+        });
+        el.addEventListener('pointermove', (e) => {
+            const p = pos(e); CB.ptr.type = e.pointerType;
+            if (G && e.pointerType !== 'mouse' && CB.ptr.down) {   // 指：なぞった分だけ動かす（船が指に隠れない）
+                G.ship.x += (p.x - CB.ptr.lx) * 1.15; G.ship.y += (p.y - CB.ptr.ly) * 1.15;
+            }
+            CB.ptr.lx = p.x; CB.ptr.ly = p.y; CB.ptr.x = p.x; CB.ptr.y = p.y;
+            if (e.pointerType === 'mouse') CB.ptr.mouseAim = true;
+        });
+        const up = () => { CB.ptr.down = false; };
+        el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+        el.addEventListener('contextmenu', (e) => e.preventDefault());
+        window.addEventListener('keydown', (e) => {
+            const sg = document.getElementById('screen-game'); if (!sg || !sg.classList.contains('active') || !G) return;
+            const k = e.key; if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'a', 'd', 'w', 's'].includes(k)) { CB.keys.add(k); CB.ptr.mouseAim = false; e.preventDefault(); }
+        });
+        window.addEventListener('keyup', (e) => CB.keys.delete(e.key));
+        window.addEventListener('blur', () => { CB.keys.clear(); CB.ptr.down = false; });
+    }
+
+    // ---- 遊ぶ・止める ----
+    function cbNewGame(mode, seed) {
+        G = { mode, rng: cbRng(seed != null ? seed : (Math.random() * 4294967296) >>> 0), t: 0, started: mode === 'solo',
+              score: 0, kills: 0, hp: mode === 'vs' ? CB_VS_HP : CB_SOLO_HP, maxHp: mode === 'vs' ? CB_VS_HP : CB_SOLO_HP,
+              inv: 0, fireCd: 0, spawnCd: 1.0, ship: { x: CB.w / 2, y: CB.h - 90 },
+              bullets: [], foes: [], fire: [], fx: [], boss: null, over: false,
+              sendPts: 0, sent: 0, recvd: 0, oppSent: 0, garbCd: 0.5, chain: 0, chainT: 0 };
+    }
+    function cbLoop(ts) {
+        CB.raf = 0;
+        if (!G) return;
+        const dt = Math.min(0.05, Math.max(0, (ts - (CB.last || ts)) / 1000));
+        CB.last = ts;
+        cbUpdate(dt);
+        cbRender();
+        if (G && !G.over) CB.raf = requestAnimationFrame(cbLoop);
+    }
+    function cbRun() { cancelAnimationFrame(CB.raf); CB.last = 0; CB.raf = requestAnimationFrame(cbLoop); }
+    function cbStop() { cancelAnimationFrame(CB.raf); CB.raf = 0; }
+
+    function cbStartSolo() {
+        cbLeaveVs(); cbCancelSearch();
+        CB.lastMode = 'solo';
+        cbResize(); cbNewGame('solo');
+        cannonPlays++; unlockAchievement('cannonFirst');
+        cbHideOverlays(); cbShowOpp(false); cbBanner('出撃！', 1.2);
+        cbRun();
+    }
+    function cbEnter() {
+        document.body.classList.add('cb-on');
+        cbResize();
+        if (!G || G.over) cbShowMenu();
+        cbPollIncoming(true);
+        clearInterval(CB.poll); CB.poll = setInterval(() => cbPollIncoming(false), 3000);
+    }
+    function cbLeave() {
+        document.body.classList.remove('cb-on');
+        clearInterval(CB.poll); CB.poll = 0;
+        cbStop(); cbLeaveVs(); cbCancelSearch();
+        if (G && !G.over) G = null;   // ひとりの途中で離れたら、その回は終わり
+    }
+    function stopGame() { cbLeave(); }   // 昔の名前で呼ばれても動くように
+
+    // ---- 1こま進める ----
+    function cbUpdate(dt) {
+        const g = G; if (!g || g.over) return;
+        if (g.mode === 'vs') {
+            const left = (CB.vs.startAt - cbNow()) / 1000;
+            if (left > 0) { cbBanner(left > 3.5 ? '対戦相手：' + CB.vs.oppName : String(Math.ceil(left)), 0.3); cbHud(); return; }
+            if (!g.started) { g.started = true; cbBanner('開戦！', 1); cbSound('start'); }
+            if (g.timeUp) { cbHud(); return; }      // 3分たった：相手の最後の様子を待つ（cbVsCheck が決める）
+        }
+        g.t += dt;
+        // 動かす
+        const s = g.ship;
+        if (CB.keys.size) {
+            const sp = 430 * dt;
+            if (CB.keys.has('ArrowLeft') || CB.keys.has('a')) s.x -= sp;
+            if (CB.keys.has('ArrowRight') || CB.keys.has('d')) s.x += sp;
+            if (CB.keys.has('ArrowUp') || CB.keys.has('w')) s.y -= sp;
+            if (CB.keys.has('ArrowDown') || CB.keys.has('s')) s.y += sp;
+        } else if (CB.ptr.type === 'mouse' && CB.ptr.mouseAim) {
+            const dx = CB.ptr.x - s.x, dy = CB.ptr.y - s.y, d = Math.hypot(dx, dy), max = 1100 * dt;
+            if (d > max) { s.x += dx / d * max; s.y += dy / d * max; } else { s.x = CB.ptr.x; s.y = CB.ptr.y; }
+        }
+        s.x = Math.max(24, Math.min(CB.w - 24, s.x)); s.y = Math.max(CB.h * 0.35, Math.min(CB.h - 30, s.y));
+        // 撃つ
+        g.fireCd -= dt; if (g.inv > 0) g.inv -= dt;
+        if ((CB.ptr.down || CB.keys.has(' ')) && g.fireCd <= 0) { g.fireCd = 0.16; g.bullets.push({ x: s.x, y: s.y - 26 }); }
+        for (let i = g.bullets.length - 1; i >= 0; i--) { const b = g.bullets[i]; b.y -= 720 * dt; if (b.y < -20) g.bullets.splice(i, 1); }
+        // 敵が来る
+        if (g.mode === 'vs' && g.t >= CB_VS_TIME && !g.timeUp) { cbVsTimeUp(); return; }
+        g.spawnCd -= dt;
+        const soloBossTime = g.mode === 'solo' && g.kills >= 30;
+        if (!soloBossTime && g.spawnCd <= 0) {
+            let iv = g.mode === 'vs' ? Math.max(0.3, 1.05 - g.t * 0.0045) : Math.max(0.35, 0.95 - g.kills * 0.02);
+            if (g.mode === 'vs' && g.t > 150) iv *= 0.6;   // 最後の30秒は嵐
+            g.spawnCd = iv;
+            const r = g.rng(), t = g.mode === 'vs' ? g.t : g.kills * 2;
+            cbSpawn(t > 40 && r < 0.18 ? 'fast' : t > 15 && r < 0.42 ? 'sail' : 'boat', g.rng(), g.rng());
+        }
+        if (soloBossTime && !g.boss && !g.foes.length && !g.bossDone) {
+            g.boss = { x: CB.w / 2, y: Math.min(130, CB.h * 0.2), hp: 60, max: 60, dir: 1, fireCd: 2 };
+            cbBanner('巨大城郭、出現！', 1.6); cbSound('boss');
+        }
+        // おじゃま小舟（相手から）
+        if (g.mode === 'vs') {
+            const pend = g.oppSent - g.recvd;
+            if (pend > 0) { g.garbCd -= dt; if (g.garbCd <= 0) { g.recvd++; g.garbCd = 0.9; cbSpawn('ojama', Math.random(), Math.random()); } }
+            if (g.chainT > 0) { g.chainT -= dt; if (g.chainT <= 0) g.chain = 0; }
+        }
+        // 敵を動かす・当たり
+        for (let i = g.foes.length - 1; i >= 0; i--) {
+            const f = g.foes[i], d = CB_FOES[f.k];
+            f.y += f.v * dt;
+            if (d.sway) f.x = Math.max(20, Math.min(CB.w - 20, f.bx + Math.sin(g.t * 2.2 + f.ph) * d.sway));
+            let dead = false;
+            for (let j = g.bullets.length - 1; j >= 0; j--) {
+                const b = g.bullets[j];
+                if (Math.abs(b.x - f.x) < d.size / 2 + 8 && Math.abs(b.y - f.y) < d.size / 2 + 10) {
+                    g.bullets.splice(j, 1); f.hp--; f.flash = 0.08;
+                    if (f.hp <= 0) { dead = true; break; }
+                }
+            }
+            if (dead) { g.foes.splice(i, 1); cbKill(f, d); continue; }
+            if (g.inv <= 0 && Math.hypot(s.x - f.x, s.y - f.y) < d.size / 2 + 18) { g.foes.splice(i, 1); cbFx('💥', f.x, f.y, 50); cbHit(); continue; }
+            if (f.y > CB.h + 30) { g.foes.splice(i, 1); if (g.mode === 'vs' && d.ojama) { cbHit(true); cbToast('⚠️ おじゃま小舟に抜けられた！'); } }
+            if (f.flash > 0) f.flash -= dt;
+        }
+        // 城（ひとり）
+        const B = g.boss;
+        if (B) {
+            B.x += 110 * B.dir * dt; if (B.x > CB.w - 70 || B.x < 70) B.dir *= -1;
+            B.fireCd -= dt;
+            if (B.fireCd <= 0) {
+                B.fireCd = Math.max(0.8, 1.6 - (1 - B.hp / B.max));
+                const a0 = Math.atan2(s.y - B.y, s.x - B.x);
+                for (const da of [-0.25, 0, 0.25]) g.fire.push({ x: B.x, y: B.y + 30, vx: Math.cos(a0 + da) * 230, vy: Math.sin(a0 + da) * 230 });
+            }
+            for (let j = g.bullets.length - 1; j >= 0; j--) {
+                const b = g.bullets[j];
+                if (Math.abs(b.x - B.x) < 55 && Math.abs(b.y - B.y) < 50) {
+                    g.bullets.splice(j, 1); B.hp--; cbFx('⚡', b.x, b.y, 30);
+                    if (B.hp <= 0) {
+                        cbFx('💥', B.x, B.y, 130); g.score += 500; g.boss = null; g.bossDone = true;
+                        unlockAchievement('cannonBoss'); cbSound('win'); cbEnd('clear'); return;
+                    }
+                }
+            }
+            if (g.inv <= 0 && Math.hypot(s.x - B.x, s.y - B.y) < 70) cbHit();
+        }
+        for (let i = g.fire.length - 1; i >= 0; i--) {
+            const f = g.fire[i]; f.x += f.vx * dt; f.y += f.vy * dt;
+            if (g.inv <= 0 && Math.hypot(s.x - f.x, s.y - f.y) < 22) { g.fire.splice(i, 1); cbHit(); continue; }
+            if (f.y > CB.h + 20 || f.x < -20 || f.x > CB.w + 20) g.fire.splice(i, 1);
+        }
+        for (let i = g.fx.length - 1; i >= 0; i--) { g.fx[i].life -= dt; if (g.fx[i].life <= 0) g.fx.splice(i, 1); }
+        cbHud();
+    }
+    function cbSpawn(kind, rx, rv) {
+        const d = CB_FOES[kind], x = 30 + rx * (CB.w - 60);
+        G.foes.push({ k: kind, x, bx: x, y: -30, v: d.v[0] + rv * (d.v[1] - d.v[0]), hp: d.hp, ph: rx * 6.28, flash: 0 });
+    }
+    function cbFx(e, x, y, size) { G.fx.push({ e, x, y, size, life: 0.35 }); }
+    function cbKill(f, d) {
+        const g = G; g.score += d.pts; g.kills++; cbFx('💥', f.x, f.y, d.size * 1.4); cbSound('boom');
+        if (g.mode !== 'vs') return;
+        g.chain = g.chainT > 0 ? g.chain + 1 : 1; g.chainT = 1.2;
+        g.sendPts += 1 + (g.chain >= 3 ? 1 : 0) + (d.ojama ? 1 : 0);
+        while (g.sendPts >= CB_SEND_EVERY) {
+            g.sendPts -= CB_SEND_EVERY;
+            if (g.oppSent - g.recvd > 0) { g.recvd++; cbToast('🛡 おじゃまを打ち消した！'); }
+            else { g.sent++; cbToast('⚔️ おじゃまを送った！'); cbSound('send'); }
+        }
+    }
+    function cbHit(escape) {
+        const g = G; if (!g || g.over) return;
+        if (!escape && g.inv > 0) return;
+        g.hp--; if (!escape) g.inv = 1.2;
+        cbSound('hit'); try { buzz(60); } catch (e) {}
+        if (g.hp <= 0) { g.hp = 0; cbFx('💥', g.ship.x, g.ship.y, 90); if (g.mode === 'vs') cbVsCheck(); else cbEnd('lose'); }
+    }
+
+    // ---- 描く ----
+    function cbRender() {
+        const cx = CB.cx; if (!cx) return;
+        cx.fillStyle = CB.bg || '#081420'; cx.fillRect(0, 0, CB.w, CB.h);
+        const off = ((G ? G.t : performance.now() / 1000) * 50) % 48;
+        cx.strokeStyle = 'rgba(160, 200, 240, 0.08)'; cx.lineWidth = 2; cx.beginPath();
+        for (let y = -48 + off; y < CB.h; y += 48) { for (let x = (y / 48 % 2) * 40; x < CB.w; x += 80) { cx.moveTo(x, y); cx.lineTo(x + 24, y); } }
+        cx.stroke();
+        if (!G) return;
+        const g = G;
+        for (const b of g.bullets) cbDraw('💣', 18, b.x, b.y);
+        for (const f of g.fire) cbDraw('🔥', 22, f.x, f.y);
+        for (const f of g.foes) {
+            const d = CB_FOES[f.k];
+            if (d.ojama) { cx.fillStyle = 'rgba(220, 30, 20, 0.35)'; cx.beginPath(); cx.arc(f.x, f.y, d.size * 0.62, 0, 6.283); cx.fill(); }
+            cbDraw(d.e, d.size, f.x, f.y, false, f.flash > 0 ? 0.4 : null);
+        }
+        if (g.boss) {
+            const B = g.boss; cbDraw('🏯', 100, B.x, B.y);
+            cx.fillStyle = 'rgba(0,0,0,0.5)'; cx.fillRect(B.x - 60, B.y - 66, 120, 8);
+            cx.fillStyle = '#ff5a3c'; cx.fillRect(B.x - 60, B.y - 66, 120 * B.hp / B.max, 8);
+        }
+        if (!(g.inv > 0 && Math.floor(g.inv * 12) % 2) && g.hp > 0) cbDraw(cbShipEmoji(), 54, g.ship.x, g.ship.y, true);
+        for (const e of g.fx) cbDraw(e.e, Math.round(e.size), e.x, e.y, false, Math.max(0, e.life / 0.35));
+    }
+    function cbShipEmoji() { return '🚢'; }
+
+    // ---- 画面の文字 ----
+    function cbHud() {
+        const now = performance.now(); if (now - CB.lastHud < 100) return; CB.lastHud = now;
+        const g = G; if (!g) return;
+        const hearts = (n, m) => '❤️'.repeat(Math.max(0, n)) + '🖤'.repeat(Math.max(0, m - n));
+        document.getElementById('cb-hp').textContent = hearts(g.hp, g.maxHp);
+        document.getElementById('cb-score').textContent = g.score.toLocaleString() + ' 点';
+        document.getElementById('cb-sub').textContent = g.mode === 'vs'
+            ? '残り ' + Math.max(0, Math.ceil(CB_VS_TIME - g.t)) + '秒　送った ' + g.sent
+            : (g.boss ? '巨大城郭を落とせ！' : '撃破 ' + Math.min(g.kills, 30) + ' / 30');
+        const warn = document.getElementById('cb-warn');
+        const pend = g.mode === 'vs' ? g.oppSent - g.recvd : 0;
+        warn.style.display = pend > 0 ? 'block' : 'none';
+        if (pend > 0) warn.textContent = '⚠️ おじゃま小舟 ×' + pend + ' が来る！';
+        if (g.mode === 'vs' && CB.vs) {
+            const o = CB.vs.oppState;
+            document.getElementById('cb-opp-hp').textContent = o ? hearts(o.hp, CB_VS_HP) : '…';
+            document.getElementById('cb-opp-score').textContent = o ? o.score.toLocaleString() + ' 点' : '';
+        }
+    }
+    function cbBanner(text, sec) {
+        const el = document.getElementById('cb-banner'); if (!el) return;
+        el.textContent = text; clearTimeout(CB.bannerT);
+        CB.bannerT = setTimeout(() => { el.textContent = ''; }, sec * 1000);
+    }
+    function cbToast(text) {
+        const el = document.getElementById('cb-toast'); if (!el) return;
+        el.textContent = text; el.classList.add('on'); clearTimeout(CB.toastT);
+        CB.toastT = setTimeout(() => el.classList.remove('on'), 900);
+    }
+    function cbSound(kind) {
+        try {
+            const ctx = sharedAudioCtx(); if (!ctx) return;
+            const t = ctx.currentTime, o = ctx.createOscillator(), gn = ctx.createGain();
+            const P = { boom: [180, 60, 0.12, 'triangle', 0.12], hit: [220, 90, 0.25, 'sawtooth', 0.15], send: [660, 990, 0.12, 'triangle', 0.1],
+                        start: [440, 880, 0.3, 'square', 0.08], boss: [110, 70, 0.6, 'sawtooth', 0.15], win: [523, 1046, 0.5, 'triangle', 0.15] }[kind];
+            if (!P) return;
+            o.type = P[3]; o.frequency.setValueAtTime(P[0], t); o.frequency.exponentialRampToValueAtTime(P[1], t + P[2]);
+            gn.gain.setValueAtTime(P[4], t); gn.gain.exponentialRampToValueAtTime(0.0001, t + P[2]);
+            o.connect(gn); gn.connect(ctx.destination); o.start(t); o.stop(t + P[2] + 0.02);
+        } catch (e) {}
+    }
+
+    // ---- メニュー・結果 ----
+    function cbRecordText() {
+        return '対戦 ' + cannonWins + '勝 ' + cannonLosses + '敗　／　ひとりの最高 ' + cannonBest.toLocaleString() + ' 点';
+    }
+    function cbHideOverlays() {
+        document.getElementById('cb-menu').style.display = 'none';
+        document.getElementById('cb-result').style.display = 'none';
+    }
+    function cbShowMenu() {
+        cbStop(); if (G && !G.over) G = null;
+        document.getElementById('cb-result').style.display = 'none';
+        document.getElementById('cb-menu').style.display = 'flex';
+        document.getElementById('cb-record').textContent = cbRecordText();
+        document.getElementById('cb-friends').innerHTML = '';
+        cbStatus('');
+        cbShowOpp(false);
+        cbResize();
+    }
+    function cbStatus(html) { const el = document.getElementById('cb-status'); if (el) el.innerHTML = html; }
+    function cbShowOpp(on) {
+        const el = document.getElementById('cb-opp'); if (el) el.style.display = on ? '' : 'none';
+        if (on && CB.vs) document.getElementById('cb-opp-name').textContent = '⚔️ ' + CB.vs.oppName + '（Lv.' + (CB.vs.oppLv || 1) + '）';
+    }
+    function cbEnd(kind, extra) {
+        const g = G; if (!g || g.over) return;
+        g.over = true; cbHud();
+        if (g.mode === 'solo') cannonBest = Math.max(cannonBest, g.score);
+        if (kind === 'win') { cannonWins++; unlockAchievement('cannonWin'); if (cannonWins >= 10) unlockAchievement('cannonWin10'); }
+        if (kind === 'lose' && g.mode === 'vs') cannonLosses++;
+        saveGame();
+        const T = { clear: ['泰平の眠りを覚ます', '巨大城郭を落とした！'], lose: [g.mode === 'vs' ? '敗北' : '作戦失敗', ''],
+                    win: ['勝利！', ''], draw: ['引き分け', ''] }[kind];
+        document.getElementById('cb-result-title').textContent = T[0];
+        const lines = [];
+        if (extra) lines.push(extra);
+        if (T[1]) lines.push(T[1]);
+        lines.push('戦果 ' + g.score.toLocaleString() + ' 点　撃破 ' + g.kills);
+        if (g.mode === 'vs') lines.push('送ったおじゃま ' + g.sent + '　／　' + cbRecordText());
+        else lines.push(cbRecordText());
+        document.getElementById('cb-result-text').innerHTML = lines.map(escapeHtml).join('<br>');
+        document.getElementById('cb-again').textContent = g.mode === 'vs' ? '⚔️ もう一度だれかと' : '⚓ もう一度出撃';
+        setTimeout(() => { if (G === g) document.getElementById('cb-result').style.display = 'flex'; }, 900);
+        if (g.mode === 'vs') cbLeaveVs(true);
+    }
+    function cbAgain() { if (CB.lastMode === 'vs') { cbShowMenu(); cbFindRandom(); } else cbStartSolo(); }
+
+    // ---- 対戦 ----
+    function cbStartVs(match, now) {
+        cbCancelSearch();
+        CB.lastMode = 'vs';
+        const sg = document.getElementById('screen-game');
+        if (!sg || !sg.classList.contains('active')) switchScreen('screen-game', document.getElementById('nav-cannon'));
+        cbResize();
+        CB.vs = Object.assign({}, match, { offset: (now || Date.now()) - Date.now(), oppState: null, lastOppAt: 0, startedAtLocal: Date.now(), finalAt: 0, ended: false });
+        cbNewGame('vs', match.seed);
+        cannonPlays++; unlockAchievement('cannonFirst');
+        cbHideOverlays(); cbShowOpp(true);
+        clearInterval(CB.vs.timer); CB.vs.timer = setInterval(cbSync, 1000); cbSync();
+        cbRun();
+    }
+    function cbSync() {
+        const v = CB.vs; if (!v || v.ended) return;
+        const g = G;
+        const st = g ? { hp: g.hp, score: g.score, kills: g.kills, sent: g.sent, t: Math.floor(g.t), alive: g.hp > 0, done: g.t >= CB_VS_TIME } : { hp: CB_VS_HP, alive: true };
+        socialApi('cbt_sync', { matchId: v.matchId, key: v.key, opp: v.opp, state: st }).then(d => {
+            if (!d || !d.success || CB.vs !== v) return;
+            v.offset = v.offset * 0.7 + (d.now - Date.now()) * 0.3;
+            if (d.opp) {
+                v.oppState = d.opp; v.lastOppAt = d.opp.at; v.serverNow = d.now;
+                if (G) G.oppSent = Math.max(G.oppSent, d.opp.sent | 0);
+            } else v.serverNow = d.now;
+            cbVsCheck();
+        }).catch(() => {});
+    }
+    function cbVsCheck() {
+        const v = CB.vs, g = G; if (!v || v.ended || !g || g.mode !== 'vs') return;
+        const o = v.oppState, sNow = v.serverNow || cbNow();
+        if (g.hp <= 0) { cbSync(); return cbEnd('lose'); }
+        if (o && o.alive === false) return cbEnd('win', CB.vs.oppName + ' の黒船が沈んだ！');
+        // 相手から10秒以上便りがない（画面を閉じた・通信が切れた）
+        const lastHeard = o ? o.at : v.startAt;
+        if (g.started && sNow - lastHeard > 12000) return cbEnd('win', '相手が港へ帰った（不戦勝）');
+        if (g.t >= CB_VS_TIME) {
+            if (!v.finalAt) v.finalAt = Date.now();
+            if ((o && o.done) || Date.now() - v.finalAt > 4000) {
+                const a = [g.hp, g.score], b = o ? [o.hp, o.score] : [0, 0];
+                const r = a[0] !== b[0] ? (a[0] > b[0] ? 'win' : 'lose') : a[1] !== b[1] ? (a[1] > b[1] ? 'win' : 'lose') : 'draw';
+                return cbEnd(r, '3分間の決着：船体 ' + a[0] + ' 対 ' + b[0] + '、戦果 ' + a[1] + ' 対 ' + b[1]);
+            }
+        }
+    }
+    function cbVsTimeUp() {
+        const g = G; if (!g) return;
+        g.t = CB_VS_TIME; g.timeUp = true; g.foes = []; g.fire = [];
+        cbBanner('そこまで！', 2); cbHud(); cbSync();
+    }
+    function cbLeaveVs(keepState) {
+        const v = CB.vs; if (!v) return;
+        v.ended = true; clearInterval(v.timer);
+        if (keepState) setTimeout(() => { if (CB.vs === v) CB.vs = null; }, 50); else CB.vs = null;
+    }
+
+    // 誰かと対戦（待っている人とすぐ組む。いなければ待つ）
+    function cbFindRandom() {
+        if (!netlifyEnabled || !playerId) return cbStatus('オンラインにつながっていません');
+        cbCancelSearch();
+        const f = CB.find = { ticket: null, t0: Date.now(), timer: 0 };
+        cbStatus('⚔️ 対戦相手を探しています…<br><button onclick="cbCancelSearch(true)">やめる</button>');
+        const step = () => {
+            if (CB.find !== f) return;
+            if (Date.now() - f.t0 > 90000) { cbCancelSearch(); return cbStatus('いまは対戦相手が見つかりませんでした。友だちを誘うか、少したってから試してね。'); }
+            socialApi('cbt_find', { ticket: f.ticket }).then(d => {
+                if (CB.find !== f) return;
+                if (d && d.success && d.status === 'matched') { CB.find = null; return cbStartVs(d.match, d.now); }
+                if (d && d.ticket) f.ticket = d.ticket;
+                if (d && !d.success) return cbStatus(escapeHtml(d.error || '探せませんでした'));
+                f.timer = setTimeout(step, 1500);
+            }).catch(() => { f.timer = setTimeout(step, 2500); });
+        };
+        step();
+    }
+    function cbCancelSearch(show) {
+        const f = CB.find, iv = CB.invite;
+        if (f) { clearTimeout(f.timer); CB.find = null; if (f.ticket) socialApi('cbt_cancel', { ticket: f.ticket }).catch(() => {}); }
+        if (iv) { clearTimeout(iv.timer); CB.invite = null; if (iv.id) socialApi('cbt_cancel', { inviteId: iv.id }).catch(() => {}); }
+        if (show) cbStatus('');
+    }
+    // フレンドと対戦
+    function cbShowFriends() {
+        const box = document.getElementById('cb-friends');
+        box.innerHTML = '<div class="cb-status">読み込み中…</div>';
+        socialApi('me').then(d => {
+            if (!d || !d.success) { box.innerHTML = '<div class="cb-status">読み込めませんでした</div>'; return; }
+            socialState.me = d;
+            if (!d.friends.length) { box.innerHTML = '<div class="cb-status">まだフレンドがいません。「👥 ソーシャル」でコードを交換しよう。</div>'; return; }
+            const list = d.friends.slice().sort((a, b) => (b.online - a.online) || (b.seenAt - a.seenAt));
+            box.innerHTML = list.map(p => '<div class="cbf"><span>' + nameHtml(p.name, p.style) + (p.online ? '<small>● オンライン</small>' : '<small class="off">' + seenText(p).replace(/<[^>]+>/g, '') + '</small>')
+                + '</span><button onclick="cbInviteFriend(' + codeArg(p.code) + ', this)">誘う</button></div>').join('');
+        }).catch(() => { box.innerHTML = '<div class="cb-status">読み込めませんでした</div>'; });
+    }
+    function cbInviteFriend(code, btn) {
+        cbCancelSearch();
+        const p = socialState.me && socialState.me.friends.find(f => f.code === code);
+        const name = p ? p.name : 'フレンド';
+        socialApi('cbt_invite', { code }).then(d => {
+            if (!d || !d.success) return cbStatus(escapeHtml((d && d.error) || '誘えませんでした'));
+            const iv = CB.invite = { id: d.inviteId, t0: Date.now(), timer: 0 };
+            document.getElementById('cb-friends').innerHTML = '';
+            cbStatus('👥 ' + escapeHtml(name) + ' さんを誘っています…<br><small>相手の画面に知らせが出ます（大砲戦を開いていればすぐ、ほかの画面では少しあとで。3分まで）。DMにもお知らせを送りました。</small><br><button onclick="cbCancelSearch(true)">やめる</button>');
+            const step = () => {
+                if (CB.invite !== iv) return;
+                socialApi('cbt_invite_poll', { inviteId: iv.id }).then(r => {
+                    if (CB.invite !== iv) return;
+                    if (r.status === 'matched') { CB.invite = null; return cbStartVs(r.match, r.now); }
+                    if (r.status === 'declined') { CB.invite = null; return cbStatus(escapeHtml(name) + ' さんは、いまは対戦できないようです。'); }
+                    if (r.status === 'expired') { CB.invite = null; return cbStatus('返事がありませんでした。もう一度誘うか、直接声をかけてみてね。'); }
+                    iv.timer = setTimeout(step, 1500);
+                }).catch(() => { iv.timer = setTimeout(step, 2500); });
+            };
+            step();
+        }).catch(() => cbStatus('誘えませんでした'));
+    }
+    // 誘われたとき：どの画面にいても、上に知らせを出す
+    let cbShownInvite = null;
+    function cbShowInvite(inv) {
+        const old = document.getElementById('cb-invite-pop');
+        if (!inv) { if (old) old.remove(); cbShownInvite = null; return; }
+        if (G && !G.over && G.mode === 'vs') return;          // 対戦中は出さない
+        if (cbShownInvite === inv.id && old) return;
+        cbShownInvite = inv.id;
+        if (old) old.remove();
+        const el = document.createElement('div'); el.id = 'cb-invite-pop'; el.className = 'cb-invite';
+        el.innerHTML = '⚔️ ' + escapeHtml(inv.fromName || 'フレンド') + ' さんが<br>浦賀沖大砲戦に誘っています！<br>'
+            + '<button class="yes">受けて立つ</button><button class="no">あとで</button>';
+        el.querySelector('.yes').onclick = () => { el.remove(); cbAnswer(inv.id, true); };
+        el.querySelector('.no').onclick = () => { el.remove(); cbAnswer(inv.id, false); };
+        document.body.appendChild(el);
+        try { burstSound('ping'); } catch (e) {}
+    }
+    function cbAnswer(id, accept) {
+        socialApi('cbt_answer', { inviteId: id, accept }).then(d => {
+            if (!accept) return;
+            if (d && d.success && d.status === 'matched') return cbStartVs(d.match, d.now);
+            alertSocial((d && d.error) || '対戦を始められませんでした');
+        }).catch(() => {});
+    }
+    function cbPollIncoming(first) {
+        if (!netlifyEnabled || !playerId || document.hidden) return;
+        if (G && !G.over && G.mode === 'vs') return;
+        socialApi('cbt_incoming').then(d => { if (d && d.success) cbShowInvite(d.invite); }).catch(() => {});
     }
 
     let pageVersionTag = null;
@@ -13537,6 +14112,18 @@ animation:facilitySweep 6s linear infinite;
     //   「実績を追加しました」のように、増えたこと・直したことだけを書く。
     const changelogData = [
         {
+            version: "v4.7",
+            title: "浦賀沖大砲戦、帰還",
+            date: "2026-10-31",
+            content: [
+                "シューティングの「💥 浦賀沖大砲戦」が、メニューから遊べるようになって帰ってきました。",
+                "オンライン対戦ができます。おたがい自分の海で戦い、敵を倒すと相手の海に「おじゃま小舟」を送り込めます。先に沈んだ方が負け（3分で決着しなければ、残りの船体、次に戦果で勝負）。「誰かと対戦」か、フレンドを誘って遊べます。",
+                "スマホで遊べるようになりました。指でなぞって黒船を動かし、触っている間は大砲を撃ち続けます。PCはマウスか、矢印キーとスペースで。",
+                "ひとりで出撃でも、船体が3つになり、巨大城郭が火の玉を撃ってくるようになりました。",
+                "対戦の勝ち負けは、隻数やランキングには関係しません。実績もいくつか追加しました。"
+            ]
+        },
+        {
             version: "v4.6.2",
             title: "黒船にまた名前を付けられるように",
             date: "2026-10-31",
@@ -14195,17 +14782,13 @@ animation:facilitySweep 6s linear infinite;
         if(speedSlider) speedSlider.addEventListener('input', (e) => { if (audio) audio.playbackRate = parseFloat(e.target.value); if (speedVal) speedVal.textContent = `x${audio.playbackRate.toFixed(1)}`; const vinylDisc = getCurrentVinylDisc(); if (vinylDisc) vinylDisc.style.animationDuration = `${6 / audio.playbackRate}s`; });
         if(bassSlider) bassSlider.addEventListener('input', (e) => { const gain = parseInt(e.target.value); if (bassEQ) { bassEQ.gain.value = gain; } if (bassVal) bassVal.textContent = gain > 0 ? `+${gain}dB` : `${gain}dB`; });
 
-        const gameCanvasElement = document.getElementById('gameCanvas');
-        if (gameCanvasElement) {
-            gameCanvasElement.addEventListener('mousemove', (e) => { if(!isPlaying) return; const r = gameCanvasElement.getBoundingClientRect(); player.x = Math.max(40, Math.min(e.clientX - r.left, cw - 40)); player.y = Math.max(ch * 0.3, Math.min(e.clientY - r.top, ch - 40)); });
-            gameCanvasElement.addEventListener('mousedown', () => { if(isPlaying) bullets.push({ x: player.x, y: player.y - 25, speedY: -11, size: ownedItems.train ? 40 : 20, emoji: player.bulletEmoji, power: player.bulletPower }); });
-        }
+        try { cbInitInput(); } catch (e) { console.error('cannon', e); }
 
-        window.addEventListener('resize', () => { const sg = document.getElementById('screen-game'); if(sg && sg.classList.contains('active')) { initGameCanvas(); } 
+        window.addEventListener('resize', () => { const sg = document.getElementById('screen-game'); if(sg && sg.classList.contains('active')) { cbResize(); } 
             const sa = document.getElementById('screen-ascension'); if (sa && sa.classList.contains('active')) updateAscensionUI();
             const ssa = document.getElementById('screen-super-ascension'); if (ssa && ssa.classList.contains('active')) updateSuperAscensionUI();
         });
-        document.addEventListener('fullscreenchange', () => { const sg = document.getElementById('screen-game'); if(sg && sg.classList.contains('active')) { initGameCanvas(); } });
+        document.addEventListener('fullscreenchange', () => { const sg = document.getElementById('screen-game'); if(sg && sg.classList.contains('active')) { cbResize(); } });
 
         // 実績「楽はできません」の長押し処理設定
         const kurofuneTarget = document.getElementById('clicker-target');
