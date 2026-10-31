@@ -6161,12 +6161,12 @@ animation:facilitySweep 6s linear infinite;
         // 新規特殊実績
         combo10000:   { title:"連打の王",           icon:"👑",  desc:"10000連打する。",                  flavor:"RENDA KING!",               unlocked:false, isRare:true  },
         clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船の効果なしで、1回のクリックで100隻以上の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
-        click1k:      { title:"クリックが超大好き！！", icon:"💘", desc:"金船の効果なしで、1回のクリックで1,000隻以上の船を生成する。", flavor:"クリック重視。", unlocked:false, isRare:true },
-        click10k:     { title:"No Click No Life.",  icon:"🖤",  desc:"金船の効果なしで、1回のクリックで1万隻以上の船を生成する。", flavor:"クリックが命。", unlocked:false, isRare:true },
-        click100k:    { title:"Click In My Life.",  icon:"🫀",  desc:"金船の効果なしで、1回のクリックで10万隻以上の船を生成する。", flavor:"私にとっての命。", unlocked:false, isRare:true },
-        click1m:      { title:"クリックが足りない…", icon:"😵‍💫", desc:"金船の効果なしで、1回のクリックで100万隻以上の船を生成する。", flavor:"もっと私にクリックを。", unlocked:false, isRare:true },
-        click10m:     { title:"もっとくれ",         icon:"🤲",  desc:"金船の効果なしで、1回のクリックで1000万隻以上の船を生成する。", flavor:"いくらあっても足りない。", unlocked:false, isRare:true },
-        click100m:    { title:"This is my The END", icon:"🏥",  desc:"金船の効果なしで、1回のクリックで1億隻以上の船を生成する。", flavor:"クリック中毒改善センター", unlocked:false, isRare:true },
+        click1k:      { title:"クリックが超大好き！！", icon:"💘", desc:"金船の効果なしで、1回のクリックで1,000隻以上の船を生成する。", flavor:"クリック重視。", unlocked:false, isRare:false },
+        click10k:     { title:"No Click No Life.",  icon:"🖤",  desc:"金船の効果なしで、1回のクリックで1万隻以上の船を生成する。", flavor:"クリックが命。", unlocked:false, isRare:false },
+        click100k:    { title:"Click In My Life.",  icon:"🫀",  desc:"金船の効果なしで、1回のクリックで10万隻以上の船を生成する。", flavor:"私にとっての命。", unlocked:false, isRare:false },
+        click1m:      { title:"クリックが足りない…", icon:"😵‍💫", desc:"金船の効果なしで、1回のクリックで100万隻以上の船を生成する。", flavor:"もっと私にクリックを。", unlocked:false, isRare:false },
+        click10m:     { title:"もっとくれ",         icon:"🤲",  desc:"金船の効果なしで、1回のクリックで1000万隻以上の船を生成する。", flavor:"いくらあっても足りない。", unlocked:false, isRare:false },
+        click100m:    { title:"This is my The END", icon:"🏥",  desc:"金船の効果なしで、1回のクリックで1億隻以上の船を生成する。", flavor:"クリック中毒改善センター", unlocked:false, isRare:false },
         kaikokuFinal: { title:"開国",               icon:"🔴",  desc:"日米修好通商条約を締結し、ペリーを帰国させる。", flavor:"さようなら、ペリー", unlocked:false, isRare:false, isFinal:true },
         superCritBurst:{ title:"超会心",           icon:"🌟",  desc:"会心のバーストが、まれに「超会心」になる。それを引き当てる。", flavor:"二十に一つの、本物の一撃。", unlocked:false, isRare:true  },
         criticalBurst:{ title:"会心のバースト",     icon:"💥",  desc:"最大まで溜めた直後に離して、会心のバーストを放つ。", flavor:"狙って撃つ。それが船乗りの流儀。", unlocked:false, isRare:true  },
@@ -11560,7 +11560,7 @@ animation:facilitySweep 6s linear infinite;
     // 式は api/_level.js と同じにしておくこと（ランキングはサーバーが数え直す）。
     // ==========================================
     const LEVEL_RARE_ACH = new Set(['music', 'noEasy', 'perryFan', 'perryAnti', 'classicShip', 'fastClick', 'deleteSave',
-        'combo10000', 'clickLover', 'click1k', 'click10k', 'click100k', 'click1m', 'click10m', 'click100m',
+        'combo10000', 'clickLover',
         'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
     function computeExpFromPlay() {
         let exp = Math.floor(Math.min(s2Clicks, 5e7) / 100) + Math.min(s2GachaPulls, 1e6) * 5;
