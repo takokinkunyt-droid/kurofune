@@ -7,9 +7,9 @@
 //  ・アイコンと manifest だけは控えから出す（小さく、めったに変わらない）
 //  ・それ以外（/api、音楽・動画、広告、フォント、ほかのサイト）にはさわらない
 // =====================================================================
-const CACHE = 'kurofune-shell-v1';
+const CACHE = 'kurofune-shell-v2';   // アイコンを変えたら数字を上げる（古い控えを消すため）
 const PAGE = '/';
-const STATIC = ['/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png', '/kurofune.png'];
+const STATIC = ['/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png', '/icons/favicon.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all([PAGE].concat(STATIC).map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
