@@ -12712,7 +12712,7 @@ animation:facilitySweep 6s linear infinite;
     //   ・様子（サーバーの座標）は回さずに持ち、描くときだけ回す
     //   ・画面で取った向き（スティック・マウス）は、送る前に回し戻す
     // ==========================================
-    const RANTO_SERVER = '';
+    const RANTO_SERVER = 'wss://kurofune.norisuke698.workers.dev/ws';
     const RT = { ws: null, state: 'idle', chars: null, mode: 'kemari', char: 'sailor', start: null, me: 0, snaps: [], roster: new Map(), boxHp: null,
                  el: null, cx: null, w: 0, h: 0, dpr: 1, raf: 0, last: 0, cam: { x: 0, y: 0, s: 0.6 }, camInit: false, sprites: {}, flip: false, v: null,
                  mv: { x: 0, y: 0 }, mvSent: { x: 0, y: 0, t: 0 }, keys: new Set(), mouse: { x: 0, y: 0, in: false, down: false, lastFire: 0 },
