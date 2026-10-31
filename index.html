@@ -6107,7 +6107,7 @@ animation:facilitySweep 6s linear infinite;
         start:        { title:"開国の始まり",      icon:"⛩️",  desc:"ゲームを起動する。",               flavor:"すべての始まり。",         unlocked:false, isRare:false },
         name:         { title:"名前を付けてる暇はない",icon:"✏️", desc:"黒船に名前を付ける。",              flavor:"他にやることがあるだろう？", unlocked:false, isRare:false },
         golden:       { title:"黄金時代",          icon:"✨",  desc:"1回金船をクリックする。",           flavor:"ラッキー！",               unlocked:false, isRare:false },
-        space:        { title:"黒船スペーサー",     icon:"⌨️",  desc:"スペースで黒船を生産する。",        flavor:"クリッカーなのに？",         unlocked:false, isRare:false },
+        space:        { title:"黒船スペーサー",     icon:"⌨️",  desc:"スペースキーで黒船を生産する（スマホなら、2本の指で同時に黒船を押す）。", flavor:"クリッカーなのに？",         unlocked:false, isRare:false },
         music:        { title:"音楽の力",           icon:"🎵",  desc:"音楽を流しながらゲームをプレイ。",  flavor:"船も踊る。",               unlocked:false, isRare:true  },
         facility:     { title:"自動生産",           icon:"⚙️",  desc:"施設を購入する。",                 flavor:"工業の時代。",             unlocked:false, isRare:false },
         upgrade:      { title:"クリックこそ至高",   icon:"🔧",  desc:"近代ドック拡張を購入する。",        flavor:"これがないと始まらないだろう？", unlocked:false, isRare:false },
@@ -6122,6 +6122,11 @@ animation:facilitySweep 6s linear infinite;
         count1t:      { title:"宇宙を超えて",       icon:"🌌",  desc:"黒船の保有数が1兆を超える。",       flavor:"宇宙をも凌駕する。",        unlocked:false, isRare:false },
         count1q:      { title:"次元を超えて",       icon:"🔮",  desc:"黒船の保有数が1京を超える。",       flavor:"次元をも凌駕する。",        unlocked:false, isRare:false },
         combo500:     { title:"はじめの連打",       icon:"🥁",  desc:"500連打する。",                    flavor:"これは序の口。",            unlocked:false, isRare:false },
+        combo1000:    { title:"指の筋トレ",         icon:"💪",  desc:"1000連打する。",                   flavor:"マッスル！",                unlocked:false, isRare:false },
+        treeSuifu:    { title:"働け水夫の海",       icon:"🌊",  desc:"スキルの木で「水夫」を解放する。",  flavor:"はた海",                    unlocked:false, isRare:false },
+        treeBurst:    { title:"暴発",               icon:"💥",  desc:"スキルの木で「溜め撃ち」（バースト）を解放する。", flavor:"溜めて打て",        unlocked:false, isRare:false },
+        treeKinsen:   { title:"黄金時代の始まり",   icon:"💰",  desc:"スキルの木で「金船」を解放する。",  flavor:"幸運が待っている",          unlocked:false, isRare:false },
+        treeJouki:    { title:"帰還者ペリー",       icon:"⚙️",  desc:"スキルの木で「蒸気機関」を解放する。", flavor:"熱気が漂う…",           unlocked:false, isRare:false },
         noEasy:       { title:"楽はできません",     icon:"👊",  desc:"黒船を長押し(五秒間)する。",        flavor:"クリックだ。",             unlocked:false, isRare:true  },
         perryFan:     { title:"ペリーファン",       icon:"🎩",  desc:"黒船の名前を「ペリー」にする。",    flavor:"ペリー：ありがとう！",      unlocked:false, isRare:true  },
         perryAnti:    { title:"ペリーアンチ",       icon:"😤",  desc:"黒船の名前を「ペリーカツラハゲ」にする。", flavor:"ペリー：許さん。",   unlocked:false, isRare:true  },
@@ -6129,8 +6134,8 @@ animation:facilitySweep 6s linear infinite;
         fastClick:    { title:"奇怪なクリック",     icon:"⚡",  desc:"0.001秒に一回のスピードでクリックする。", flavor:"チート？",          unlocked:false, isRare:true  },
         deleteSave:   { title:"やめてくれ！",       icon:"💀",  desc:"セーブデータを消去するボタンを押す。", flavor:"本当にやるのか？",     unlocked:false, isRare:true  },
         // 新規特殊実績
-        flagLover:    { title:"旗が大好き",         icon:"🏴",  desc:"合衆国の国旗を100万枚買う。",       flavor:"チート？？",               unlocked:false, isRare:true  },
-        clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船なしで一回のクリックで100隻の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
+        combo10000:   { title:"連打の王",           icon:"👑",  desc:"10000連打する。",                  flavor:"RENDA KING!",               unlocked:false, isRare:true  },
+        clickLover:   { title:"クリックが大好き",   icon:"🖱️",  desc:"金船の効果なしで、1回のクリックで100隻以上の船を生成する。", flavor:"これこそクリッカー。", unlocked:false, isRare:true },
         kaikokuFinal: { title:"開国",               icon:"🔴",  desc:"日米修好通商条約を締結し、ペリーを帰国させる。", flavor:"さようなら、ペリー", unlocked:false, isRare:false, isFinal:true },
         superCritBurst:{ title:"超会心",           icon:"🌟",  desc:"会心のバーストが、まれに「超会心」になる。それを引き当てる。", flavor:"二十に一つの、本物の一撃。", unlocked:false, isRare:true  },
         criticalBurst:{ title:"会心のバースト",     icon:"💥",  desc:"最大まで溜めた直後に離して、会心のバーストを放つ。", flavor:"狙って撃つ。それが船乗りの流儀。", unlocked:false, isRare:true  },
@@ -9210,6 +9215,7 @@ animation:facilitySweep 6s linear infinite;
             updateBulkBuySelector();
             initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); updateAscensionUI(); updateSuperAscensionUI(); updateCenterView(); updateAchievementsModal();
             applyShipSkin();
+            try { checkTreeAchievements(); } catch (e) {}
         };
 
         if (netlifyEnabled) {
@@ -10329,6 +10335,8 @@ animation:facilitySweep 6s linear infinite;
         const fest = document.body.classList.contains('fever-fest');
         festComboCount++;
         if (festComboCount >= 500) unlockAchievement('combo500');
+        if (festComboCount >= 1000) unlockAchievement('combo1000');
+        if (festComboCount >= 10000) unlockAchievement('combo10000');
         if (!burst) playComboTone(festComboCount);
         checkComboTier(base, festComboCount, fest);
         clearTimeout(festComboTimer);
@@ -10897,6 +10905,13 @@ animation:facilitySweep 6s linear infinite;
     }
 
     // ---- 施設の解放 ----
+    // スキルの木で特定の枝を開いたときの実績（読み込み時にも確かめるので、前から持っている人ももらえる）
+    function checkTreeAchievements() {
+        if (s2has('suifu')) unlockAchievement('treeSuifu');
+        if (s2has('tamedachi')) unlockAchievement('treeBurst');
+        if (s2has('kinsen')) unlockAchievement('treeKinsen');
+        if (s2has('jouki')) unlockAchievement('treeJouki');
+    }
     function s2ApplyUnlocks() {
         if (s2has('kyoten')) { facilities.flute.locked = false; facilities.cake.locked = false; facilities.gun.locked = false; }
         if (s2has('kenjou')) { facilities.binoculars.locked = false; facilities.liquor.locked = false; facilities.katana.locked = false; }
@@ -11032,6 +11047,7 @@ animation:facilitySweep 6s linear infinite;
         s2tree[id] = s2lvl(id) + 1;
         playSE('buy');
         s2ApplyUnlocks();
+        checkTreeAchievements();
         initFacilitiesDOM(); initUpgradesDOM(); updateClickerUI(); renderSea();
         if (id === 'kinsen') nextGoldAt = Date.now() + 60 * 1000;   // 初めての金船は1分後
         if (id === 'meiji') { const pop = document.getElementById('offline-popup'), t = document.getElementById('offline-popup-text');
@@ -11505,7 +11521,7 @@ animation:facilitySweep 6s linear infinite;
     // 式は api/_level.js と同じにしておくこと（ランキングはサーバーが数え直す）。
     // ==========================================
     const LEVEL_RARE_ACH = new Set(['music', 'noEasy', 'perryFan', 'perryAnti', 'classicShip', 'fastClick', 'deleteSave',
-        'flagLover', 'clickLover', 'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
+        'combo10000', 'clickLover', 'superCritBurst', 'criticalBurst', 'feverFestival', 'lastVoyage']);
     function computeExpFromPlay() {
         let exp = Math.floor(Math.min(s2Clicks, 5e7) / 100) + Math.min(s2GachaPulls, 1e6) * 5;
         for (const k in s2Ach) if (s2Ach[k]) exp += LEVEL_RARE_ACH.has(k) ? 50 : 20;
@@ -12074,9 +12090,7 @@ animation:facilitySweep 6s linear infinite;
             if (clickerScore >= 1e12) unlockAchievement('count1t');
             if (clickerScore >= 1e16) unlockAchievement('count1q');
             // 旗100万枚チェック
-            if (typeof facilities !== 'undefined' && facilities.flag && facilities.flag.count >= 1000000) unlockAchievement('flagLover');
-            // クリック100隻チェック（通常クリック力のみ・金船ボーナスなし）
-            if (clickPower >= 100) unlockAchievement('clickLover');
+
             // シーズン1終了イベント：期間中に遊んでいれば解除
             if (isSeasonEventActive()) unlockAchievement('lastVoyage');
             if (isFeverFestActive()) unlockAchievement('feverFestival');
@@ -12501,7 +12515,13 @@ animation:facilitySweep 6s linear infinite;
         const t = document.getElementById('clicker-target');
         if (!t || t.dataset.burstReady) return;
         t.dataset.burstReady = '1';
+        const downPointers = new Set();
+        const upPointer = (e) => downPointers.delete(e.pointerId);
+        t.addEventListener('pointerup', upPointer);
+        t.addEventListener('pointercancel', upPointer);
         t.addEventListener('pointerdown', (e) => {
+            // スペースキーが無いスマホでは、2本の指で同時に押すと「黒船スペーサー」
+            if (e.pointerType === 'touch') { downPointers.add(e.pointerId); if (downPointers.size >= 2) unlockAchievement('space'); }
             if (e.button !== undefined && e.button !== 0) return;
             try { t.setPointerCapture(e.pointerId); } catch (err) {}
             startBurstCharge('pointer', e);
@@ -12592,8 +12612,9 @@ animation:facilitySweep 6s linear infinite;
         if (clickerScore >= 10000000) unlockAchievement('count10m');
         if (clickerScore >= 1e12) unlockAchievement('count1t');
         if (clickerScore >= 1e16) unlockAchievement('count1q');
-        if (typeof facilities !== 'undefined' && facilities.flag && facilities.flag.count >= 1000000) unlockAchievement('flagLover');
-        if (clickPower >= 100) unlockAchievement('clickLover');
+        // 1回のクリックで100隻以上（金船の黄金時代・777倍の間は数えない）。
+        // 以前は「近代ドック拡張の基本値」だけを見ていて、シーズン2のクリックの強さと合っていなかった
+        if (currentClickPower >= 100 && !(frenzyTimer > 0 && frenzyClickMult > 1)) unlockAchievement('clickLover');
 
         // updateClickerUI は1回 6ms 前後かかる。連打中にクリックごとに
         // 呼ぶと、それだけで処理時間を食い潰す。
@@ -13441,15 +13462,26 @@ animation:facilitySweep 6s linear infinite;
     // アップデートログ（スレッド式）
     // ==========================================
     // 新しいバージョンを配列の先頭に追加していくと、スレッドが新着順に並びます。
+    // ※ 実績の中身（名前・条件・フレーバーテキスト）はここに書かない。探す楽しみのネタばれになるため。
+    //   「実績を追加しました」のように、増えたこと・直したことだけを書く。
     const changelogData = [
+        {
+            version: "v4.6.1",
+            title: "実績の追加と見直し",
+            date: "2026-10-31",
+            content: [
+                "新しい実績をいくつか追加しました。どんな実績かは、遊びながら探してみてください。",
+                "スマホでは達成できなかった実績を、スマホでも達成できるようにしました。",
+                "達成がほぼできなかった実績を1つなくしました。条件の判定が正しくなかった実績も1つ直しました。"
+            ]
+        },
         {
             version: "v4.6",
             title: "連打の掛け声を1万連打まで／連打でクリックが強く",
             date: "2026-10-30",
             content: [
                 "連打の掛け声を、100連打の「👑 神業」から先にも増やしました。200「🌪️ 疾風怒濤」、300「🐉 昇り龍」、500「🌋 天変地異」、750「⚔️ 一騎当千」、1000「🙏 千手観音」、1500「🚢 黒船来航」、2000「🏯 天下統一」、3000「🌌 森羅万象」、5000「🔱 前人未到」、7500「☄️ 神の領域」、そして10000連打で「🗻 万里一空」。500連打からは連打の数字が虹色に、1万連打で金色に光ります。",
-                "500連打するごとに、クリックでもらえる隻数が +0.1倍 になります（500連打で×1.1、1000連打で×1.2 … 1万連打で×3.0）。連打の数字の横に「クリック×◯」と出ます。手を止めて1.2秒たつと連打は0に戻ります。",
-                "新しい通常実績「🥁 はじめの連打」（500連打する。「これは序の口。」）を追加しました。"
+                "500連打するごとに、クリックでもらえる隻数が +0.1倍 になります（500連打で×1.1、1000連打で×1.2 … 1万連打で×3.0）。連打の数字の横に「クリック×◯」と出ます。手を止めて1.2秒たつと連打は0に戻ります。"
             ]
         },
         {
