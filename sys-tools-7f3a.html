@@ -193,6 +193,16 @@
     <div id="repDmOut"></div>
   </section>
 
+  <!-- 9. 目安箱 -->
+  <section>
+    <h2>9. 目安箱</h2>
+    <div class="note">プレイヤーから届いた「やってほしい」「直してほしい」です。状態と返事は、送った本人の「送ったもの」に出ます（ほかの人には見えません）。<br>
+      状態や返事を保存すると、本人が次にゲームを開いたとき、メニューに赤い数字でお知らせが出ます。</div>
+    <button class="primary" onclick="ideaList(true)">まだのものを見る</button>
+    <button onclick="ideaList(false)">全部見る</button>
+    <div id="ideaOut"></div>
+  </section>
+
 </div>
 
 <script>
@@ -477,6 +487,42 @@ async function repMute(on) {
   const id = $('muteId').value.trim(); if (!id) return show('repDmOut', '船長IDを入れてください。');
   const { status, body } = await post('/social', { secret: secret(), action: on ? 'admin_mute' : 'admin_unmute', playerId: id });
   show('repDmOut', status === 200 ? (on ? '話す機能を止めました。' : '元に戻しました。') : body, status === 200 ? 'ok' : 'err');
+}
+
+// ---- 9. 目安箱 ------------------------------------------------
+const IDEA_KIND_JA = { want: '💡やってほしい', fix: '🔧直してほしい', other: '💬そのほか' };
+const IDEA_ST_JA = { new: '📨 届いた', read: '👀 読んだ', plan: '🛠 やる予定', done: '✅ やった！', no: '🙇 見送り' };
+let IDEAS = [], IDEA_OPEN = true;
+async function ideaList(open) {
+  if (!secret()) return show('ideaOut', '先に管理キーを入れてください。');
+  IDEA_OPEN = open;
+  const { status, body } = await post('/social', { secret: secret(), action: 'admin_ideas', open });
+  if (status !== 200) return show('ideaOut', body, 'err');
+  IDEAS = body.ideas || [];
+  if (!IDEAS.length) return show('ideaOut', open ? 'まだのものはありません。' : '目安箱は空です。');
+  let h = '<div class="note">' + IDEAS.length + ' 件（新しい順）</div><table><tr><th>日時・送った人</th><th>内容</th><th>状態・返事</th></tr>';
+  IDEAS.forEach((o, i) => {
+    h += '<tr><td class="mono" style="white-space:nowrap">' + new Date(o.at).toLocaleString('ja-JP') + '<br>' + escapeHtml(o.name || '-')
+       + (o.shadow ? ' <span class="err">(シャドウBAN)</span>' : '') + '<br><span style="font-size:11px">' + escapeHtml(o.playerId) + '</span></td>'
+       + '<td style="white-space:pre-wrap;word-break:break-word"><b>' + (IDEA_KIND_JA[o.kind] || '') + '</b><br>' + escapeHtml(o.text) + '</td>'
+       + '<td style="min-width:220px"><select id="ideaSt' + i + '">' + Object.entries(IDEA_ST_JA).map(([k, v]) => '<option value="' + k + '"' + (o.status === k ? ' selected' : '') + '>' + v + '</option>').join('') + '</select>'
+       + '<textarea id="ideaRe' + i + '" rows="2" maxlength="300" placeholder="返事（なくてもいい）" style="margin-top:6px">' + escapeHtml(o.reply || '') + '</textarea>'
+       + '<button class="primary" onclick="ideaSave(' + i + ')">保存</button><button class="danger" onclick="ideaDel(' + i + ')">消す</button>'
+       + '<span id="ideaMsg' + i + '" class="note"></span></td></tr>';
+  });
+  $('ideaOut').innerHTML = h + '</table>';
+}
+async function ideaSave(i) {
+  const o = IDEAS[i]; if (!o) return;
+  const { status, body } = await post('/social', { secret: secret(), action: 'admin_idea_set', id: o.id, status: $('ideaSt' + i).value, reply: $('ideaRe' + i).value });
+  $('ideaMsg' + i).innerHTML = status === 200 ? '<span class="ok">保存しました</span>' : '<span class="err">' + escapeHtml(body.error || '失敗') + '</span>';
+  if (status === 200) Object.assign(o, body.idea);
+}
+async function ideaDel(i) {
+  const o = IDEAS[i]; if (!o || !confirm('この投函を消しますか？（本人の「送ったもの」からも消えます）')) return;
+  const { status, body } = await post('/social', { secret: secret(), action: 'admin_idea_delete', id: o.id });
+  if (status !== 200) return show('ideaOut', body, 'err');
+  ideaList(IDEA_OPEN);
 }
 
 // ---- 6. シーズン ----------------------------------------------

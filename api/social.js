@@ -37,6 +37,13 @@ const SS = require('./_substyle');
 //  画像は30日で消える。1人1日20枚まで。見るときは GET ?img=<id>
 //  admin_mute / admin_unmute { playerId } … 話す機能（DM・談話室・申請）だけ止める。ゲームとセーブはそのまま
 //
+// 目安箱（開発者にだけ届く。ほかのプレイヤーには見えない）
+//  idea_send { kind:'want'|'fix'|'other', text } … 1通500文字まで。1分に1通、1日5通まで
+//  idea_mine                  … 自分が送ったもの（読んだ・やった！などの状態と、開発者からの返事つき）
+//  admin_ideas { open }       … 届いたものの一覧（open: true なら、やった／見送り を除く）
+//  admin_idea_set { id, status, reply } … 状態と返事を付ける。返事は送った本人にだけ見える
+//  admin_idea_delete { id }
+//
 // 安全のための決まり
 //  ・DM はフレンドどうしだけ。ブロックした／された相手には届かない
 //  ・1通200文字まで。10秒に3通まで
@@ -119,6 +126,8 @@ module.exports = async (req, res) => {
       case 'lounge_get':  return res.status(200).json(await loungeGet(me, Number(body.since) || 0));
       case 'lounge_send': return res.status(200).json(await loungeSend(me, myName, body.text, shadow, body.image));
       case 'report':      return res.status(200).json(await doReport(me, body));
+      case 'idea_send':   return res.status(200).json(await ideaSend(me, myName, body.kind, body.text));
+      case 'idea_mine':   return res.status(200).json(await ideaMine(me));
       case 'cbt_find':    return res.status(200).json(await cbFind(me, body.ticket));
       case 'cbt_cancel':  return res.status(200).json(await cbCancel(me, body));
       case 'cbt_invite':  return res.status(200).json(await cbInvite(me, myName, body.code));
@@ -612,6 +621,39 @@ async function cbSync(body) {
   return { success: true, opp: jparse(o && o.result), now };
 }
 
+// ---------------------------------------------------------------- 目安箱
+const IDEA_KINDS = ['want', 'fix', 'other'];
+const IDEA_STATUS = ['new', 'read', 'plan', 'done', 'no'];   // 届いた・読んだ・やる予定・やった！・見送り
+const IDEA_MAX = 500, IDEA_REPLY_MAX = 300, IDEA_PER_DAY = 5, IDEA_KEEP = 2000, IDEA_TTL = 400 * 86400;
+const IDEA_ID = /^[0-9a-f]{16}$/;
+function ideaView(o) { return { id: o.i, kind: o.k, text: o.x, at: o.t, status: o.s, reply: o.r || '', updatedAt: o.u || o.t }; }
+async function ideaSend(me, myName, kind, text) {
+  if (!IDEA_KINDS.includes(kind)) kind = 'other';
+  const x = String(text || '').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').replace(/\n{4,}/g, '\n\n\n').trim().slice(0, IDEA_MAX);
+  if (x.length < 5) return { success: false, error: 'もう少しくわしく書いてね（5文字以上）' };
+  const cool = await redisRequest(['set', `idea_cd:${me}`, 1, 'NX', 'EX', 60]);
+  if (cool.result !== 'OK') return { success: false, error: '続けて送るときは、1分あけてね' };
+  const day = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);   // 日本の日付
+  const [n, , sb] = await redisPipeline([['incr', `idea_n:${me}:${day}`], ['expire', `idea_n:${me}:${day}`, 2 * 86400], ['sismember', 'shadow_banned_players', me]]);
+  if (Number(n.result) > IDEA_PER_DAY) return { success: false, error: '目安箱は1日' + IDEA_PER_DAY + '通までです。また明日送ってね' };
+  const now = Date.now(), id = rid();
+  const o = { i: id, f: me, n: cleanName(myName), k: kind, x, t: now, s: 'new', r: '', u: now };
+  if (sb.result === 1) o.sb = 1;   // 管理画面で分かるように印だけ付ける
+  await redisPipeline([
+    ['set', `idea:${id}`, JSON.stringify(o), 'EX', IDEA_TTL],
+    ['zadd', 'ideas:all', now, id],
+    ['zremrangebyrank', 'ideas:all', 0, -(IDEA_KEEP + 1)],
+    ['lpush', `ideas_of:${me}`, id], ['ltrim', `ideas_of:${me}`, 0, 49], ['expire', `ideas_of:${me}`, IDEA_TTL],
+  ]);
+  return { success: true, idea: ideaView(o) };
+}
+async function ideaMine(me) {
+  const ids = ((await redisRequest(['lrange', `ideas_of:${me}`, 0, 49])).result || []).filter(id => IDEA_ID.test(id));
+  if (!ids.length) return { success: true, ideas: [] };
+  const got = await redisPipeline(ids.map(id => ['get', `idea:${id}`]));
+  return { success: true, ideas: got.map(g => jparse(g && g.result)).filter(o => o && o.f === me).map(ideaView) };
+}
+
 // ---------------------------------------------------------------- 管理
 async function admin(body, res) {
   const SECRET = process.env.ADMIN_SECRET;
@@ -654,6 +696,33 @@ async function admin(body, res) {
     if (!id) return res.status(400).json({ error: 'Missing playerId' });
     await redisRequest([body.action === 'admin_mute' ? 'sadd' : 'srem', 'social_muted', id]);
     return res.status(200).json({ success: true, muted: body.action === 'admin_mute' });
+  }
+  if (body.action === 'admin_ideas') {
+    const ids = ((await redisRequest(['zrevrange', 'ideas:all', 0, 499])).result || []).filter(id => IDEA_ID.test(id));
+    const got = ids.length ? await redisPipeline(ids.map(id => ['get', `idea:${id}`])) : [];
+    let list = got.map(g => jparse(g && g.result)).filter(Boolean);
+    if (body.open) list = list.filter(o => o.s !== 'done' && o.s !== 'no');
+    const pids = [...new Set(list.map(o => o.f))];
+    const names = pids.length ? await redisPipeline(pids.map(id => ['get', `sname:${id}`])) : [];
+    const nameOf = {}; pids.forEach((id, i) => { nameOf[id] = names[i].result || null; });
+    return res.status(200).json({ success: true, ideas: list.map(o => ({ ...ideaView(o), playerId: o.f, name: nameOf[o.f] || o.n, nameAtSend: o.n, shadow: !!o.sb })) });
+  }
+  if (body.action === 'admin_idea_set') {
+    const id = String(body.id || '');
+    if (!IDEA_ID.test(id)) return res.status(400).json({ error: 'Bad id' });
+    const o = jparse((await redisRequest(['get', `idea:${id}`])).result);
+    if (!o) return res.status(404).json({ error: 'Not found' });
+    if (body.status != null) { if (!IDEA_STATUS.includes(body.status)) return res.status(400).json({ error: 'Bad status' }); o.s = body.status; }
+    if (body.reply != null) o.r = String(body.reply).replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim().slice(0, IDEA_REPLY_MAX);
+    o.u = Date.now();
+    await redisRequest(['set', `idea:${id}`, JSON.stringify(o), 'EX', IDEA_TTL]);
+    return res.status(200).json({ success: true, idea: ideaView(o) });
+  }
+  if (body.action === 'admin_idea_delete') {
+    const id = String(body.id || '');
+    if (!IDEA_ID.test(id)) return res.status(400).json({ error: 'Bad id' });
+    await redisPipeline([['del', `idea:${id}`], ['zrem', 'ideas:all', id]]);
+    return res.status(200).json({ success: true });
   }
   return res.status(400).json({ error: 'Unknown admin action' });
 }

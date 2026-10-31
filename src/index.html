@@ -960,6 +960,36 @@
         .cb-friends .cbf small.off { color: #999; }
         .cb-how { margin-top: 18px; font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.8; text-align: left; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 12px; }
 
+
+        /* ---------- 📮 目安箱 ---------- */
+        .idea-kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+        .idea-kinds button { border: 1px solid #e2d3b5; background: #fffaf0; color: #6b5a3a; border-radius: 10px; padding: 10px 4px; font-weight: 800; font-size: 0.86rem;
+                             cursor: pointer; font-family: 'Noto Sans JP', sans-serif; white-space: nowrap; }
+        .idea-kinds .ik-e { margin-right: 4px; }
+        @media (max-width: 560px) { .idea-kinds .ik-e { display: block; margin: 0 0 2px; font-size: 1.25rem; } }
+        .idea-kinds button.on { background: #8a1a10; border-color: #8a1a10; color: #fff3d6; box-shadow: 0 2px 6px rgba(138,26,16,0.3); }
+        #idea-text { width: 100%; box-sizing: border-box; min-height: 130px; resize: vertical; padding: 10px 12px; border: 1px solid #ccc; border-radius: 10px;
+                     font-size: 1rem; line-height: 1.6; font-family: 'Noto Sans JP', sans-serif; background: #fff; color: #2a1408; }
+        #idea-text:focus { outline: none; border-color: #c9a35a; box-shadow: 0 0 0 3px rgba(201,163,90,0.25); }
+        .idea-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+        .idea-count { font-size: 0.78rem; color: #999; font-variant-numeric: tabular-nums; }
+        .idea-count.near { color: #c0392b; font-weight: 800; }
+        .idea-foot .soc-btn { padding: 10px 18px; font-size: 0.95rem; }
+        .idea-note { font-size: 0.75rem; color: #8a7a5a; margin-top: 10px; line-height: 1.7; }
+        .idea-item { padding: 12px 0; border-top: 1px solid rgba(0,0,0,0.07); }
+        .idea-item:first-child { border-top: none; padding-top: 2px; }
+        .idea-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.75rem; color: #999; margin-bottom: 4px; }
+        .idea-st { display: inline-block; border-radius: 999px; padding: 2px 9px; font-weight: 800; font-size: 0.72rem; background: #eee; color: #666; }
+        .idea-st.read { background: #e3efff; color: #1f5fa8; } .idea-st.plan { background: #fff0d6; color: #a35a00; }
+        .idea-st.done { background: #dff5e3; color: #1d7a34; } .idea-st.no { background: #f0f0f0; color: #777; }
+        .idea-body { white-space: pre-wrap; word-break: break-word; color: #2a1408; font-size: 0.92rem; line-height: 1.6; }
+        .idea-reply { margin-top: 8px; background: #fff8e6; border-left: 3px solid #c9a35a; border-radius: 0 8px 8px 0; padding: 7px 10px; font-size: 0.86rem;
+                      color: #5a3415; white-space: pre-wrap; word-break: break-word; }
+        .idea-reply b { display: block; font-size: 0.72rem; color: #a07a3a; margin-bottom: 2px; }
+        .idea-item.fresh { background: linear-gradient(90deg, rgba(255,211,107,0.18), transparent); border-radius: 8px; padding-left: 8px; }
+        .idea-empty { color: #999; font-size: 0.85rem; padding: 6px 0; }
+        /* 大乱闘は自分で広告ぶんの余白を取っているので、ページ共通の「下の余白」は付けない（二重になって画面が狭くなる） */
+        #screen-ranto::after { display: none !important; }
         /* ===== ⚔️ 幕末大乱闘 ===== */
         #sidebar .nav-menu .nav-item.nav-ranto { position: relative; overflow: hidden; color: #fff3d6; font-weight: 800; border-left-color: #ff6a2a;
             background: linear-gradient(90deg, rgba(210, 46, 18, 0.42), rgba(255, 170, 40, 0.12)); text-shadow: 0 0 10px rgba(255, 120, 40, 0.6); }
@@ -5108,6 +5138,7 @@ animation:facilitySweep 6s linear infinite;
             <div class="nav-item" id="nav-cannon" onclick="switchScreen('screen-game', this)"><span class="nav-icon">💥</span><span class="nav-text">浦賀沖大砲戦</span></div>
             <div class="nav-item" id="nav-social" onclick="openSocial(this)"><span class="nav-icon">👥</span><span class="nav-text">ソーシャル</span></div>
             <div class="nav-item" id="nav-changelog" onclick="switchScreen('screen-changelog', this); renderChangelog();"><span class="nav-icon">📰</span><span class="nav-text">アップデートログ</span></div>
+            <div class="nav-item" id="nav-ideas" onclick="openIdeas(this)"><span class="nav-icon">📮</span><span class="nav-text">目安箱</span></div>
             <div class="nav-item" onclick="switchScreen('screen-ranking', this); refreshRanking();"><span class="nav-icon">🏆</span><span class="nav-text">世界ランキング</span></div>
             <div class="nav-item" id="nav-hall" onclick="openSeasonHall(this)"><span class="nav-icon">🏛</span><span class="nav-text">殿堂</span></div>
             <div class="nav-item" onclick="openGamblingHall(this)"><span class="nav-icon">🎲</span><span class="nav-text">浦賀賭博室</span></div>
@@ -5178,6 +5209,31 @@ animation:facilitySweep 6s linear infinite;
             <div class="game-select-layout">
                 <div class="game-select-card" onclick="goToGame('screen-game')"><span class="game-select-icon">💥</span><h3 class="game-select-title serif-font">浦賀沖大砲戦 (改)</h3><p class="game-select-desc">黒船を操り、幕府の小舟を大砲で撃ち落とせ！30体撃破すると現れる巨大ボス要塞を攻略しろ！</p><button class="btn-primary" style="padding: 10px 25px; font-size: 1rem;">出撃する</button></div>
                 <div class="game-select-card" onclick="goToGame('screen-clicker')"><span class="game-select-icon" style="filter: grayscale(1) brightness(0.55) contrast(1.2);">🚢</span><h3 class="game-select-title serif-font">黒船クリッカー</h3><p class="game-select-desc">黒船をひたすら連打してポイントを稼ごう！溜まった物資で設備や軍備を購入し、無限開国に挑め！</p><button class="btn-primary" style="padding: 10px 25px; font-size: 1rem; background-color: var(--gold-color);">開発する</button></div>
+            </div>
+        </div>
+
+        <!-- 📮 目安箱 -->
+        <div id="screen-ideas" class="screen">
+            <div class="screen-header"><h2 class="serif-font">📮 目安箱</h2><p style="color: #888;">「こうしてほしい」「ここが変だよ」を、開発者に直接送れます。</p></div>
+            <div class="page-wrap" style="padding: 0 60px 60px; max-width: 760px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+                <div id="idea-error" class="social-error" style="display:none;"></div>
+                <div class="soc-card">
+                    <div class="soc-h">なにについて？</div>
+                    <div class="idea-kinds" id="idea-kinds">
+                        <button data-k="want" class="on" onclick="ideaKind('want')"><span class="ik-e">💡</span>やってほしい</button>
+                        <button data-k="fix" onclick="ideaKind('fix')"><span class="ik-e">🔧</span>直してほしい</button>
+                        <button data-k="other" onclick="ideaKind('other')"><span class="ik-e">💬</span>そのほか</button>
+                    </div>
+                    <textarea id="idea-text" maxlength="500" placeholder="" oninput="ideaInput()"></textarea>
+                    <div class="idea-foot"><span class="idea-count" id="idea-count">0 / 500</span><button class="soc-btn primary" id="idea-send" onclick="ideaSubmit()">📮 投函する</button></div>
+                    <div class="soc-msg" id="idea-msg"></div>
+                    <div class="idea-note">開発者にだけ、あなたの名前つきで届きます（ほかのプレイヤーには見えません）。全部は叶えられないこともあるけど、ちゃんと読みます。<br>
+                        1日5通まで。住所・電話番号・学校名など、自分のことがわかる情報は書かないでね。</div>
+                </div>
+                <div class="soc-card">
+                    <div class="soc-h">送ったもの</div>
+                    <div id="idea-mine"><div class="idea-empty">読み込み中…</div></div>
+                </div>
             </div>
         </div>
 
@@ -13338,6 +13394,96 @@ animation:facilitySweep 6s linear infinite;
     function rtAgain() { rtSend({ t: 'leave' }); rtShowLobby(); rtPlay(false); }
     function rtBack() { rtSend({ t: 'leave' }); rtShowLobby(); }
 
+    // ==========================================
+    // 📮 目安箱：やってほしいこと・直してほしいことを開発者に送る（api/social.js の idea_send / idea_mine）
+    // 開発者が「読んだ」「やった！」などの印や返事を付けると、送った本人の「送ったもの」に出る。
+    // 一度でも送ったことがある人だけ、開いたときに1回だけ確かめて、新しい返事があればメニューに赤い数字を付ける。
+    // ==========================================
+    let ideaUnseen = 0, ideaKindSel = 'want', ideaBusy = false;
+    const IDEA_KIND = { want: '💡 やってほしい', fix: '🔧 直してほしい', other: '💬 そのほか' };
+    const IDEA_ST = { new: '📨 届いた', read: '👀 読んだ', plan: '🛠 やる予定', done: '✅ やった！', no: '🙇 今回は見送り' };
+    const IDEA_PH = {
+        want: '例：新しいガチャを追加してほしい／大乱闘に新しいキャラがほしい',
+        fix: '例：スマホで〇〇を押すと画面が止まる。\nどの画面で、何をしたらそうなったかを書いてくれると、直しやすくなります。',
+        other: '感想・質問など、なんでもどうぞ',
+    };
+    function ideaLS(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
+    function ideaApi(action, extra) {
+        return fetch(getNetlifyFunctionUrl('social'), {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.assign({ playerId, saveToken: saveToken || getOrCreateSaveToken(), playerName, action }, extra || {})),
+        }).then(r => r.json().then(b => { if (r.status === 403) { ideaError(b.error || '使えません'); throw new Error(b.code || 'FORBIDDEN'); } return b; }));
+    }
+    function ideaError(msg) { const el = document.getElementById('idea-error'); if (el) { el.textContent = msg ? '⚠️ ' + msg : ''; el.style.display = msg ? '' : 'none'; } }
+    function openIdeas(nav) {
+        switchScreen('screen-ideas', nav || document.getElementById('nav-ideas'));
+        ideaError('');
+        const ta = document.getElementById('idea-text');
+        if (ta && !ta.value) { const d = ideaLS('kurofuneIdeaDraft'); if (d) ta.value = d; }
+        const k = ideaLS('kurofuneIdeaKind'); ideaKind(IDEA_KIND[k] ? k : ideaKindSel);
+        ideaInput();
+        ideaLoadMine(true);
+    }
+    function ideaKind(k) {
+        if (!IDEA_KIND[k]) return;
+        ideaKindSel = k; ideaLS('kurofuneIdeaKind', k);
+        document.querySelectorAll('#idea-kinds button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+        const ta = document.getElementById('idea-text'); if (ta) ta.placeholder = IDEA_PH[k];
+    }
+    function ideaInput() {
+        const ta = document.getElementById('idea-text'), c = document.getElementById('idea-count'); if (!ta || !c) return;
+        const n = ta.value.length; c.textContent = n + ' / 500'; c.classList.toggle('near', n >= 450);
+        ideaLS('kurofuneIdeaDraft', ta.value);   // 書きかけは、この端末にだけ残す
+    }
+    async function ideaSubmit() {
+        if (ideaBusy) return;
+        const ta = document.getElementById('idea-text'), msg = document.getElementById('idea-msg'), btn = document.getElementById('idea-send');
+        const text = ta.value.trim();
+        if (text.length < 5) { msg.textContent = 'もう少しくわしく書いてね（5文字以上）'; return; }
+        ideaBusy = true; btn.disabled = true; msg.textContent = '投函しています…'; ideaError('');
+        try {
+            const r = await ideaApi('idea_send', { kind: ideaKindSel, text });
+            if (!r.success) { msg.textContent = '⚠️ ' + (r.error || '送れませんでした'); return; }
+            ta.value = ''; ideaInput(); ideaLS('kurofuneIdeaSent', '1');
+            msg.textContent = '📮 投函しました！ ありがとう。';
+            try { buzz(20); } catch (e) {}
+            ideaLoadMine(true);
+        } catch (e) {
+            if (!/FORBIDDEN|TOKEN|BANNED/.test(e.message)) msg.textContent = '⚠️ 送れませんでした。電波のいいところで、もう一度押してね。';
+            else msg.textContent = '';
+        } finally { ideaBusy = false; btn.disabled = false; }
+    }
+    async function ideaLoadMine(markSeen) {
+        const box = document.getElementById('idea-mine'); if (!box) return;
+        let r;
+        try { r = await ideaApi('idea_mine'); } catch (e) { box.innerHTML = '<div class="idea-empty">読み込めませんでした。</div>'; return; }
+        const list = (r && r.ideas) || [];
+        const seen = Number(ideaLS('kurofuneIdeaSeen')) || 0;
+        if (!list.length) { box.innerHTML = '<div class="idea-empty">まだ送ったものはありません。</div>'; }
+        else box.innerHTML = list.map(o => {
+            const fresh = o.updatedAt > seen && o.updatedAt > o.at;   // 開発者が印や返事を付けたもの
+            return '<div class="idea-item' + (fresh ? ' fresh' : '') + '"><div class="idea-meta"><span class="idea-st ' + escapeHtml(o.status) + '">' + (IDEA_ST[o.status] || '📨 届いた') + '</span>'
+                + '<span>' + (IDEA_KIND[o.kind] || '') + '</span><span>' + new Date(o.at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + '</span></div>'
+                + '<div class="idea-body">' + escapeHtml(o.text) + '</div>'
+                + (o.reply ? '<div class="idea-reply"><b>開発者より</b>' + escapeHtml(o.reply) + '</div>' : '') + '</div>';
+        }).join('');
+        if (markSeen) {
+            const top = list.reduce((m, o) => Math.max(m, o.updatedAt || 0), seen);
+            ideaLS('kurofuneIdeaSeen', String(top));
+            ideaUnseen = 0; try { updateLogBadges(); } catch (e) {}
+        }
+    }
+    // 起動したとき：送ったことがある人だけ、新しい返事があるか1回だけ確かめる
+    async function ideaCheckReplies() {
+        if (!ideaLS('kurofuneIdeaSent') || !playerId) return;
+        try {
+            const r = await ideaApi('idea_mine');
+            const seen = Number(ideaLS('kurofuneIdeaSeen')) || 0;
+            ideaUnseen = ((r && r.ideas) || []).filter(o => o.updatedAt > seen && o.updatedAt > o.at).length;
+            updateLogBadges();
+        } catch (e) {}
+    }
+
     let pageVersionTag = null;
     async function checkForNewVersion() {
         if (location.protocol === 'file:') return;
@@ -14878,6 +15024,17 @@ animation:facilitySweep 6s linear infinite;
     //   「実績を追加しました」のように、増えたこと・直したことだけを書く。
     const changelogData = [
         {
+            version: "v4.9",
+            title: "📮 目安箱を設置",
+            date: "2026-10-31",
+            content: [
+                "メニューに「📮 目安箱」を置きました。「こうしてほしい」「ここが変だよ」を、開発者に直接送れます。",
+                "送ったものは開発者にだけ届きます（ほかのプレイヤーには見えません）。1日5通まで。",
+                "開発者が読むと「👀 読んだ」「✅ やった！」などの印が付き、返事が来ることもあります。返事が来たら、メニューに赤い数字でお知らせします。",
+                "住所・電話番号・学校名など、自分のことがわかる情報は書かないでね。"
+            ]
+        },
+        {
             version: "v4.8",
             title: "⚔️ 幕末大乱闘、近日開幕",
             date: "2026-10-31",
@@ -15448,9 +15605,12 @@ animation:facilitySweep 6s linear infinite;
     function updateLogBadges() {
         const n = unreadLogCount();
         const social = (typeof socialBadgeCount === 'function') ? socialBadgeCount() : 0;
-        setBadge(document.getElementById('mobile-menu-btn'), n + social);
+        const ideas = (typeof ideaUnseen === 'number') ? ideaUnseen : 0;
+        setBadge(document.getElementById('mobile-menu-btn'), n + social + ideas);
         const nav = document.getElementById('nav-changelog');
         setBadge(nav && nav.querySelector('.nav-icon'), n);
+        const navI = document.getElementById('nav-ideas');
+        setBadge(navI && navI.querySelector('.nav-icon'), ideas);
     }
 
     function renderChangelog() {
@@ -15598,6 +15758,7 @@ animation:facilitySweep 6s linear infinite;
         try { updateLogBadges(); } catch (e) { console.error('log badge', e); }
         try { initSocial(); } catch (e) { console.error('social', e); }
         try { rtInitNav(); } catch (e) { console.error('ranto', e); }
+        setTimeout(() => { try { ideaCheckReplies(); } catch (e) {} }, 6000);
         try { touchPlayDay(); updateLevelUi(); setInterval(() => { touchPlayDay(); updateLevelUi(); }, 5000); } catch (e) { console.error('level', e); }
 
         // 告知バーはどの画面にいても動かす
