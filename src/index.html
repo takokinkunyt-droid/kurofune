@@ -959,6 +959,88 @@
         .cb-friends .cbf small { color: #9fd8a8; margin-left: 6px; }
         .cb-friends .cbf small.off { color: #999; }
         .cb-how { margin-top: 18px; font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.8; text-align: left; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 10px 12px; }
+
+        /* ===== ⚔️ 幕末大乱闘 ===== */
+        #sidebar .nav-menu .nav-item.nav-ranto { position: relative; overflow: hidden; color: #fff3d6; font-weight: 800; border-left-color: #ff6a2a;
+            background: linear-gradient(90deg, rgba(210, 46, 18, 0.42), rgba(255, 170, 40, 0.12)); text-shadow: 0 0 10px rgba(255, 120, 40, 0.6); }
+        #sidebar .nav-menu .nav-item.nav-ranto:hover { background: linear-gradient(90deg, rgba(230, 60, 24, 0.6), rgba(255, 170, 40, 0.2)); }
+        #sidebar .nav-menu .nav-item.nav-ranto.active { color: #fff; border-left-color: #ffd36b; background: linear-gradient(90deg, rgba(230, 60, 24, 0.7), rgba(255, 190, 60, 0.25)); }
+        #sidebar .nav-menu .nav-item.nav-ranto::after { content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; pointer-events: none;
+            background: linear-gradient(100deg, transparent, rgba(255, 240, 200, 0.35), transparent); animation: rtShine 3.2s ease-in-out infinite; }
+        @keyframes rtShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+        .nav-new { margin-left: auto; background: #ff3b30; color: #fff; font: 900 0.66rem/1 'Noto Sans JP', sans-serif; padding: 4px 7px; border-radius: 999px; letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(255, 90, 40, 0.9); animation: rtNewPulse 1.6s ease-in-out infinite; text-shadow: none; }
+        @keyframes rtNewPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+        #sidebar.collapsed .nav-ranto .nav-new { position: absolute; top: 5px; right: 4px; font-size: 0.55rem; padding: 3px 5px; }
+        .rt-newtag { position: absolute; right: -10px; bottom: -7px; background: #ff3b30; color: #fff; font: 900 9px/1 'Noto Sans JP', sans-serif; padding: 3px 4px;
+            border-radius: 6px; letter-spacing: .5px; box-shadow: 0 0 8px rgba(255, 90, 40, 0.9); pointer-events: none; }
+        body.lite-mode #sidebar .nav-menu .nav-item.nav-ranto::after, body.lite-mode .nav-new { animation: none; }
+
+        #screen-ranto { padding: 0 !important; padding-bottom: var(--admax-h, 0px) !important; overflow: hidden !important; box-sizing: border-box; background: #120703; }
+        #rt-stage { position: relative; flex: 1; min-height: 0; overflow: hidden; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        #rt-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+        #rt-hud { position: absolute; inset: 0; pointer-events: none; z-index: 7; }   /* 操作の板（6）より上。✕だけ押せる */
+        #rt-top { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; white-space: nowrap;
+            background: rgba(20, 8, 2, 0.72); border: 1px solid rgba(255, 211, 107, 0.5); border-radius: 14px; padding: 6px 14px;
+            color: #fff; font-weight: 900; font-size: 1rem; font-family: 'Noto Sans JP', sans-serif; }
+        #rt-top:empty { display: none; }
+        .rt-blue { color: #8cc4ff; } .rt-red { color: #ff8f80; } .rt-dash { color: rgba(255,255,255,0.6); }
+        .rt-time { color: #ffd36b; margin-left: 6px; font-variant-numeric: tabular-nums; }
+        #rt-quit { position: absolute; top: 10px; right: 10px; z-index: 9; pointer-events: auto; min-width: 42px; height: 42px; padding: 0 12px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.5); background: rgba(20, 8, 2, 0.72); color: #fff; font: 900 0.95rem 'Noto Sans JP', sans-serif; cursor: pointer; }
+        #rt-pc-sup { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(20, 8, 2, 0.72); color: #ffe3a0;
+            border-radius: 12px; padding: 6px 14px; font-weight: 800; font-size: 0.9rem; border: 1px solid rgba(255, 211, 107, 0.4); }
+        #rt-pc-sup.ready { background: linear-gradient(180deg, #ffcf3a, #ff8a1c); color: #3a1600; box-shadow: 0 0 16px #ffb02e; }
+        #rt-toast { position: absolute; left: 50%; top: 62px; transform: translateX(-50%); white-space: nowrap; color: #fff; font-weight: 900; font-size: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.85); opacity: 0; transition: opacity .2s; }
+        #rt-toast.on { opacity: 1; }
+        #rt-touch { position: absolute; inset: 0; z-index: 6; touch-action: none; }
+        .rt-hint { position: absolute; bottom: 14px; color: rgba(255,255,255,0.4); font-weight: 800; font-size: 0.72rem; pointer-events: none; text-shadow: 0 1px 3px #000; }
+        #rt-sup { position: absolute; right: 18px; bottom: 96px; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            text-align: center; border: 3px solid rgba(255, 211, 107, 0.55); color: #fff; font: 900 0.78rem/1.2 'Noto Sans JP', sans-serif; text-shadow: 0 1px 3px #000;
+            background: conic-gradient(rgba(255, 190, 40, 0.75) var(--p, 0%), rgba(30, 12, 4, 0.6) 0); box-sizing: border-box; padding: 6px; }
+        #rt-sup.ready { border-color: #fff3c4; background: radial-gradient(circle, #ffd84a, #ff8a1c); color: #3a1600; text-shadow: none; animation: rtSupGlow 0.9s ease-in-out infinite; }
+        @keyframes rtSupGlow { 0%, 100% { box-shadow: 0 0 10px #ffb02e; } 50% { box-shadow: 0 0 26px #ffd84a; } }
+        .rt-overlay { position: absolute; inset: 0; z-index: 8; display: flex; overflow-y: auto; padding: 66px 14px 24px; box-sizing: border-box;
+            background: radial-gradient(ellipse at top, rgba(140, 30, 12, 0.6), rgba(12, 5, 2, 0.97) 70%); }
+        .rt-box { width: min(640px, 100%); margin: auto; color: #fff3d6; text-align: center; font-family: 'Noto Sans JP', sans-serif; }
+        .rt-title { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: clamp(2.2rem, 9vw, 3.3rem); color: #fff3c4; letter-spacing: 3px;
+            text-shadow: 0 0 18px #ff6a1c, 0 3px 0 #6b0d04; }
+        .rt-lead { margin: 2px 0 6px; color: rgba(255, 243, 214, 0.8); font-size: 0.95rem; }
+        .rt-sec { text-align: left; font-weight: 900; color: #ffd36b; font-size: 0.82rem; margin: 16px 2px 6px; letter-spacing: 2px; }
+        .rt-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .rt-mode, .rt-char { border-radius: 16px; border: 2px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #fff; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: inherit; padding: 12px 8px; transition: transform .12s, border-color .12s; }
+        .rt-mode:active, .rt-char:active { transform: scale(0.97); }
+        .rt-mode .rt-me { font-size: 2.3rem; line-height: 1.1; }
+        .rt-mode b { font-size: 1.3rem; font-family: 'Shippori Mincho', serif; }
+        .rt-mode small, .rt-char small { color: rgba(255,255,255,0.65); font-size: 0.72rem; line-height: 1.4; }
+        .rt-mode.on, .rt-char.on { border-color: #ffd36b; box-shadow: 0 0 0 2px rgba(255, 211, 107, 0.3), 0 0 18px rgba(255, 140, 40, 0.35); }
+        .rt-mode-kemari.on { background: linear-gradient(180deg, #34742f, #1a3d18); }
+        .rt-mode-ikki.on { background: linear-gradient(180deg, #92301a, #4a1406); }
+        .rt-char.on { background: linear-gradient(180deg, #6b4a12, #3a2508); }
+        .rt-mode-desc { text-align: left; font-size: 0.84rem; line-height: 1.7; color: rgba(255, 243, 214, 0.88); margin-top: 8px; background: rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 8px 12px; }
+        .rt-chars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        @media (max-width: 560px) { .rt-chars { grid-template-columns: 1fr 1fr; } }
+        .rt-char .rt-ce { font-size: 2.1rem; line-height: 1.15; }
+        .rt-char b { font-size: 1rem; }
+        .rt-play { margin-top: 18px; width: 100%; border: none; border-radius: 16px; padding: 13px; cursor: pointer; font-family: inherit;
+            background: linear-gradient(180deg, #e8461e, #8a1a10); color: #fff; font-size: 1.35rem; font-weight: 900; letter-spacing: 2px;
+            box-shadow: 0 4px 0 #4a0a04, 0 0 24px rgba(255, 90, 30, 0.35); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .rt-play small { font-size: 0.72rem; font-weight: 600; opacity: 0.85; letter-spacing: 0; }
+        .rt-practice { margin-top: 10px; width: 100%; border: 1px solid rgba(255, 211, 107, 0.5); border-radius: 14px; padding: 10px; cursor: pointer; font-family: inherit;
+            background: rgba(255,255,255,0.06); color: #ffe3a0; font-weight: 800; font-size: 1rem; }
+        .rt-play:disabled, .rt-practice:disabled { opacity: 0.45; cursor: default; }
+        .rt-status { margin-top: 12px; min-height: 1.2em; color: #ffe3a0; font-weight: 700; line-height: 1.7; }
+        .rt-status button { margin-top: 6px; border-radius: 10px; border: 1px solid #c9a35a; background: #fff8e6; color: #5a3415; font-weight: 800; padding: 6px 16px;
+            cursor: pointer; font-family: inherit; }
+        .rt-record { margin-top: 6px; font-size: 0.8rem; color: #ffd36b; }
+        .rt-how { margin-top: 16px; font-size: 0.78rem; text-align: left; line-height: 1.8; color: rgba(255,255,255,0.72); background: rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 10px 12px; }
+        .rt-res-title { font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: clamp(2.2rem, 10vw, 3.4rem); color: #fff3c4; text-shadow: 0 0 18px #ff6a1c, 0 3px 0 #6b0d04; }
+        .rt-res-text { font-size: 1.1rem; margin: 10px 0 4px; line-height: 1.8; font-weight: 700; }
+        body.rt-playing #mobile-menu-btn { display: none !important; }
         /* 大砲戦の間は、実績の知らせを下に出す（上の船体や点数を隠さない） */
         body.cb-on #achievement-toast-container { top: auto !important; bottom: calc(16px + var(--admax-h, 0px)) !important; }
         .cb-invite { position: fixed; left: 50%; top: calc(14px + var(--admax-top, 0px)); transform: translateX(-50%); z-index: 99997; width: min(420px, calc(100vw - 24px));
@@ -5017,6 +5099,7 @@ animation:facilitySweep 6s linear infinite;
     <div id="sidebar" style="display: none;">
         <div class="sidebar-header"><div class="date" id="date-display"></div><h1 class="serif-font">黒船クリッカー<br><span>1853</span></h1><div id="sb-level" class="sb-level"></div></div>
         <div class="nav-menu">
+            <div class="nav-item nav-ranto" id="nav-ranto" onclick="openRanto(this)"><span class="nav-icon">⚔️</span><span class="nav-text">幕末大乱闘</span><span class="nav-new">NEW</span></div>
             <div class="nav-item" id="nav-clicker" onclick="switchScreen('screen-clicker', this)"><span class="nav-icon">🚢</span><span class="nav-text">黒船クリッカー</span></div>
             <div class="nav-item" id="nav-plan" onclick="openPlanScreen(this)"><span class="nav-icon">🎫</span><span class="nav-text">加入プラン</span></div>
             <div class="nav-item" onclick="switchScreen('screen-home', null)"><span class="nav-icon">⛩️</span><span class="nav-text">ホームに戻る</span></div>
@@ -5095,6 +5178,53 @@ animation:facilitySweep 6s linear infinite;
             <div class="game-select-layout">
                 <div class="game-select-card" onclick="goToGame('screen-game')"><span class="game-select-icon">💥</span><h3 class="game-select-title serif-font">浦賀沖大砲戦 (改)</h3><p class="game-select-desc">黒船を操り、幕府の小舟を大砲で撃ち落とせ！30体撃破すると現れる巨大ボス要塞を攻略しろ！</p><button class="btn-primary" style="padding: 10px 25px; font-size: 1rem;">出撃する</button></div>
                 <div class="game-select-card" onclick="goToGame('screen-clicker')"><span class="game-select-icon" style="filter: grayscale(1) brightness(0.55) contrast(1.2);">🚢</span><h3 class="game-select-title serif-font">黒船クリッカー</h3><p class="game-select-desc">黒船をひたすら連打してポイントを稼ごう！溜まった物資で設備や軍備を購入し、無限開国に挑め！</p><button class="btn-primary" style="padding: 10px 25px; font-size: 1rem; background-color: var(--gold-color);">開発する</button></div>
+            </div>
+        </div>
+
+        <!-- ⚔️ 幕末大乱闘 -->
+        <div id="screen-ranto" class="screen">
+            <div id="rt-stage">
+                <canvas id="rt-canvas"></canvas>
+                <div id="rt-hud" style="display:none;">
+                    <div id="rt-top"></div>
+                    <div id="rt-pc-sup"></div>
+                    <div id="rt-toast"></div>
+                    <button id="rt-quit" onclick="rtQuit()">✕</button>
+                </div>
+                <div id="rt-touch" style="display:none;">
+                    <div class="rt-hint" style="left: 16px;">← 左手：動く</div>
+                    <div class="rt-hint" style="right: 16px;">右手：狙って離す（ちょんで自動）→</div>
+                    <div id="rt-sup"><span id="rt-sup-name">必殺</span></div>
+                </div>
+                <div id="rt-lobby" class="rt-overlay">
+                    <div class="rt-box">
+                        <div class="rt-title">⚔️ 幕末大乱闘</div>
+                        <p class="rt-lead">みんなと、いま、その場で戦え。</p>
+                        <div class="rt-sec">ルール</div>
+                        <div id="rt-modes" class="rt-modes"></div>
+                        <div id="rt-mode-desc" class="rt-mode-desc"></div>
+                        <div class="rt-sec">使う人</div>
+                        <div id="rt-chars" class="rt-chars"></div>
+                        <button id="rt-play" class="rt-play" onclick="rtPlay(false)">⚔️ 対戦する<small>人が足りないときは、空いた席に CPU が入ります</small></button>
+                        <button id="rt-practice" class="rt-practice" onclick="rtPlay(true)">🎯 CPUと練習する</button>
+                        <div id="rt-status" class="rt-status"></div>
+                        <div id="rt-record" class="rt-record"></div>
+                        <div class="rt-how">
+                            <b>操作</b><br>
+                            📱 スマホ：左手で動く。右手で狙って離すと攻撃（ちょんと押すだけなら近くの相手を自動で狙う）。光る丸を引いて離すと必殺技。<br>
+                            💻 PC：WASD（矢印キー）で動く。マウスで狙ってクリックで攻撃（押しっぱなしで連射）。右クリックかスペースで必殺技。<br>
+                            <b>必殺技</b>：相手に攻撃を当てるとたまる。
+                        </div>
+                    </div>
+                </div>
+                <div id="rt-result" class="rt-overlay" style="display:none;">
+                    <div class="rt-box">
+                        <div id="rt-res-title" class="rt-res-title"></div>
+                        <div id="rt-res-text" class="rt-res-text"></div>
+                        <button class="rt-play" onclick="rtAgain()">⚔️ もう一回</button>
+                        <button class="rt-practice" onclick="rtBack()">ロビーへ戻る</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -6506,7 +6636,7 @@ animation:facilitySweep 6s linear infinite;
         
         const target = document.getElementById(screenId); 
         if(target) {
-            if (screenId === 'screen-clicker' || screenId === 'screen-game') {
+            if (screenId === 'screen-clicker' || screenId === 'screen-game' || screenId === 'screen-ranto') {
                 target.style.display = 'flex';
             } else {
                 target.style.display = 'block';
@@ -6519,6 +6649,7 @@ animation:facilitySweep 6s linear infinite;
         if (sidebarEl) sidebarEl.style.display = (screenId === 'screen-home') ? 'none' : 'flex';
 
         if (screenId === 'screen-game') cbEnter(); else cbLeave();
+        if (screenId === 'screen-ranto') rtEnter(); else rtLeave();
         if(screenId === 'screen-clicker') { initClickerLoop(); } else { stopClickerLoop(); }
         if(screenId === 'screen-study') { document.getElementById('screen-study').scrollTop = 0; checkScroll(); }
         // 音楽室を開いたとき、現在の曲の位置にスライドを合わせ直す
@@ -12572,6 +12703,641 @@ animation:facilitySweep 6s linear infinite;
         socialApi('cbt_incoming').then(d => { if (d && d.success) cbShowInvite(d.invite); }).catch(() => {});
     }
 
+    // ==========================================
+    // ⚔️ 幕末大乱闘（リアルタイム対戦。サーバーは game/ の Cloudflare Workers）
+    //
+    // つなぎ先：RANTO_SERVER。空のあいだは「準備中」と出す。試すときは ?ranto=ws://... で上書きできる。
+    // サーバーが正本。こちらは届いた様子を 100ms 遅らせてなめらかに動かす（自分だけは先に動かして、あとで合わせる）。
+    // 蹴鞠で上側のチームになったときは、画面を 180° 回して「いつも上へ攻める」ように見せる（RT.flip）。
+    //   ・様子（サーバーの座標）は回さずに持ち、描くときだけ回す
+    //   ・画面で取った向き（スティック・マウス）は、送る前に回し戻す
+    // ==========================================
+    const RANTO_SERVER = '';
+    const RT = { ws: null, state: 'idle', chars: null, mode: 'kemari', char: 'sailor', start: null, me: 0, snaps: [], roster: new Map(), boxHp: null,
+                 el: null, cx: null, w: 0, h: 0, dpr: 1, raf: 0, last: 0, cam: { x: 0, y: 0, s: 0.6 }, camInit: false, sprites: {}, flip: false, v: null,
+                 mv: { x: 0, y: 0 }, mvSent: { x: 0, y: 0, t: 0 }, keys: new Set(), mouse: { x: 0, y: 0, in: false, down: false, lastFire: 0 },
+                 sticks: { move: null, aim: null, sup: null }, pred: null, fx: [], nums: [], banner: '', bannerT: 0, lastHud: 0, endShown: false, quitArm: 0 };
+    function rtServerUrl() {
+        try { const q = new URLSearchParams(location.search).get('ranto'); if (q && /^wss?:\/\//.test(q)) return q; } catch (e) {}
+        return RANTO_SERVER;
+    }
+    function rtSave() { try { localStorage.setItem('kurofuneRanto', JSON.stringify({ mode: RT.mode, char: RT.char })); } catch (e) {} }
+    function rtLoadPref() {
+        try { const o = JSON.parse(localStorage.getItem('kurofuneRanto') || 'null'); if (o) { if (RT_MODES[o.mode]) RT.mode = o.mode; if (RT_CHAR_INFO[o.char]) RT.char = o.char; } } catch (e) {}
+    }
+
+    // ---- 画面に入る・出る ----
+    function openRanto(nav) {
+        switchScreen('screen-ranto', nav || document.getElementById('nav-ranto'));
+        try { localStorage.setItem('kurofuneRantoSeen', '1'); } catch (e) {}
+        const t = document.querySelector('#mobile-menu-btn .rt-newtag'); if (t) t.remove();
+    }
+    function rtInitNav() {   // スマホのメニューボタンにも、一度開くまで「NEW」を付ける
+        let seen = false; try { seen = !!localStorage.getItem('kurofuneRantoSeen'); } catch (e) {}
+        const btn = document.getElementById('mobile-menu-btn');
+        if (!seen && btn && !btn.querySelector('.rt-newtag')) { const t = document.createElement('span'); t.className = 'rt-newtag'; t.textContent = 'NEW'; btn.appendChild(t); }
+    }
+    function rtEnter() {
+        document.body.classList.add('rt-on');
+        rtLoadPref(); rtInitInput(); rtResize();
+        if (RT.state !== 'play' && RT.state !== 'queue') rtShowLobby();
+    }
+    function rtLeave() {
+        if (!document.body.classList.contains('rt-on')) return;
+        document.body.classList.remove('rt-on', 'rt-playing');
+        cancelAnimationFrame(RT.raf); RT.raf = 0;
+        if (RT.ws) { try { RT.ws.close(); } catch (e) {} RT.ws = null; }
+        RT.state = 'idle'; RT.start = null; RT.snaps = []; RT.v = null;
+        RT.keys.clear(); RT.mv = { x: 0, y: 0 }; RT.sticks = { move: null, aim: null, sup: null };
+    }
+
+    // ---- ロビー ----
+    const RT_MODES = {
+        kemari: { e: '🏐', name: '蹴鞠', sub: '3対3', desc: '鞠を相手のゴールへ運んで蹴り込め。2点先取か、2分半で点の多い方が勝ち。鞠を持っている間は、攻撃のかわりに蹴る。倒されても少しで戻れる。' },
+        ikki:   { e: '🔥', name: '一揆', sub: '6人のバトロワ', desc: '最後の1人まで生き残れ。箱を壊すと「力の玉」が出て強くなる。役人の包囲（煙）がだんだん狭まる。倒されたらそこで終わり。' },
+    };
+    const RT_CHAR_INFO = {   // サーバーとつながる前でも選べるように（強さの数字はサーバーが正本）
+        sailor: { name: '水夫', e: '🧑‍✈️', desc: '3方向に撃つ。必殺技は貫く錨' },
+        ninja:  { name: '忍者', e: '🥷', desc: '足が速い。必殺技は斬りながら駆け抜ける' },
+        oni:    { name: '鬼武者', e: '👹', desc: '体力が多い近接。必殺技は体当たり' },
+        perry:  { name: 'ペリー', e: '🎩', desc: '遠くまで届く大砲。必殺技は離れた所を吹き飛ばす' },
+    };
+    function rtShowLobby(msg) {
+        RT.state = 'lobby';
+        document.body.classList.remove('rt-playing');
+        cancelAnimationFrame(RT.raf); RT.raf = 0;
+        document.getElementById('rt-result').style.display = 'none';
+        document.getElementById('rt-lobby').style.display = 'flex';
+        document.getElementById('rt-touch').style.display = 'none';
+        document.getElementById('rt-hud').style.display = 'none';
+        const ok = !!rtServerUrl();
+        document.getElementById('rt-modes').innerHTML = Object.entries(RT_MODES).map(([k, m]) =>
+            '<button class="rt-mode rt-mode-' + k + (RT.mode === k ? ' on' : '') + '" onclick="rtPick(\'mode\',\'' + k + '\')"><span class="rt-me">' + m.e + '</span><b>' + m.name + '</b><small>' + m.sub + '</small></button>').join('');
+        document.getElementById('rt-mode-desc').textContent = RT_MODES[RT.mode].desc;
+        document.getElementById('rt-chars').innerHTML = Object.entries(RT_CHAR_INFO).map(([k, c]) =>
+            '<button class="rt-char' + (RT.char === k ? ' on' : '') + '" onclick="rtPick(\'char\',\'' + k + '\')"><span class="rt-ce">' + c.e + '</span><b>' + c.name + '</b><small>' + c.desc + '</small></button>').join('');
+        document.getElementById('rt-play').disabled = !ok;
+        document.getElementById('rt-practice').disabled = !ok;
+        rtStatus(msg || (ok ? '' : '🛠 対戦サーバーを準備中です。もうしばらく待っててね。'));
+        document.getElementById('rt-record').textContent = rtRecordText();
+        rtResize(); rtDrawIdle();
+    }
+    function rtPick(kind, v) {
+        if (RT.state === 'queue') return;
+        if (kind === 'mode' && RT_MODES[v]) RT.mode = v; else if (kind === 'char' && RT_CHAR_INFO[v]) RT.char = v;
+        rtSave(); rtShowLobby();
+    }
+    function rtStatus(html) { const el = document.getElementById('rt-status'); if (el) el.innerHTML = html; }
+
+    function rtConnect() {
+        return new Promise((resolve, reject) => {
+            if (RT.ws && RT.ws.readyState === 1) return resolve(RT.ws);
+            const url = rtServerUrl(); if (!url) return reject(new Error('no server'));
+            let ws;
+            try { ws = new WebSocket(url); } catch (e) { return reject(e); }
+            RT.ws = ws;
+            const to = setTimeout(() => { try { ws.close(); } catch (e) {} reject(new Error('timeout')); }, 8000);
+            ws.onopen = () => { clearTimeout(to); resolve(ws); };
+            ws.onmessage = (e) => { let m; try { m = JSON.parse(e.data); } catch (err) { return; } rtOnMessage(m); };
+            ws.onclose = () => {
+                clearTimeout(to);
+                if (RT.ws === ws) { RT.ws = null; if (RT.state === 'play' || RT.state === 'queue') rtShowLobby('⚠️ 通信が切れました。もう一度試してね。'); }
+                reject(new Error('closed'));
+            };
+            ws.onerror = () => {};
+        });
+    }
+    function rtSend(o) { if (RT.ws && RT.ws.readyState === 1) RT.ws.send(JSON.stringify(o)); }
+    async function rtPlay(practice) {
+        if (RT.state === 'queue') return;
+        RT.state = 'queue';
+        document.getElementById('rt-play').disabled = true; document.getElementById('rt-practice').disabled = true;
+        rtStatus('⚓ 港につないでいます…');
+        try { await rtConnect(); } catch (e) { RT.state = 'lobby'; rtShowLobby('⚠️ 対戦サーバーにつながりませんでした。少したってから試してね。'); return; }
+        let lv = 1; try { lv = levelFromExp(computeExp()).level || 1; } catch (e) {}
+        rtSend({ t: 'leave' });   // 前の試合の席が残っていたら外す
+        rtSend({ t: 'hello', mode: RT.mode, char: RT.char, name: (typeof playerName === 'string' && playerName) || '名無しの船長', lv, practice: !!practice });
+        rtStatus(practice ? '⚓ CPUと練習を始めます…' : '⚔️ 仲間を集めています…<br><button onclick="rtCancel()">やめる</button>');
+    }
+    function rtCancel() { rtSend({ t: 'cancel' }); rtShowLobby(); }
+
+    function rtOnMessage(m) {
+        if (m.t === 'hi') { RT.chars = m.chars; return; }
+        if (m.t === 'busy') { if (RT.state === 'queue') rtShowLobby('🙇 いま対戦場が混み合っています。少したってから試してね。'); return; }
+        if (m.t === 'queue' && RT.state === 'queue') {
+            rtStatus('⚔️ 仲間を集めています… <b>' + m.n + ' / ' + m.need + '</b><br><small>あと ' + m.wait + ' 秒で、空いた席に CPU が入って始まります</small><br><button onclick="rtCancel()">やめる</button>');
+            return;
+        }
+        if (m.t === 'start') { if (RT.state === 'queue') rtStart(m); else rtSend({ t: 'leave' }); return; }
+        if (m.t === 'roster') { m.roster.forEach(p => RT.roster.set(p.id, p)); return; }
+        if (m.t === 's' && RT.state === 'play') {
+            m.at = performance.now();
+            RT.snaps.push(m); if (RT.snaps.length > 30) RT.snaps.shift();
+            if (m.bx) RT.boxHp = m.bx;
+            for (const e of m.ev || []) rtEvent(e);
+            if (m.res && !RT.endShown) { RT.endShown = true; const snap = m; setTimeout(() => rtShowResult(snap.res, snap), 1600); }
+        }
+    }
+    function rtStart(m) {
+        RT.state = 'play'; RT.start = m; RT.me = m.me; RT.snaps = []; RT.fx = []; RT.nums = []; RT.endShown = false; RT.v = null;
+        RT.chars = m.chars || RT.chars;
+        RT.roster = new Map(m.roster.map(p => [p.id, p]));
+        RT.boxHp = m.map.boxes.map(() => 4000);
+        RT.pred = null; RT.camInit = false; RT.quitArm = 0;
+        RT.flip = m.mode === 'kemari' && (RT.roster.get(RT.me) || {}).team === 1;
+        document.getElementById('rt-lobby').style.display = 'none';
+        document.getElementById('rt-result').style.display = 'none';
+        document.getElementById('rt-hud').style.display = '';
+        document.getElementById('rt-quit').textContent = '✕';
+        const touch = matchMedia('(pointer: coarse)').matches;
+        document.getElementById('rt-touch').style.display = touch ? 'block' : 'none';
+        document.getElementById('rt-pc-sup').style.display = touch ? 'none' : '';
+        const me = RT.roster.get(RT.me) || {};
+        document.getElementById('rt-sup-name').textContent = (RT.chars && RT.chars[me.char] && RT.chars[me.char].supName) || '必殺';
+        rtResize();
+        rtBanner(m.mode === 'kemari' ? '🏐 蹴鞠　上のゴールを狙え！' : '🔥 一揆　最後の1人まで', 2.6);
+        document.body.classList.add('rt-playing');
+        cancelAnimationFrame(RT.raf); RT.last = 0; RT.raf = requestAnimationFrame(rtLoop);
+    }
+    function rtQuit() {
+        if (RT.state !== 'play') return;
+        const now = Date.now(), btn = document.getElementById('rt-quit');
+        if (now - RT.quitArm > 2500) { RT.quitArm = now; btn.textContent = 'もう一度押すと抜ける'; setTimeout(() => { if (Date.now() - RT.quitArm >= 2500) btn.textContent = '✕'; }, 2600); return; }
+        rtSend({ t: 'leave' }); rtShowLobby('抜けました（あなたの席は CPU が引き継ぎました）');
+    }
+
+    // ---- できごと（座標はサーバーのまま持つ） ----
+    function rtEvent(e) {
+        const k = e[0];
+        if (k === 'hit') {
+            const p = rtPlayerNow(e[1]); if (p) RT.nums.push({ x: p.x, y: p.y, v: e[2], t: 0.8, me: e[1] === RT.me, dy: 0 });
+            if (e[1] === RT.me) { try { buzz(25); } catch (err) {} }
+        } else if (k === 'ko') {
+            const who = RT.roster.get(e[1]);
+            if (e[1] === RT.me) rtBanner(RT.start.mode === 'kemari' ? '倒された…（すぐ戻る）' : '倒された…', 2);
+            else if (e[2] === RT.me && who) rtToast('⚔️ ' + who.name + ' を倒した！');
+            rtSound('ko');
+        } else if (k === 'goal') {
+            const myTeam = (RT.roster.get(RT.me) || {}).team;
+            rtBanner(e[1] === myTeam ? '🎉 ゴール！' : '😱 決められた…', 2.4); rtSound(e[1] === myTeam ? 'goal' : 'ko');
+        } else if (k === 'go') { rtBanner('はじめ！', 1); rtSound('go'); }
+        else if (k === 'ot') rtBanner('延長戦！ 次の1点で勝ち', 2.5);
+        else if (k === 'boom') { RT.fx.push({ kind: 'boom', x: e[1], y: e[2], r: e[3], t: 0.5 }); rtSound('boom'); }
+        else if (k === 'arc') { const p = rtPlayerNow(e[1]); if (p) RT.fx.push({ kind: 'arc', x: p.x, y: p.y, a: e[2] / 100, t: 0.18, r: ((RT.chars || {}).oni || { atk: { range: 165 } }).atk.range }); }
+        else if (k === 'cube' && e[1] === RT.me) rtToast('🔷 力の玉！ 強くなった');
+        else if (k === 'sup' && e[1] === RT.me) rtSound('sup');
+        else if (k === 'kick') rtSound('kick');
+        else if (k === 'end') rtBanner(RT.start.mode === 'kemari' ? '試合終了！' : '決着！', 2);
+    }
+    function rtBanner(t, sec) { RT.banner = t; RT.bannerT = sec; }
+    let rtToastT = 0;
+    function rtToast(t) { const el = document.getElementById('rt-toast'); if (!el) return; el.textContent = t; el.classList.add('on'); clearTimeout(rtToastT); rtToastT = setTimeout(() => el.classList.remove('on'), 1300); }
+    function rtSound(kind) {
+        try {
+            const ctx = sharedAudioCtx(); if (!ctx) return;
+            const P = { ko: [300, 80, 0.3, 'sawtooth', 0.1], goal: [523, 1046, 0.6, 'triangle', 0.14], go: [440, 880, 0.25, 'square', 0.06],
+                        sup: [200, 900, 0.35, 'triangle', 0.1], fire: [700, 400, 0.06, 'square', 0.03], kick: [180, 90, 0.12, 'triangle', 0.12],
+                        boom: [120, 40, 0.4, 'sawtooth', 0.1] }[kind]; if (!P) return;
+            const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+            o.type = P[3]; o.frequency.setValueAtTime(P[0], t); o.frequency.exponentialRampToValueAtTime(P[1], t + P[2]);
+            g.gain.setValueAtTime(P[4], t); g.gain.exponentialRampToValueAtTime(0.0001, t + P[2]);
+            o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + P[2] + 0.02);
+        } catch (e) {}
+    }
+
+    // ---- 様子を「少し前」で読む（なめらかにするため）。サーバーの座標のまま ----
+    const RT_DELAY = 100;
+    function rtView() {
+        const S = RT.snaps; if (!S.length) return null;
+        const tt = performance.now() - RT_DELAY;
+        let a = S[0], b = S[0];
+        for (let i = S.length - 1; i > 0; i--) { if (S[i - 1].at <= tt) { a = S[i - 1]; b = S[i]; break; } }
+        const span = b.at - a.at, f = span > 0 ? Math.max(0, Math.min(1, (tt - a.at) / span)) : 1;
+        const pa = new Map(a.p.map(x => [x[0], x])), out = [];
+        for (const q of b.p) {
+            const o = pa.get(q[0]) || q;
+            const jump = Math.hypot(q[1] - o[1], q[2] - o[2]) > 250;   // 生き返りなどで飛んだときは補わない
+            out.push({ id: q[0], x: jump ? q[1] : o[1] + (q[1] - o[1]) * f, y: jump ? q[2] : o[2] + (q[2] - o[2]) * f, hp: q[3], maxHp: q[4], ang: q[5] / 100,
+                       ammo: q[6], sup: q[7], dead: !!(q[8] & 1), dash: !!(q[8] & 2), power: q[9], kills: q[10], respawn: q[11] });
+        }
+        let ball = null;
+        if (b.b) { const ob = a.b || b.b, j = Math.hypot(b.b[0] - ob[0], b.b[1] - ob[1]) > 300; ball = { x: j ? b.b[0] : ob[0] + (b.b[0] - ob[0]) * f, y: j ? b.b[1] : ob[1] + (b.b[1] - ob[1]) * f, holder: b.b[2] }; }
+        const sa = a.sh || [], shots = (b.sh || []).map((s, i) => { const o = sa[i]; return o && o[3] === s[3] && Math.hypot(o[0] - s[0], o[1] - s[1]) < 120 ? [o[0] + (s[0] - o[0]) * f, o[1] + (s[1] - o[1]) * f, s[2], s[3]] : s; });
+        return { snap: b, players: out, ball, shots };
+    }
+    function rtPlayerNow(id) { const v = RT.v || rtView(); return v ? v.players.find(p => p.id === id) : null; }
+    // 回して見せるとき用：サーバーの座標 ⇔ 画面の座標
+    function rtVX(x) { return RT.flip ? RT.start.map.w - x : x; }
+    function rtVY(y) { return RT.flip ? RT.start.map.h - y : y; }
+    function rtVDir(x, y) { return RT.flip ? { x: -x, y: -y } : { x, y }; }   // 向きはどちらへも同じ式
+
+    // ---- 操作 ----
+    function rtInitInput() {
+        const el = document.getElementById('rt-canvas'); if (!el || el.dataset.rt) return;
+        el.dataset.rt = '1';
+        // PC：マウスで狙う・左クリックで攻撃（押しっぱなしで連射）・右クリックで必殺技
+        const pos = (e) => { const r = el.getBoundingClientRect(); RT.mouse.x = e.clientX - r.left; RT.mouse.y = e.clientY - r.top; RT.mouse.in = true; };
+        el.addEventListener('mousemove', pos);
+        el.addEventListener('mouseleave', () => { RT.mouse.in = false; RT.mouse.down = false; });
+        el.addEventListener('mousedown', (e) => {
+            if (RT.state !== 'play') return;
+            pos(e);
+            const aim = rtMouseAim();
+            if (e.button === 2) rtSuper(aim.x, aim.y, aim.d);
+            else if (e.button === 0) { RT.mouse.down = true; RT.mouse.lastFire = performance.now(); rtFire(aim.x, aim.y); }
+        });
+        window.addEventListener('mouseup', () => { RT.mouse.down = false; });
+        el.addEventListener('contextmenu', (e) => e.preventDefault());
+        window.addEventListener('keydown', (e) => {
+            if (RT.state !== 'play') return;
+            const tag = (e.target && e.target.tagName) || ''; if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+            const k = e.key.toLowerCase();
+            if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) { RT.keys.add(k); e.preventDefault(); rtKeysToMove(); }
+            if ((k === ' ' || k === 'e') && !e.repeat) { e.preventDefault(); const aim = rtMouseAim(); rtSuper(aim.x, aim.y, aim.d); }
+        });
+        window.addEventListener('keyup', (e) => { const k = e.key.toLowerCase(); if (RT.keys.delete(k)) rtKeysToMove(); });
+        window.addEventListener('blur', () => { RT.keys.clear(); rtKeysToMove(); RT.mouse.down = false; });
+        window.addEventListener('resize', () => { if (document.body.classList.contains('rt-on')) rtResize(); });
+        if (window.ResizeObserver) new ResizeObserver(() => { if (document.body.classList.contains('rt-on')) rtResize(); }).observe(document.getElementById('rt-stage'));
+        // スマホ：左半分で移動、右半分で狙って離すと攻撃（ちょんと押すと自動で狙う）、必殺技の丸を引いて離すと必殺技
+        const tl = document.getElementById('rt-touch');
+        const supBtn = document.getElementById('rt-sup');
+        const start = (e) => {
+            if (RT.state !== 'play') return;
+            for (const t of e.changedTouches) {
+                const onSup = t.target === supBtn || supBtn.contains(t.target);
+                const kind = onSup ? 'sup' : (t.clientX < window.innerWidth * 0.45 ? 'move' : 'aim');
+                if (RT.sticks[kind]) continue;
+                RT.sticks[kind] = { id: t.identifier, x0: t.clientX, y0: t.clientY, x: t.clientX, y: t.clientY };
+            }
+            e.preventDefault();
+        };
+        const move = (e) => {
+            for (const t of e.changedTouches) for (const kind of ['move', 'aim', 'sup']) {
+                const s = RT.sticks[kind]; if (!s || s.id !== t.identifier) continue;
+                s.x = t.clientX; s.y = t.clientY;
+                if (kind === 'move') {
+                    let dx = (s.x - s.x0) / 50, dy = (s.y - s.y0) / 50; const m = Math.hypot(dx, dy);
+                    if (m > 1) { dx /= m; dy /= m; }
+                    if (m < 0.15) { dx = 0; dy = 0; }
+                    RT.mv = { x: dx, y: dy };
+                    // 指が遠くへ行ったら、スティックの中心もついてくる
+                    const far = Math.hypot(s.x - s.x0, s.y - s.y0); if (far > 80) { s.x0 = s.x - (s.x - s.x0) / far * 80; s.y0 = s.y - (s.y - s.y0) / far * 80; }
+                }
+            }
+            e.preventDefault();
+        };
+        const end = (e) => {
+            for (const t of e.changedTouches) for (const kind of ['move', 'aim', 'sup']) {
+                const s = RT.sticks[kind]; if (!s || s.id !== t.identifier) continue;
+                RT.sticks[kind] = null;
+                if (kind === 'move') { RT.mv = { x: 0, y: 0 }; continue; }
+                if (e.type === 'touchcancel') continue;
+                const dx = s.x - s.x0, dy = s.y - s.y0, d = Math.hypot(dx, dy);
+                let aim;
+                if (d < 18) aim = rtAutoTarget();   // ちょんと押しただけなら、近くの相手を自動で狙う
+                else { const w = rtVDir(dx / d, dy / d); aim = { x: w.x, y: w.y, d: Math.min(1, d / 110) * rtSupRange() }; }
+                if (kind === 'aim') rtFire(aim.x, aim.y); else rtSuper(aim.x, aim.y, aim.d);
+            }
+            e.preventDefault();
+        };
+        tl.addEventListener('touchstart', start, { passive: false });
+        tl.addEventListener('touchmove', move, { passive: false });
+        tl.addEventListener('touchend', end, { passive: false });
+        tl.addEventListener('touchcancel', end, { passive: false });
+    }
+    function rtKeysToMove() {
+        const K = RT.keys; let x = 0, y = 0;
+        if (K.has('a') || K.has('arrowleft')) x -= 1; if (K.has('d') || K.has('arrowright')) x += 1;
+        if (K.has('w') || K.has('arrowup')) y -= 1; if (K.has('s') || K.has('arrowdown')) y += 1;
+        const m = Math.hypot(x, y); RT.mv = m ? { x: x / m, y: y / m } : { x: 0, y: 0 };
+    }
+    function rtMyPos() { return RT.pred ? RT.pred : (rtPlayerNow(RT.me) || { x: 0, y: 0 }); }   // サーバーの座標
+    function rtMouseAim() {   // 返すのはサーバーの向き
+        const me = rtMyPos(), vx = RT.mouse.x / RT.cam.s + RT.cam.x, vy = RT.mouse.y / RT.cam.s + RT.cam.y;
+        const dx = vx - rtVX(me.x), dy = vy - rtVY(me.y), d = Math.hypot(dx, dy) || 1, w = rtVDir(dx / d, dy / d);
+        return { x: w.x, y: w.y, d };
+    }
+    function rtMyChar() { return RT.chars && RT.chars[(RT.roster.get(RT.me) || {}).char]; }
+    function rtSupRange() { const c = rtMyChar(); return c ? (c.sup.range || c.sup.dist || 400) : 400; }
+    function rtAutoTarget() {   // サーバーの座標で考える
+        const v = RT.v || rtView(), me = rtMyPos(); if (!v) return { x: 0, y: -1, d: 300 };
+        const myTeam = (RT.roster.get(RT.me) || {}).team, M = RT.start.map;
+        let best = null, bd = 1e9;
+        if (v.ball && v.ball.holder === RT.me) best = { x: M.w / 2, y: myTeam === 0 ? -40 : M.h + 40 };   // 鞠を持っていたらゴールへ
+        else for (const p of v.players) {
+            if (p.dead || p.id === RT.me) continue;
+            const r = RT.roster.get(p.id); if (!r || (RT.start.mode === 'kemari' && r.team === myTeam)) continue;
+            const d = Math.hypot(p.x - me.x, p.y - me.y); if (d < bd) { bd = d; best = p; }
+        }
+        if (RT.start.mode === 'kemari' && !best && v.ball && !v.ball.holder) best = v.ball;
+        if (RT.start.mode === 'ikki' && (!best || bd > 700)) M.boxes.forEach((b, i) => {
+            if (RT.boxHp && RT.boxHp[i] > 0) { const d = Math.hypot(b.x + b.w / 2 - me.x, b.y + b.h / 2 - me.y); if (d < bd) { bd = d; best = { x: b.x + b.w / 2, y: b.y + b.h / 2 }; } }
+        });
+        if (!best) { const a = (v.players.find(p => p.id === RT.me) || {}).ang || -Math.PI / 2; return { x: Math.cos(a), y: Math.sin(a), d: 300 }; }
+        const dx = best.x - me.x, dy = best.y - me.y, d = Math.hypot(dx, dy) || 1;
+        return { x: dx / d, y: dy / d, d };
+    }
+    function rtFire(x, y) { rtSend({ t: 'fire', x: +x.toFixed(3), y: +y.toFixed(3) }); rtSound('fire'); }
+    function rtSuper(x, y, d) { const me = RT.v && RT.v.players.find(p => p.id === RT.me); if (me && me.sup < 100) return; rtSend({ t: 'sup', x: +x.toFixed(3), y: +y.toFixed(3), d: Math.round(d || 0) }); }
+    function rtSendMove(now) {
+        const w = rtVDir(RT.mv.x, RT.mv.y), q = (v) => Math.round(v * 10) / 10 || 0, mx = q(w.x), my = q(w.y), s = RT.mvSent;
+        if ((mx !== s.x || my !== s.y) && now - s.t > 50) { rtSend({ t: 'mv', x: mx, y: my }); RT.mvSent = { x: mx, y: my, t: now }; }
+    }
+
+    // ---- 毎こま ----
+    function rtResize() {
+        const stage = document.getElementById('rt-stage'); if (!stage) return;
+        RT.el = document.getElementById('rt-canvas'); RT.cx = RT.el.getContext('2d');
+        const dpr = Math.min(2, window.devicePixelRatio || 1); RT.sprites = {};
+        RT.dpr = dpr; RT.w = Math.max(200, stage.clientWidth); RT.h = Math.max(200, stage.clientHeight);
+        RT.el.width = Math.round(RT.w * dpr); RT.el.height = Math.round(RT.h * dpr);
+        RT.cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        RT.rect = stage.getBoundingClientRect();
+        // 見える広さ：だいたい縦横 900 くらいの範囲が入るように（小さい画面ほど引いて見せる）
+        RT.cam.s = Math.max(0.42, Math.min(1.1, Math.min(RT.w / 820, RT.h / 900) * 1.05));
+        if (RT.state !== 'play') rtDrawIdle();
+    }
+    function rtLoop(ts) {
+        RT.raf = 0; if (RT.state !== 'play' && RT.state !== 'result') return;
+        const dt = Math.min(0.05, Math.max(0, (ts - (RT.last || ts)) / 1000)); RT.last = ts;
+        if (RT.state === 'play') {
+            rtSendMove(ts);
+            if (RT.mouse.down && ts - RT.mouse.lastFire > 230) { RT.mouse.lastFire = ts; const a = rtMouseAim(); rtFire(a.x, a.y); }
+        }
+        const v = rtView(); RT.v = v;
+        if (v) { rtPredict(v, dt); rtRender(v, dt); rtHud(v); }
+        if (RT.state === 'play') RT.raf = requestAnimationFrame(rtLoop);
+    }
+    // 自分は、押した瞬間に動かす（届くまで待つと、もたつくため）。サーバーの最新の位置には少しずつ寄せる
+    function rtPredict(v, dt) {
+        const me = v.players.find(p => p.id === RT.me), ch = rtMyChar();
+        if (!me || !ch || me.dead || me.dash || v.snap.ph !== 'play') { RT.pred = null; return; }
+        if (!RT.pred) RT.pred = { x: me.x, y: me.y };
+        const P = RT.pred, w = rtVDir(RT.mv.x, RT.mv.y);
+        const latest = RT.snaps[RT.snaps.length - 1].p.find(x => x[0] === RT.me);
+        const tx = latest ? latest[1] : me.x, ty = latest ? latest[2] : me.y;
+        P.x += w.x * ch.speed * dt; P.y += w.y * ch.speed * dt;
+        rtCollide(P, ch.r);
+        const err = Math.hypot(tx - P.x, ty - P.y);
+        if (err > 150) { P.x = tx; P.y = ty; }
+        else { const k = Math.min(1, dt * (w.x || w.y ? 2.5 : 8)); P.x += (tx - P.x) * k; P.y += (ty - P.y) * k; }
+    }
+    function rtCollide(P, r) {
+        const M = RT.start.map;
+        P.x = Math.max(r, Math.min(M.w - r, P.x)); P.y = Math.max(r, Math.min(M.h - r, P.y));
+        const list = M.walls.concat(M.boxes.filter((b, i) => RT.boxHp && RT.boxHp[i] > 0));
+        for (const b of list) {
+            const cx = Math.max(b.x, Math.min(b.x + b.w, P.x)), cy = Math.max(b.y, Math.min(b.y + b.h, P.y));
+            const dx = P.x - cx, dy = P.y - cy, d = Math.hypot(dx, dy);
+            if (d < r && d > 0.001) { P.x += dx / d * (r - d); P.y += dy / d * (r - d); }
+        }
+    }
+
+    // ---- 描く ----
+    function rtSprite(e, size) {
+        size = Math.round(size);
+        const k = e + '|' + size; if (RT.sprites[k]) return RT.sprites[k];
+        const s = Math.ceil(size * 1.35), c = document.createElement('canvas'), q = RT.dpr * Math.max(1, RT.cam.s);
+        c.width = c.height = Math.ceil(s * q);
+        const x = c.getContext('2d'); x.scale(q, q); x.font = size + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(e, s / 2, s / 2 + size * 0.06);
+        return (RT.sprites[k] = { c, s });
+    }
+    function rtDrawE(e, size, x, y, alpha) {
+        const sp = rtSprite(e, size), cx = RT.cx;
+        if (alpha != null) cx.globalAlpha = Math.max(0, Math.min(1, alpha));
+        cx.drawImage(sp.c, x - sp.s / 2, y - sp.s / 2, sp.s, sp.s);
+        if (alpha != null) cx.globalAlpha = 1;
+    }
+    function rtDrawIdle() {
+        const cx = RT.cx; if (!cx) return;
+        cx.setTransform(RT.dpr, 0, 0, RT.dpr, 0, 0);
+        const g = cx.createLinearGradient(0, 0, 0, RT.h); g.addColorStop(0, '#3a1608'); g.addColorStop(1, '#120703');
+        cx.fillStyle = g; cx.fillRect(0, 0, RT.w, RT.h);
+    }
+    function rtRender(v, dt) {
+        const cx = RT.cx, M = RT.start.map, mode = RT.start.mode, s = RT.cam.s, roster = RT.roster;
+        const myTeam = (roster.get(RT.me) || {}).team, X = rtVX, Y = rtVY;
+        const me = v.players.find(p => p.id === RT.me);
+        // カメラ：自分を真ん中に。一揆で倒されたら、残っている人を映す
+        let focus;
+        if (me && !me.dead) focus = RT.pred || me;
+        else if (mode === 'ikki') { const alive = v.players.filter(p => !p.dead).sort((a, b) => b.kills - a.kills)[0]; focus = alive || me || { x: M.w / 2, y: M.h / 2 }; }
+        else focus = me || { x: M.w / 2, y: M.h / 2 };
+        const vw = RT.w / s, vh = RT.h / s;
+        let tx = X(focus.x) - vw / 2, ty = Y(focus.y) - vh / 2;
+        tx = vw >= M.w ? (M.w - vw) / 2 : Math.max(-60, Math.min(M.w - vw + 60, tx));
+        ty = vh >= M.h + 120 ? (M.h - vh) / 2 : Math.max(-80, Math.min(M.h - vh + 80, ty));
+        if (!RT.camInit) { RT.cam.x = tx; RT.cam.y = ty; RT.camInit = true; }
+        RT.cam.x += (tx - RT.cam.x) * Math.min(1, dt * 10); RT.cam.y += (ty - RT.cam.y) * Math.min(1, dt * 10);
+        cx.setTransform(RT.dpr, 0, 0, RT.dpr, 0, 0);
+        cx.fillStyle = mode === 'kemari' ? '#1f3d1c' : '#4a3a20'; cx.fillRect(0, 0, RT.w, RT.h);
+        cx.setTransform(RT.dpr * s, 0, 0, RT.dpr * s, -RT.cam.x * s * RT.dpr, -RT.cam.y * s * RT.dpr);
+        // 地面
+        if (mode === 'kemari') {
+            cx.fillStyle = '#3f7d3a'; cx.fillRect(0, 0, M.w, M.h);
+            cx.fillStyle = 'rgba(255,255,255,0.05)'; for (let y = 0; y < M.h; y += 120) cx.fillRect(0, y, M.w, 60);
+            cx.strokeStyle = 'rgba(255,255,255,0.45)'; cx.lineWidth = 4;
+            cx.strokeRect(2, 2, M.w - 4, M.h - 4); cx.beginPath(); cx.moveTo(0, M.h / 2); cx.lineTo(M.w, M.h / 2); cx.stroke();
+            cx.beginPath(); cx.arc(M.w / 2, M.h / 2, 90, 0, 6.283); cx.stroke();
+            // ゴール：画面の上が「攻める側」（金）、下が「守る側」（青）
+            const G = M.goal, gx0 = Math.min(X(G.x0), X(G.x1)), gw = Math.abs(G.x1 - G.x0);
+            cx.fillStyle = 'rgba(255, 200, 60, 0.9)'; cx.fillRect(gx0, -30, gw, 30);
+            cx.fillStyle = 'rgba(80, 150, 255, 0.9)'; cx.fillRect(gx0, M.h, gw, 30);
+            cx.font = 'bold 22px "Noto Sans JP", sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillStyle = '#3a2400';
+            cx.fillText('攻める', gx0 + gw / 2, -15); cx.fillStyle = '#fff'; cx.fillText('守る', gx0 + gw / 2, M.h + 15);
+        } else {
+            cx.fillStyle = '#b89a62'; cx.fillRect(0, 0, M.w, M.h);
+            cx.fillStyle = 'rgba(90, 60, 20, 0.08)'; for (let i = 0; i < 40; i++) { cx.beginPath(); cx.arc((i * 397) % M.w, (i * 211) % M.h, 40 + (i % 5) * 12, 0, 6.283); cx.fill(); }
+        }
+        // 壁・箱
+        for (const b of M.walls) {
+            const bx = RT.flip ? M.w - b.x - b.w : b.x, by = RT.flip ? M.h - b.y - b.h : b.y;
+            cx.fillStyle = '#5b3a1e'; cx.fillRect(bx, by, b.w, b.h); cx.fillStyle = '#8a5a2e'; cx.fillRect(bx, by, b.w, Math.min(10, b.h));
+        }
+        M.boxes.forEach((b, i) => {
+            const hp = RT.boxHp ? RT.boxHp[i] : 4000; if (hp <= 0) return;
+            const bx = X(b.x + b.w / 2), by = Y(b.y + b.h / 2);
+            rtDrawE('📦', 56, bx, by);
+            if (hp < 4000) { cx.fillStyle = 'rgba(0,0,0,0.5)'; cx.fillRect(bx - b.w / 2, by - b.h / 2 - 10, b.w, 6); cx.fillStyle = '#ffd36b'; cx.fillRect(bx - b.w / 2, by - b.h / 2 - 10, b.w * hp / 4000, 6); }
+        });
+        for (const c of v.snap.cu || []) rtDrawE('🔷', 30, X(c[0]), Y(c[1]));
+        // 一揆：煙（外側）
+        if (mode === 'ikki' && v.snap.rg) {
+            const R = M.ring; cx.fillStyle = 'rgba(40, 120, 60, 0.42)'; cx.beginPath();
+            cx.rect(-1000, -1000, M.w + 2000, M.h + 2000); cx.moveTo(R.cx + v.snap.rg, R.cy); cx.arc(R.cx, R.cy, v.snap.rg, 0, Math.PI * 2); cx.fill('evenodd');   // 内側をくりぬく
+            cx.strokeStyle = 'rgba(120, 255, 140, 0.6)'; cx.lineWidth = 6; cx.beginPath(); cx.arc(R.cx, R.cy, v.snap.rg, 0, Math.PI * 2); cx.stroke();
+        }
+        // 大砲の着弾予告
+        for (const L of v.snap.lb || []) {
+            const lx = X(L[0]), ly = Y(L[1]), k = 1 - L[3] / 100;
+            cx.strokeStyle = 'rgba(255, 60, 40, 0.85)'; cx.lineWidth = 4; cx.beginPath(); cx.arc(lx, ly, L[2], 0, 6.283); cx.stroke();
+            cx.fillStyle = 'rgba(255, 60, 40, ' + (0.1 + k * 0.25) + ')'; cx.fill();
+            const sx = X(L[4]), sy = Y(L[5]);
+            rtDrawE('💣', 30, sx + (lx - sx) * k, sy + (ly - sy) * k - Math.sin(k * Math.PI) * 160);
+        }
+        // 人
+        for (const p of v.players) {
+            if (p.dead) continue;
+            const r = roster.get(p.id) || {}, ch = (RT.chars && RT.chars[r.char]) || { e: '🙂', r: 26, ammo: 3 };
+            const isMe = p.id === RT.me, wp = isMe && RT.pred ? RT.pred : p, px = X(wp.x), py = Y(wp.y);
+            const friend = mode === 'kemari' ? r.team === myTeam : isMe;
+            cx.fillStyle = 'rgba(0,0,0,0.25)'; cx.beginPath(); cx.ellipse(px, py + ch.r * 0.8, ch.r, ch.r * 0.45, 0, 0, 6.283); cx.fill();
+            cx.fillStyle = isMe ? 'rgba(80, 220, 120, 0.55)' : friend ? 'rgba(80, 150, 255, 0.5)' : 'rgba(230, 60, 40, 0.5)';
+            cx.beginPath(); cx.arc(px, py, ch.r + 5, 0, 6.283); cx.fill();
+            if (v.ball && v.ball.holder === p.id) { cx.strokeStyle = '#ffe14a'; cx.lineWidth = 4; cx.stroke(); }
+            rtDrawE(ch.e, ch.r * 1.7, px, py, p.dash ? 0.55 : null);
+            const bw = 66, by = py - ch.r - 22;
+            cx.fillStyle = 'rgba(0,0,0,0.55)'; cx.fillRect(px - bw / 2, by, bw, 9);
+            cx.fillStyle = isMe ? '#4fd17a' : friend ? '#4aa3ff' : '#ff4a3c'; cx.fillRect(px - bw / 2, by, bw * Math.max(0, p.hp / p.maxHp), 9);
+            cx.font = 'bold 15px "Noto Sans JP", sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'bottom';
+            cx.lineWidth = 4; cx.strokeStyle = 'rgba(0,0,0,0.75)';
+            const label = (p.power ? '🔷' + p.power + ' ' : '') + (isMe ? 'あなた' : (r.name || ''));
+            cx.strokeText(label, px, by - 2); cx.fillStyle = isMe ? '#b8ffcb' : '#fff'; cx.fillText(label, px, by - 2);
+            if (isMe) {   // 弾の残り
+                const n = ch.ammo || 3, w0 = 20, gap = 3, left = px - (n * w0 + (n - 1) * gap) / 2;
+                for (let i = 0; i < n; i++) {
+                    const full = Math.min(1, Math.max(0, p.ammo - i)), x0 = left + i * (w0 + gap);
+                    cx.fillStyle = 'rgba(0,0,0,0.55)'; cx.fillRect(x0, py + ch.r + 9, w0, 7);
+                    cx.fillStyle = full >= 1 ? '#ffb02e' : 'rgba(255,176,46,0.45)'; cx.fillRect(x0, py + ch.r + 9, w0 * full, 7);
+                }
+            }
+        }
+        if (v.ball) rtDrawE('🏐', 32, X(v.ball.x), Y(v.ball.y));
+        // 弾
+        for (const sh of v.shots) {
+            const k = sh[3], sx = X(sh[0]), sy = Y(sh[1]);
+            if (k === 'sailorS') rtDrawE('⚓', 44, sx, sy);
+            else if (k === 'ninja') rtDrawE('✴️', 22, sx, sy);
+            else { cx.fillStyle = k === 'perry' ? '#222' : '#fff3c4'; cx.beginPath(); cx.arc(sx, sy, k === 'perry' ? 11 : 7, 0, 6.283); cx.fill(); cx.strokeStyle = 'rgba(0,0,0,0.5)'; cx.lineWidth = 2; cx.stroke(); }
+        }
+        // 効果
+        for (let i = RT.fx.length - 1; i >= 0; i--) {
+            const f = RT.fx[i]; f.t -= dt; if (f.t <= 0) { RT.fx.splice(i, 1); continue; }
+            const fx = X(f.x), fy = Y(f.y);
+            if (f.kind === 'boom') { cx.fillStyle = 'rgba(255, 140, 40, ' + f.t + ')'; cx.beginPath(); cx.arc(fx, fy, f.r * (1.2 - f.t), 0, 6.283); cx.fill(); rtDrawE('💥', 80, fx, fy, f.t * 2); }
+            if (f.kind === 'arc') { const a = RT.flip ? f.a + Math.PI : f.a; cx.strokeStyle = 'rgba(255,255,255,' + Math.min(1, f.t * 5) + ')'; cx.lineWidth = 12; cx.beginPath(); cx.arc(fx, fy, f.r - 10, a - 0.75, a + 0.75); cx.stroke(); }
+        }
+        for (let i = RT.nums.length - 1; i >= 0; i--) {
+            const n = RT.nums[i]; n.t -= dt; n.dy += 45 * dt; if (n.t <= 0) { RT.nums.splice(i, 1); continue; }
+            cx.font = 'bold 22px sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.lineWidth = 4; cx.strokeStyle = 'rgba(0,0,0,0.75)';
+            cx.globalAlpha = Math.min(1, n.t * 2); const nx = X(n.x), ny = Y(n.y) - 52 - n.dy;
+            cx.strokeText(String(n.v), nx, ny); cx.fillStyle = n.me ? '#ff6a5a' : '#fff'; cx.fillText(String(n.v), nx, ny); cx.globalAlpha = 1;
+        }
+        // 狙いの線（画面の向きのまま描く）
+        if (me && !me.dead && RT.state === 'play') {
+            const wp = RT.pred || me, px = X(wp.x), py = Y(wp.y), ch = rtMyChar();
+            let aim = null, isSup = false;
+            const stick = RT.sticks.aim || RT.sticks.sup;
+            if (stick) { const dx = stick.x - stick.x0, dy = stick.y - stick.y0, d = Math.hypot(dx, dy); if (d > 18) { aim = { x: dx / d, y: dy / d, f: Math.min(1, d / 110) }; isSup = stick === RT.sticks.sup; } }
+            else if (RT.mouse.in && matchMedia('(pointer: fine)').matches) {
+                const vx = RT.mouse.x / s + RT.cam.x, vy = RT.mouse.y / s + RT.cam.y, dx = vx - px, dy = vy - py, d = Math.hypot(dx, dy) || 1;
+                aim = { x: dx / d, y: dy / d, f: 1 };
+            }
+            if (aim && ch) {
+                const atkLen = ch.atk.range || 300;
+                if (isSup && ch.sup.kind === 'lob') {
+                    const L = aim.f * ch.sup.range; cx.strokeStyle = 'rgba(255, 210, 60, 0.8)'; cx.lineWidth = 5;
+                    cx.beginPath(); cx.arc(px + aim.x * L, py + aim.y * L, ch.sup.radius, 0, 6.283); cx.stroke();
+                } else {
+                    const len = isSup ? (ch.sup.range || ch.sup.dist || 400) : atkLen;
+                    cx.strokeStyle = isSup ? 'rgba(255, 210, 60, 0.6)' : 'rgba(255,255,255,0.35)'; cx.lineWidth = isSup ? 12 : 8; cx.lineCap = 'round';
+                    cx.beginPath(); cx.moveTo(px + aim.x * (ch.r + 6), py + aim.y * (ch.r + 6)); cx.lineTo(px + aim.x * len, py + aim.y * len); cx.stroke(); cx.lineCap = 'butt';
+                }
+            }
+        }
+        // ここから画面の座標
+        cx.setTransform(RT.dpr, 0, 0, RT.dpr, 0, 0);
+        // スティック
+        const R0 = RT.rect || { left: 0, top: 0 };
+        for (const kind of ['move', 'aim', 'sup']) {
+            const st = RT.sticks[kind]; if (!st) continue;
+            const ox = st.x0 - R0.left, oy = st.y0 - R0.top, dx = st.x - st.x0, dy = st.y - st.y0, d = Math.hypot(dx, dy), lim = kind === 'move' ? 50 : 70, k = d > lim ? lim / d : 1;
+            cx.fillStyle = kind === 'sup' ? 'rgba(255, 210, 60, 0.18)' : 'rgba(255,255,255,0.15)'; cx.beginPath(); cx.arc(ox, oy, lim + 14, 0, 6.283); cx.fill();
+            cx.fillStyle = kind === 'sup' ? 'rgba(255, 210, 60, 0.75)' : kind === 'aim' ? 'rgba(255, 120, 90, 0.7)' : 'rgba(255,255,255,0.6)';
+            cx.beginPath(); cx.arc(ox + dx * k, oy + dy * k, 24, 0, 6.283); cx.fill();
+        }
+        // 真ん中の大きな文字
+        if (RT.bannerT > 0) {
+            RT.bannerT -= dt;
+            cx.font = '800 ' + Math.round(Math.min(42, RT.w / 13)) + 'px "Shippori Mincho", serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+            cx.lineWidth = 8; cx.strokeStyle = 'rgba(60, 10, 0, 0.85)'; cx.globalAlpha = Math.min(1, RT.bannerT * 2);
+            cx.strokeText(RT.banner, RT.w / 2, RT.h * 0.36); cx.fillStyle = '#fff3c4'; cx.fillText(RT.banner, RT.w / 2, RT.h * 0.36); cx.globalAlpha = 1;
+        }
+        if (v.snap.ph === 'count' && v.snap.pt > 0) {
+            cx.font = '800 76px "Shippori Mincho", serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+            cx.lineWidth = 10; cx.strokeStyle = 'rgba(60,10,0,0.85)'; cx.strokeText(String(v.snap.pt), RT.w / 2, RT.h * 0.52); cx.fillStyle = '#fff'; cx.fillText(String(v.snap.pt), RT.w / 2, RT.h * 0.52);
+        }
+        if (me && me.dead && RT.state === 'play') {
+            cx.font = '800 ' + (mode === 'kemari' ? 24 : 18) + 'px "Noto Sans JP", sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.lineWidth = 5; cx.strokeStyle = 'rgba(0,0,0,0.7)';
+            const t = mode === 'kemari' ? (me.respawn > 0 ? 'あと ' + me.respawn + ' 秒で戻る' : '') : '👀 観戦中（右上の✕で抜けられます）';
+            const ty2 = mode === 'kemari' ? RT.h * 0.62 : 84;
+            if (t) { cx.strokeText(t, RT.w / 2, ty2); cx.fillStyle = '#fff'; cx.fillText(t, RT.w / 2, ty2); }
+        }
+    }
+    function rtHud(v) {
+        const now = performance.now(); if (now - RT.lastHud < 120) return; RT.lastHud = now;
+        const s = v.snap, mode = RT.start.mode, myTeam = (RT.roster.get(RT.me) || {}).team;
+        const tl = Math.max(0, s.tl), mm = Math.floor(tl / 60) + ':' + String(tl % 60).padStart(2, '0');
+        let top;
+        if (mode === 'kemari') {
+            const mine = s.sc ? s.sc[myTeam] : 0, theirs = s.sc ? s.sc[1 - myTeam] : 0;
+            top = '<span class="rt-blue">味方 ' + mine + '</span><span class="rt-dash">－</span><span class="rt-red">' + theirs + ' 相手</span><span class="rt-time">⏱ ' + mm + (s.ot ? ' 延長' : '') + '</span>';
+        } else {
+            const alive = v.players.filter(p => !p.dead).length;
+            top = '<span>👤 残り ' + alive + ' 人</span><span class="rt-time">⏱ ' + mm + '</span>';
+        }
+        const topEl = document.getElementById('rt-top'); if (topEl.innerHTML !== top) topEl.innerHTML = top;
+        const me = v.players.find(p => p.id === RT.me); if (!me) return;
+        const full = me.sup >= 100;
+        const sb = document.getElementById('rt-sup');
+        sb.classList.toggle('ready', full); sb.style.setProperty('--p', me.sup + '%'); sb.style.visibility = me.dead ? 'hidden' : '';
+        const ps = document.getElementById('rt-pc-sup');
+        const txt = full ? '⚡ 必殺技OK！（右クリック / スペース）' : '⚡ 必殺技 ' + me.sup + '%';
+        if (ps.textContent !== txt) ps.textContent = txt; ps.classList.toggle('ready', full);
+    }
+
+    // ---- 結果 ----
+    function rtShowResult(res, snap) {
+        if (RT.state !== 'play') return;
+        RT.state = 'result';
+        document.body.classList.remove('rt-playing');
+        RT.bannerT = 0; RT.sticks = { move: null, aim: null, sup: null }; try { if (RT.v) rtRender(RT.v, 0); } catch (e) {}   // 「試合終了！」の文字を消した絵にしておく
+        const mode = RT.start.mode, myTeam = (RT.roster.get(RT.me) || {}).team;
+        let title, text, win = false;
+        if (mode === 'kemari') {
+            const sc = res.score || [0, 0];
+            win = res.winner === myTeam;
+            title = res.winner === -1 ? '🤝 引き分け' : win ? '🎉 勝利！' : '💧 敗北…';
+            text = '味方 ' + sc[myTeam] + ' － ' + sc[1 - myTeam] + ' 相手';
+        } else {
+            const mine = (res.places || []).find(x => x[0] === RT.me), place = mine ? mine[1] : 0;
+            win = place === 1;
+            title = win ? '👑 1位！ 天下を取った！' : place + '位';
+            text = (res.places || []).length + '人中 ' + place + ' 位';
+        }
+        const me = snap.p.find(x => x[0] === RT.me);
+        if (me) text += '<br>倒した数 ' + me[10];
+        document.getElementById('rt-res-title').textContent = title;
+        document.getElementById('rt-res-text').innerHTML = text;
+        document.getElementById('rt-result').style.display = 'flex';
+        document.getElementById('rt-touch').style.display = 'none';
+        try { rtRecord(mode, win); } catch (e) {}
+    }
+    function rtRecord(mode, win) {   // 戦績（見るだけ）
+        let o = {}; try { o = JSON.parse(localStorage.getItem('kurofuneRantoRec') || '{}') || {}; } catch (e) {}
+        const k = mode === 'kemari' ? 'k' : 'i'; o[k + 'p'] = (o[k + 'p'] || 0) + 1; if (win) o[k + 'w'] = (o[k + 'w'] || 0) + 1;
+        try { localStorage.setItem('kurofuneRantoRec', JSON.stringify(o)); } catch (e) {}
+    }
+    function rtRecordText() {
+        let o = {}; try { o = JSON.parse(localStorage.getItem('kurofuneRantoRec') || '{}') || {}; } catch (e) {}
+        if (!o.kp && !o.ip) return '';
+        return '🏐 蹴鞠 ' + (o.kw || 0) + '勝 / ' + (o.kp || 0) + '戦　🔥 一揆 1位 ' + (o.iw || 0) + '回 / ' + (o.ip || 0) + '戦';
+    }
+    function rtAgain() { rtSend({ t: 'leave' }); rtShowLobby(); rtPlay(false); }
+    function rtBack() { rtSend({ t: 'leave' }); rtShowLobby(); }
+
     let pageVersionTag = null;
     async function checkForNewVersion() {
         if (location.protocol === 'file:') return;
@@ -14112,6 +14878,18 @@ animation:facilitySweep 6s linear infinite;
     //   「実績を追加しました」のように、増えたこと・直したことだけを書く。
     const changelogData = [
         {
+            version: "v4.8",
+            title: "⚔️ 幕末大乱闘、近日開幕",
+            date: "2026-10-31",
+            content: [
+                "新しいゲーム「⚔️ 幕末大乱闘」をメニューのいちばん上に追加しました。みんなと同時に、その場で戦うアクション対戦です。",
+                "ルールは2つ。「🏐 蹴鞠」は3対3で、鞠を相手のゴールに蹴り込んだ方が勝ち。「🔥 一揆」は6人のバトロワで、箱を壊して「力の玉」を集め、狭まる役人の包囲の中で最後の1人まで生き残れ。",
+                "使える人は、水夫・忍者・鬼武者・ペリーの4人。それぞれ必殺技があります。",
+                "スマホは左手で移動、右手で狙って離すと攻撃。PCは WASD とマウス。人が足りないときは CPU が入るので、1人でもすぐ遊べます。",
+                "いまは対戦サーバーの準備中です。開いたら、ここでお知らせします。"
+            ]
+        },
+        {
             version: "v4.7",
             title: "浦賀沖大砲戦、帰還",
             date: "2026-10-31",
@@ -14819,6 +15597,7 @@ animation:facilitySweep 6s linear infinite;
         try { applySubPerks(); refreshSub(); setInterval(refreshSub, 10 * 60 * 1000); } catch (e) { console.error('sub', e); }
         try { updateLogBadges(); } catch (e) { console.error('log badge', e); }
         try { initSocial(); } catch (e) { console.error('social', e); }
+        try { rtInitNav(); } catch (e) { console.error('ranto', e); }
         try { touchPlayDay(); updateLevelUi(); setInterval(() => { touchPlayDay(); updateLevelUi(); }, 5000); } catch (e) { console.error('level', e); }
 
         // 告知バーはどの画面にいても動かす

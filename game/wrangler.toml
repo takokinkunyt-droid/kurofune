@@ -1,0 +1,13 @@
+# 幕末大乱闘のサーバー設定（Cloudflare Workers）
+name = "bakumatsu-ranto"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+
+[[durable_objects.bindings]]
+name = "HUB"
+class_name = "Hub"
+
+# 無料プランで使えるのは SQLite 型の Durable Object だけなので、こちらで登録する
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Hub"]

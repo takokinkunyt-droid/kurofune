@@ -11,3 +11,5 @@ compensate.ps1
 rescue-mysave.js
 diagnose-save.js
 recover-step2.js
+# 幕末大乱闘の対戦サーバー（Cloudflare で動かす。Vercel では配らない）
+game
