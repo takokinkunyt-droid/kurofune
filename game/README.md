@@ -21,8 +21,8 @@ npx wrangler dev --port 8787
 1. Cloudflare のダッシュボード → Workers & Pages → 作成 → 「Git リポジトリをインポート」
 2. GitHub をつなぎ、このリポジトリを選ぶ
 3. 「ルートディレクトリ（Root directory）」を `game` にする。ほかはそのまま
-4. デプロイ。できたら `https://bakumatsu-ranto.〇〇.workers.dev` という住所が出る
-5. `src/index.html` の `RANTO_SERVER` に `wss://bakumatsu-ranto.〇〇.workers.dev/ws` を書いて、ビルドしてコミット
+4. デプロイ。できたら `https://kurofune.〇〇.workers.dev` という住所が出る
+5. `src/index.html` の `RANTO_SERVER` に `wss://kurofune.〇〇.workers.dev/ws` を書いて、ビルドしてコミット
 
 以後は main に push するたび、Cloudflare も自動で作り直される。
 

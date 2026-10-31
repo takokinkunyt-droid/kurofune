@@ -1,5 +1,5 @@
 # 幕末大乱闘のサーバー設定（Cloudflare Workers）
-name = "bakumatsu-ranto"
+name = "kurofune"   # Cloudflare のダッシュボードの Worker 名と同じにする
 main = "src/worker.js"
 compatibility_date = "2026-10-01"
 
